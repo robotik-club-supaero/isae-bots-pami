@@ -5,7 +5,6 @@
 #include <SparkFun_VL53L5CX_Library.h> //http://librarymanager/All#SparkFun_VL53L5CX
 
 // Create an object for our VL53L5CX sensor
-
 Irsensor::Irsensor(int Ir_PIN)
 {
     m_IR_PIN = Ir_PIN; // Setup le PIN
@@ -22,15 +21,15 @@ void Irsensor::setup()
 {
     Serial.begin(115200);
     delay(1000);
-    Serial.println("SparkFun VL53L5CX Imager Example");
 
     Wire.begin();           // This resets I2C bus to 100kHz
     Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
 
-    Serial.println("Initializing sensor board. This can take up to 10s. Please wait.");
-    if (myImager.begin() == false) {
+    if (myImager.begin() == false)
+    {
         Serial.println(F("## FAILED : Sensor not found - check your wiring. Freezing ##"));
-        while (1) ; // Infinite loop
+        while (1)
+            ; // Infinite loop
     }
 
     myImager.setResolution(8 * 8); // Enable all 64 pads
@@ -57,7 +56,8 @@ void Irsensor::setup()
     else
     {
         Serial.println(F("Cannot set ranging frequency requested. Freezing..."));
-        while (1) ; // Infinite loop
+        while (1)
+            ; // Infinite loop
     }
 
     myImager.startRanging();
@@ -73,26 +73,29 @@ void Irsensor::loop()
         {
             if (myImager.getRangingData(&measurementData)) // Read distance data into array
             {
-               // Recupère les distances de gauche à droite en faisant la moyenne vertical de chaque colonne (8x8) et enregistre dans la variable 'vision'
-               // Recupère le minimum au passage
-               int min_distance = -1;
-                for (int col = 0; col < 8; col++){
+                // Recupère les distances de gauche à droite en faisant la moyenne vertical de chaque colonne (8x8) et enregistre dans la variable 'vision'
+                // Recupère le minimum au passage
+                int min_distance = -1;
+                for (int col = 0; col < 8; col++)
+                {
                     int tot_tmp = 0;
-                    for (int line = 0; line < 8; line++){
-                        tot_tmp += measurementData.distance_mm[line * col] ;
+                    for (int line = 0; line < 8; line++)
+                    {
+                        tot_tmp += measurementData.distance_mm[line * col];
                     }
-                    vision[col] = tot_tmp / 8 ;
-                    if (min_distance == -1 || vision[col] < min_distance){
-                        min_distance = vision[col] ;
+                    vision[col] = tot_tmp / 8;
+                    if (min_distance == -1 || vision[col] < min_distance)
+                    {
+                        min_distance = vision[col];
                     }
                 }
-                ir_minimum_distance = min_distance ;
+                ir_minimum_distance = min_distance;
 
                 // Print minimum distance
                 Serial.print("Minimum distance: ");
                 Serial.println(ir_minimum_distance);
                 // Serial.print("Minimum distance_centrale: ");
-                //Serial.println(measurementData.distance_mm[35]);
+                // Serial.println(measurementData.distance_mm[35]);
             }
         }
         m_time = millis();

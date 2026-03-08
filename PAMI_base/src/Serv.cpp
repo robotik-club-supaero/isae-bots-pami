@@ -1,12 +1,15 @@
-
 #include <Serv.h>
 
 Serv::Serv(int pin)
 {
   this->servo = Servo(); // Objet de la library Serv.h
-  this->pin = pin; // Setup le PIN
+  this->pin = pin;       // Setup le PIN
 }
 
+/*
+  - Temps en ms
+  - Angles en degrés
+*/
 void Serv::blink(long temps_blink, int angle1, int angle2)
 {
   if (millis() - temps_servo > temps_blink)
@@ -30,13 +33,12 @@ void Serv::blink(long temps_blink, int angle1, int angle2)
 void Serv::setup()
 {
   temps_servo = millis();
-  servo.attach(pin); // demandé par la l'objet servo de la library
+  servo.attach(pin); // demandé par l'objet servo de la library
 
-  etat = 90; // Initialise l'etat du servo 
+  etat = 90; // Initialise l'etat du servo
   servo.write(etat);
 }
 
-void Serv::loop() // Actuellement fait juste bouger le servo de droite à gauche.
+void Serv::loop()
 {
-  this->blink(1000, 60, 120) ;
 }

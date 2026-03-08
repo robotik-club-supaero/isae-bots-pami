@@ -23,6 +23,11 @@ private:
 
 public:
     Serv(int pin);
+
+    /* Fait bouger le servomoteur entre deux angles
+      - Temps en ms
+      - Angles en degrés
+    */
     void blink(long temps_blink, int angle1, int angle2);
     void setup();
     void loop();

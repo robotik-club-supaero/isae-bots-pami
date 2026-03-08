@@ -28,7 +28,7 @@ void Asserv::asservissement(float vitesse_l_consigne, float vitesse_r_consigne)
     m_p_moteur_r->set_speed(output_r * Kmot_r);
 }
 
-void Asserv::asservissement_angle(float theta_consigne)
+void Asserv::asserv_angle(float theta_consigne)
 {
     float erreur = theta_consigne - m_p_mesure_pos->position_theta;
     erreur = fmod(erreur, 2 * PI);
@@ -47,14 +47,6 @@ void Asserv::asservissement_angle(float theta_consigne)
     m_p_moteur_r->set_speed(output * Kmot_angle);
 }
 
-void Asserv::setup()
-{
-    m_time = micros();
-    m_asservPID_l.RAZ(micros());
-    m_asservPID_r.RAZ(micros());
-    m_asservPID_angle.RAZ(micros());
-}
-
 void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, float theta_consigne)
 {
     float erreur_l = vitesse_l_consigne - m_p_mesure_pos->vitesse_l;
@@ -65,20 +57,34 @@ void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, f
     // Serial.println("erreur_r" + String(erreur_r));
     // Serial.println("output_l" + String(output_l));
     // Serial.println("output_r" + String(output_r));
-    
+
     float erreur_theta = theta_consigne - m_p_mesure_pos->position_theta;
-    // erreur_theta = fmod(erreur_theta, 2 * PI); ???? modulo ?
+
+    // On prend l'angle modulo 2pi et on choisit le sens optimale après
+    erreur_theta = fmod(erreur_theta, 2 * PI);
+    if (erreur_theta > PI)
+    {
+        erreur_theta -= 2 * PI;
+    }
+    else if (erreur_theta < -PI)
+    {
+        erreur_theta += 2 * PI;
+    }
     float output_theta = m_asservPID_angle.computeOutput(erreur_theta, micros());
     // Serial.println("erreur_theta" + String(erreur_theta));
 
     m_p_moteur_l->set_speed(output_theta * Kmot_angle + output_l * Kmot_l);
     m_p_moteur_r->set_speed(output_r * Kmot_r - output_theta * Kmot_angle);
 }
+
+void Asserv::setup()
+{
+    m_time = micros();
+    m_asservPID_l.RAZ(micros());
+    m_asservPID_r.RAZ(micros());
+    m_asservPID_angle.RAZ(micros());
+}
+
 void Asserv::loop()
 {
-    if (micros() - m_time >= 1e4)
-    {
-        asserv_global(-20, -20, 0); // vitesse max de 25 cm/s. Est-ce vrai ?
-        m_time = micros();
-    }
 }

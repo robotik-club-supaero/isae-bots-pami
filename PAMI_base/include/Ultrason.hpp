@@ -14,12 +14,12 @@
 class Ultrason
 {
 private:
-    int m_echo_PIN;     // Broche Echo du HC-SR04
-    int m_trigger_PIN;  // Broche Trigger du HC-SR04
-    double m_duration; // Durée de l'echo
-    long m_dt = 10; // Délai entre les lectures (10ms)
-    bool m_reading = false ; // Etat pour indiquer si on est en train de lire ou pas
-    long m_t_reading = 0; // Pour mesurer le temps depuis que l'acquisition est lancé
+    int m_echo_PIN;            // Broche Echo du HC-SR04
+    int m_trigger_PIN;         // Broche Trigger du HC-SR04
+    double m_duration;         // Durée de l'echo
+    long m_dt = 10;            // Délai entre les lectures (10ms)
+    bool m_reading = false;    // Etat pour indiquer si on est en train de lire ou pas
+    long m_t_reading = 0;      // Pour mesurer le temps depuis que l'acquisition est lancé
     long max_duration = 50000; // Durée max de l'echo
 
 public:

@@ -8,7 +8,7 @@ Moteur::Moteur(int EN, int IN1, int IN2)
 }
 
 void Moteur::setup()
-{   
+{
     // Setup les broches en output
     pinMode(m_EN, OUTPUT);  // PWM (vitesse)
     pinMode(m_IN1, OUTPUT); // Direction
@@ -40,7 +40,8 @@ void Moteur::set_speed(int vitesse)
     analogWrite(m_EN, m_vitesse); // envoie la command de vitesse
 }
 
-void Moteur::stop(){
+void Moteur::stop()
+{
     digitalWrite(m_IN1, 0);
     digitalWrite(m_IN2, 0);
     analogWrite(m_EN, 0);
@@ -49,4 +50,3 @@ void Moteur::stop(){
 void Moteur::loop()
 {
 }
-

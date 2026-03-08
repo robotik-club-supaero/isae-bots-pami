@@ -27,7 +27,7 @@ public:
      */
     void set_speed(int vitesse);
     /**
-     * @brief Pas utilisé , arrête le moteur
+     * @brief Pas utilisé, arrête le moteur
      */
     void stop();
 

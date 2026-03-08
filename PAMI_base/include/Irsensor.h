@@ -22,19 +22,21 @@ public:
     Irsensor(int Ir_PIN);
 
     int ir_minimum_distance = 1000; // Distance absolue que l'on récupère du capteur
-    int vision[8]; // liste des 8 distances mouyennes des capteurs de gauche à droite
+    int vision[8];                  // liste des 8 distances moyennes des capteurs de gauche à droite
     long m_time;
 
     /**
      * @brief Fonction d'interruption
      * ne marche pas pour le moment
      */
-    void interruptRoutine(); // TODO : A voir si on l'utilisE ? la faire marcher si on a le temps
+    void interruptRoutine(); // TODO : A voir si on l'utilise ? la faire marcher si on a le temps
+
     /**
      * @brief Initialisation du capteur IR
-     * Si ne marche pas , affiche une erreur et s'arrête
+     * Si ne marche pas, affiche une erreur et s'arrête
      */
     void setup();
+
     /**
      * @brief Boucle de lecture du capteur IR, met à jour la distance
      */
