@@ -14,17 +14,19 @@ void Serv::blink(long temps_blink, int angle1, int angle2)
 {
   if (millis() - temps_servo > temps_blink)
   {
-    if (etat == angle1)
-    {
-      this->servo.write(angle2);
-      etat = angle2;
-      Serial.println("Servo moved to angle2");
-    }
-    else
+    if (etat == angle2)
     {
       this->servo.write(angle1);
       etat = angle1;
-      Serial.println("Servo moved to angle1");
+      Serial.print("Servo moved to ");
+      Serial.println(angle1);
+    }
+    else
+    {
+      this->servo.write(angle2);
+      etat = angle2;
+      Serial.print("Servo moved to ");
+      Serial.println(angle2);
     }
     temps_servo = millis();
   }

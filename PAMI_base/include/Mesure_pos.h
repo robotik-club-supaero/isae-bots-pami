@@ -7,6 +7,7 @@
 #define MESURE_POS_H
 #include <Arduino.h>
 #include <Encodeur.h>
+
 class Mesure_pos
 {
 
@@ -19,7 +20,7 @@ private:
      */
     float K_angle = 0.15; // TODO : regler les facteurs si on change la meca
     float K_r = 0.0109;   // TODO : regler les facteurs si on change la meca
-    float K_l = 0.011;   // TODO : regler les facteurs si on change la meca
+    float K_l = 0.011;    // TODO : regler les facteurs si on change la meca
     /**s
      * temps entre deux mesures
      */
@@ -27,21 +28,27 @@ private:
 
     /**
      * temps mis a jour à chaque boucle
-     */
-    long m_time;
+     * 2 variables permet d'éviter les bruits/erreurs lors de la conversion millis & micros
+     * On utilise micros pour les calculs de positions car plus de précisions et donc moins d'erreurs d'intégrations
+     * On utilise millis pour le dt car n'a aucun risque de saturation (micros sature 1000 fois plus vite)
+     * */
+    unsigned long m_time_millis;
+    unsigned long m_time_micros;
 
 public:
     void setup();
     void loop();
     void reinitialise();
     Mesure_pos(Encodeur *p_encodeur_r, Encodeur *p_encodeur_l);
+
     /**
      * Mesure right & left encoder
      */
     long mesure_r;
     long mesure_l;
+
     /**
-     * Position dans le plan x , y et theta ( angle de rotation ) , mis à jour à chaque boucle
+     * Position dans le plan x, y, et theta (angle de rotation), mis à jour à chaque boucle
      */
     float position_x;
     float position_y;
@@ -50,9 +57,9 @@ public:
     /**
      * Vitesse selon x , y et theta
      */
-    float Vitesse_x;
-    float Vitesse_y;
-    float Vitesse_theta;
+    float vitesse_x;
+    float vitesse_y;
+    float vitesse_theta;
 
     /**
      * vitesse des roues droites et gauche

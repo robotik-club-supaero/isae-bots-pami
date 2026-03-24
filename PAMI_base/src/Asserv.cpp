@@ -41,8 +41,7 @@ void Asserv::asserv_angle(float theta_consigne)
         erreur += 2 * PI;
     }
     float output = m_asservPID_angle.computeOutput(erreur, micros());
-    Serial.println(output);
-    Serial.print(erreur);
+
     m_p_moteur_l->set_speed(-output * Kmot_angle);
     m_p_moteur_r->set_speed(output * Kmot_angle);
 }

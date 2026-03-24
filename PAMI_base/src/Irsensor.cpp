@@ -5,9 +5,11 @@
 #include <SparkFun_VL53L5CX_Library.h> //http://librarymanager/All#SparkFun_VL53L5CX
 
 // Create an object for our VL53L5CX sensor
-Irsensor::Irsensor(int Ir_PIN)
+Irsensor::Irsensor(int SDA_PIN, int SCL_PIN, int LPN_PIN)
 {
-    m_IR_PIN = Ir_PIN; // Setup le PIN
+    m_SDA_PIN = SDA_PIN;
+    m_SCL_PIN = SCL_PIN;
+    m_LPN_PIN = LPN_PIN;
     dataReady = false;
 }
 
@@ -22,8 +24,12 @@ void Irsensor::setup()
     Serial.begin(115200);
     delay(1000);
 
-    Wire.begin();           // This resets I2C bus to 100kHz
-    Wire.setClock(1000000); // Sensor has max I2C freq of 1MHz
+    pinMode(m_LPN_PIN, OUTPUT);
+    digitalWrite(m_LPN_PIN, HIGH);
+    delay(50);
+
+    Wire.begin(m_SDA_PIN, m_SCL_PIN); // This resets I2C bus to 100kHz
+    Wire.setClock(500000);            // Sensor has max I2C freq of 1MHz
 
     if (myImager.begin() == false)
     {
@@ -91,9 +97,6 @@ void Irsensor::loop()
                 }
                 ir_minimum_distance = min_distance;
 
-                // Print minimum distance
-                Serial.print("Minimum distance: ");
-                Serial.println(ir_minimum_distance);
                 // Serial.print("Minimum distance_centrale: ");
                 // Serial.println(measurementData.distance_mm[35]);
             }
