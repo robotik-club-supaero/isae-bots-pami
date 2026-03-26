@@ -1,9 +1,10 @@
 #include <Encodeur.h>
 
-Encodeur::Encodeur(int clk, int dt)
+Encodeur::Encodeur(int clk, int dt, bool inv)
 {
     m_clk = clk;
     m_dt = dt;
+    m_inv = inv;
 }
 
 void Encodeur::setup()
@@ -15,7 +16,7 @@ void Encodeur::setup()
 
 long Encodeur::mesure()
 {
-    return encoder.getCount();
+    return (m_inv == true) ? -encoder.getCount() : encoder.getCount();
 }
 
 void Encodeur::loop()

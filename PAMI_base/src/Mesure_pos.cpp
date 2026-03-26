@@ -19,22 +19,8 @@ void Mesure_pos::setup()
     position_x = 0;
     position_y = 0;
 
-    if (INV_L == 1)
-    {
-        mesure_l = -m_p_encoder_L->mesure();
-    }
-    else
-    {
-        mesure_l = m_p_encoder_L->mesure();
-    }
-    if (INV_R == 1)
-    {
-        mesure_r = -m_p_encoder_R->mesure();
-    }
-    else
-    {
-        mesure_r = m_p_encoder_R->mesure();
-    }
+    mesure_l = m_p_encoder_L->mesure();
+    mesure_r = m_p_encoder_R->mesure();
 
     // Evite
     m_time_millis = millis();
@@ -61,22 +47,8 @@ void Mesure_pos::loop()
         float position_l = 0;
         float position_r = 0;
 
-        if (INV_L == 1)
-        {
-            position_l = -m_p_encoder_L->mesure() - mesure_l;
-        }
-        else
-        {
-            position_l = m_p_encoder_L->mesure() - mesure_l;
-        }
-        if (INV_R == 1)
-        {
-            position_r = -m_p_encoder_R->mesure() - mesure_r;
-        }
-        else
-        {
-            position_r = m_p_encoder_R->mesure() - mesure_r;
-        }
+        position_l = m_p_encoder_L->mesure() - mesure_l;
+        position_r = m_p_encoder_R->mesure() - mesure_r;
 
         // Positions
         position_theta += (position_l * K_l - position_r * K_r) * K_angle;
@@ -110,21 +82,7 @@ void Mesure_pos::loop()
         // Serial.println("Mesure_l= " + String(mesure_l));
 
         // Maj des mesures et temps ;
-        if (INV_L == 1)
-        {
-            mesure_l = -m_p_encoder_L->mesure();
-        }
-        else
-        {
-            mesure_l = m_p_encoder_L->mesure();
-        }
-        if (INV_R == 1)
-        {
-            mesure_r = -m_p_encoder_R->mesure();
-        }
-        else
-        {
-            mesure_r = m_p_encoder_R->mesure();
-        }
+        mesure_l = m_p_encoder_L->mesure();
+        mesure_r = m_p_encoder_R->mesure();
     }
 }

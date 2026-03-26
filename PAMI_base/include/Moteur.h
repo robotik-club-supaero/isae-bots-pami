@@ -12,9 +12,10 @@
 class Moteur
 {
 private:
-    int m_EN;  // pin de la pwm
-    int m_IN1; // pin de direction 1
-    int m_IN2; // pin de direction 2
+    int m_EN;   // pin de la pwm
+    int m_IN1;  // pin de direction 1
+    int m_IN2;  // pin de direction 2
+    bool m_inv; // flag pour l'inversion de la direction
     long m_vitesse;
     // Facteur pour passer d'un entier entre 0 ET 255 à une vitesse en cm/s
     float K_conv;
@@ -34,7 +35,7 @@ public:
     /**
      * @brief constructeur
      */
-    Moteur(int EN, int IN1, int IN2);
+    Moteur(int EN, int IN1, int IN2, bool inv = false);
     /**
      * @brief Initialisation du moteur
      */

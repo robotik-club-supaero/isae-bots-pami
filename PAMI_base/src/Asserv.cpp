@@ -1,7 +1,9 @@
 #include <Asserv.h>
 #include <Moteur.h>
 #include <Arduino.h>
+#include <define.h>
 #include <Mesure_pos.h>
+
 /**
  * @file Asserv.cpp
  * @brief Asservissement en vitesse et en angle du robot
@@ -9,7 +11,7 @@
  */
 Asserv::Asserv(Moteur *p_moteur_r, Moteur *p_moteur_l, Mesure_pos *p_mesure_pos) : m_asservPID_r(1, 0.1, 0, 255, 5), // TODO : regler l'asservissement
                                                                                    m_asservPID_l(1, 0.1, 0, 255, 5),
-                                                                                   m_asservPID_angle(50, 0, 0, 255, 5)
+                                                                                   m_asservPID_angle(1, 0, 0, 255, 5)
 {
     m_p_mesure_pos = p_mesure_pos;
     m_p_moteur_l = p_moteur_l;
@@ -22,10 +24,12 @@ void Asserv::asservissement(float vitesse_l_consigne, float vitesse_r_consigne)
     float erreur_r = vitesse_r_consigne - m_p_mesure_pos->vitesse_r;
     float output_l = m_asservPID_l.computeOutput(erreur_l, micros());
     float output_r = m_asservPID_r.computeOutput(erreur_r, micros());
-    Serial.println("output");
-    Serial.printf("serial_d = %f \n", output_r * Kmot_r);
-    m_p_moteur_l->set_speed(output_l * Kmot_l);
-    m_p_moteur_r->set_speed(output_r * Kmot_r);
+
+    float speed_l = output_l * Kmot_l;
+    float speed_r = output_r * Kmot_r;
+
+    m_p_moteur_l->set_speed(speed_l);
+    m_p_moteur_r->set_speed(speed_r);
 }
 
 void Asserv::asserv_angle(float theta_consigne)
@@ -41,9 +45,11 @@ void Asserv::asserv_angle(float theta_consigne)
         erreur += 2 * PI;
     }
     float output = m_asservPID_angle.computeOutput(erreur, micros());
+    float speed_l = -output * Kmot_angle;
+    float speed_r = output * Kmot_angle;
 
-    m_p_moteur_l->set_speed(-output * Kmot_angle);
-    m_p_moteur_r->set_speed(output * Kmot_angle);
+    m_p_moteur_l->set_speed(speed_l);
+    m_p_moteur_r->set_speed(speed_r);
 }
 
 void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, float theta_consigne)
@@ -69,11 +75,13 @@ void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, f
     {
         erreur_theta += 2 * PI;
     }
-    float output_theta = m_asservPID_angle.computeOutput(erreur_theta, micros());
-    // Serial.println("erreur_theta" + String(erreur_theta));
 
-    m_p_moteur_l->set_speed(output_theta * Kmot_angle + output_l * Kmot_l);
-    m_p_moteur_r->set_speed(output_r * Kmot_r - output_theta * Kmot_angle);
+    float output_theta = m_asservPID_angle.computeOutput(erreur_theta, micros());
+    float speed_l = output_theta * Kmot_angle + output_l * Kmot_l;
+    float speed_r = output_r * Kmot_r - output_theta * Kmot_angle;
+
+    m_p_moteur_l->set_speed(speed_l);
+    m_p_moteur_r->set_speed(speed_r);
 }
 
 void Asserv::setup()

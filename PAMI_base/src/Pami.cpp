@@ -225,7 +225,7 @@ void Pami::avancer(float distance, int speed)
 
         // 2. On projette ce déplacement sur l'axe du robot (produit scalaire)
         // Comme le robot recule, cette valeur va devenir de plus en plus NÉGATIVE
-        distance_traveled = dx * cos(start_angle) + dy * sin(start_angle);
+        distance_traveled = abs(dx * cos(start_angle) + dy * sin(start_angle));
 
         Serial.print("distance parcourue : ");
         Serial.println(distance_traveled);
@@ -500,10 +500,12 @@ void Pami::set_initial_position(float pos_initial_x, float pos_initial_y)
 }
 
 /*
-Allume les deux moteurs à une vitesse (entre 0 et 255)
+Allume les deux moteurs à une vitesse en (entre 0 et 255)
 */
 void Pami::allumer_moteur(float speed)
 {
+    // Si on règle les gains askip c'est mieux
+    // m_p_asserv->asservissement(speed, speed);
     m_p_moteur_d->set_speed(speed);
     m_p_moteur_g->set_speed(speed);
     delay(100);
@@ -579,13 +581,14 @@ void Pami::print_encodeur()
 
 void Pami::print_speed()
 {
-    if (millis() - m_time_log > 250)
+    if (millis() - m_time_log > 275)
     {
         m_p_mesure_pos->loop();
         Serial.print("Vitesse droite : ");
         Serial.print(m_p_mesure_pos->vitesse_r);
-        Serial.print(" | Vitesse gauche : ");
-        Serial.println(m_p_mesure_pos->vitesse_l);
+        Serial.print(" cm/s | Vitesse gauche : ");
+        Serial.print(m_p_mesure_pos->vitesse_l);
+        Serial.println(" cm/s");
     }
 }
 

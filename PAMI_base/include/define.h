@@ -11,14 +11,23 @@
 /*
 ENCODEURS
 */
-#define CLK_R 4 // CLK RIGHT ENCODER
-#define DT_R 16 // DT RIGHT ENCODER
+#define CLK_R 4 // C1 RIGHT ENCODER
+#define DT_R 16 // C2 RIGHT ENCODER
 
-#define CLK_L 19 // CLK LEFT ENCODER
-#define DT_L 18  // DT LEFT ENCODER
+#define CLK_L 19 // C1 LEFT ENCODER
+#define DT_L 18  // C2 LEFT ENCODER
 
-#define INV_R 0 // Inversion du sens de rotation de l'encodeur droit
-#define INV_L 1 // Inversion du sens de rotation de l'encodeur gauche
+/*
+A tester avec print_vitesse ou print_encodeur pour que les vitesses soient positives et que le robot avance
+    Mais modifier le sens moteur change le sens encodeur
+    Mais modifier le sens encodeur ne change pas le sens moteur
+# Mention abominable
+*/
+#define INV_ENC_R 1 // Inversion du sens de rotation de l'encodeur gauche
+#define INV_MOT_R 1 // Inversion du sens de rotation du moteur gauche
+
+#define INV_ENC_L 1 // Inversion du sens de rotation de l'encodeur droit
+#define INV_MOT_L 0 // Inversion du sens de rotation du moteur gauche
 
 /*
 MOTEURS
