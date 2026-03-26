@@ -41,14 +41,14 @@ void loop()
 
     // pami.print_encodeur();
     // pami.print_speed();
-    pami.print_position();
+    // pami.print_position();
 
-    // pami.go_to_with_obstacle(10, 7, SPEED);
-    if (i == 0)
-    {
-        pami.avancer(10, SPEED);
-        i = 1;
-    }
+    pami.go_to(20, 20, SPEED);
+    // if (i == 0)
+    // {
+    //     pami.reculer(20);
+    //     i = 1;
+    // }
 
     pami.print_log();
     // pami.start_match();

@@ -11,7 +11,7 @@
  */
 Asserv::Asserv(Moteur *p_moteur_r, Moteur *p_moteur_l, Mesure_pos *p_mesure_pos) : m_asservPID_r(1, 0.1, 0, 255, 5), // TODO : regler l'asservissement
                                                                                    m_asservPID_l(1, 0.1, 0, 255, 5),
-                                                                                   m_asservPID_angle(1, 0, 0, 255, 5)
+                                                                                   m_asservPID_angle(5, 0, 0, 255, 5)
 {
     m_p_mesure_pos = p_mesure_pos;
     m_p_moteur_l = p_moteur_l;
@@ -36,14 +36,15 @@ void Asserv::asserv_angle(float theta_consigne)
 {
     float erreur = theta_consigne - m_p_mesure_pos->position_theta;
     erreur = fmod(erreur, 2 * PI);
-    if (erreur > PI)
-    {
-        erreur -= 2 * PI;
-    }
-    else if (erreur < -PI)
-    {
-        erreur += 2 * PI;
-    }
+    // if (erreur > PI)
+    // {
+    //     erreur -= 2 * PI;
+    // }
+    // else if (erreur < -PI)
+    // {
+    //     erreur += 2 * PI;
+    // }
+
     float output = m_asservPID_angle.computeOutput(erreur, micros());
     float speed_l = -output * Kmot_angle;
     float speed_r = output * Kmot_angle;

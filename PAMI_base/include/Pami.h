@@ -58,7 +58,7 @@ public:
     bool reculer_with_obstacle(float distance, int speed = SPEED);
 
     void allumer_moteur(float speed);
-    void tourner(float angle_degres); // Chelou
+    void tourner(float angle_degres, float speed = SPEED);
     void blink_servo(long temps_blink, int angle1, int angle2);
 
     double get_ultrason_distance();

@@ -277,42 +277,38 @@ void Pami::reculer(float distance, int speed)
 /*
 Fonction de test qui fait tourner la pami de [theta_target] degrés
 */
-void Pami::tourner(float angle_degres)
+void Pami::tourner(float angle_degres, float speed)
 {
     m_p_mesure_pos->loop();
+
     float angle_rad = angle_degres * (PI / 180.0);
     float target_theta = m_p_mesure_pos->position_theta + angle_rad;
-    float erreur_angle = angle_rad;
+    float current_theta = m_p_mesure_pos->position_theta;
+    float erreur_angle = fmod(target_theta - current_theta, 2 * PI);
+    if (erreur_angle > PI)
+    {
+        erreur_angle -= 2 * PI;
+    }
+    else if (erreur_angle < -PI)
+    {
+        erreur_angle += 2 * PI;
+    }
 
     while (abs(erreur_angle) > EPSA)
     {
         m_p_mesure_pos->loop();
-        float current_theta = m_p_mesure_pos->position_theta;
+        current_theta = abs(m_p_mesure_pos->position_theta);
+        erreur_angle = fmod(target_theta - current_theta, 2 * PI);
 
-        // Calcul de l'erreur avec le modulo (pour trouver le chemin le plus court)
-        erreur_angle = target_theta - current_theta;
-        erreur_angle = fmod(erreur_angle, 2 * PI);
-        if (erreur_angle > PI)
-        {
-            erreur_angle -= 2 * PI;
-        }
-        else if (erreur_angle < -PI)
-        {
-            erreur_angle += 2 * PI;
-        }
-
-        Serial.print("Target angle : ");
-        Serial.println(target_theta);
         Serial.print("Current angle : ");
-        Serial.println(current_theta);
+        Serial.println(current_theta * (180.0 / PI));
         Serial.print("Erreur angle : ");
-        Serial.println(erreur_angle);
+        Serial.println(erreur_angle * (180.0 / PI));
 
         m_p_asserv->asserv_angle(target_theta);
         delay(10);
     }
 
-    // On s'arrête une fois fini
     this->allumer_moteur(0);
 }
 
@@ -559,12 +555,9 @@ void Pami::print_position()
     if (millis() - m_time_log > 250)
     {
         m_p_mesure_pos->loop();
-        Serial.print("Pos X :");
-        Serial.print(m_p_mesure_pos->position_x);
-        Serial.print(" |  Pos Y :");
-        Serial.print(m_p_mesure_pos->position_y);
-        Serial.print(" | Theta :");
-        Serial.println(m_p_mesure_pos->position_theta);
+        Serial.print("Pos X :" + String(m_p_mesure_pos->position_x));
+        Serial.print(" | Pos Y :" + String(m_p_mesure_pos->position_y));
+        Serial.println(" | Theta :" + String(m_p_mesure_pos->position_theta * (180.0 / PI)) + "°");
     }
 }
 
@@ -572,10 +565,8 @@ void Pami::print_encodeur()
 {
     if (millis() - m_time_log > 250)
     {
-        Serial.print("Encodeur droit : ");
-        Serial.print(m_p_encodeur_d->mesure());
-        Serial.print(" | Encodeur gauche : ");
-        Serial.println(m_p_encodeur_g->mesure());
+        Serial.print("Encodeur droit : " + String(m_p_encodeur_d->mesure()));
+        Serial.println(" | Encodeur gauche : " + String(m_p_encodeur_g->mesure()));
     }
 }
 
@@ -584,11 +575,9 @@ void Pami::print_speed()
     if (millis() - m_time_log > 275)
     {
         m_p_mesure_pos->loop();
-        Serial.print("Vitesse droite : ");
-        Serial.print(m_p_mesure_pos->vitesse_r);
-        Serial.print(" cm/s | Vitesse gauche : ");
-        Serial.print(m_p_mesure_pos->vitesse_l);
-        Serial.println(" cm/s");
+        Serial.print("Vitesse droite : " + String(m_p_mesure_pos->vitesse_r) + " cm/s | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l) + " cm/s");
+        Serial.print(" | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l) + " cm/s | Vitesse en y : " + String(m_p_mesure_pos->vitesse_y) + " cm/s");
+        Serial.println(" | Vitesse angulaire : " + String(m_p_mesure_pos->vitesse_theta) + " rad/s");
     }
 }
 
@@ -596,8 +585,7 @@ void Pami::print_log()
 {
     if (m_time_log + 500 < millis()) // Log toutes les secondes
     {
-        Serial.print("Distance Ir: ");
-        Serial.println(this->get_IR_distance());
+        Serial.println("Distance Ir: " + String(this->get_IR_distance()) + " mm");
         this->print_speed();
         this->print_position();
         this->print_encodeur();
