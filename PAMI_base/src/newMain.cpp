@@ -37,13 +37,13 @@ void setup()
 
 void loop()
 {
-    // pami.allumer_moteur(20);
+    pami.allumer_moteur(200);
 
-    // pami.print_encodeur();
-    // pami.print_speed();
-    // pami.print_position();
+    pami.print_encodeur();
+    pami.print_speed();
+    pami.print_position();
 
-    pami.go_to(20, 20, SPEED);
+    // pami.go_to(20, 20, SPEED);
     // if (i == 0)
     // {
     //     pami.reculer(20);
