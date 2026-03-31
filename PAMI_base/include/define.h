@@ -92,6 +92,25 @@ Paramètres globaux
 #define EPSP 1           // Incertitude position, cm
 #define EPSA 0.1         // Incertitude position, radian
 
+/*
+Paramètres de l'asservissement
+    A régler pour que le robot suive bien sa trajectoire
+    Kp : gain proportionnel, plus il est grand plus le robot réagit vite à une erreur de position, mais peut causer des oscillations si trop élevé.
+    Ti : gain intégral, permet de corriger les erreurs persistantes en accumulant les erreurs passées, mais peut causer des oscillations si trop élevé.
+    Td : gain dérivé, permet de réduire les oscillations en anticipant les erreurs futures, mais peut rendre le système instable si trop élevé.
+*/
+#define KP_r 1
+#define KP_l 1
+#define KP_angle 5
+
+#define TI_r 0.1
+#define TI_l 0.1
+#define TI_angle 0
+
+#define TD_r 0
+#define TD_l 0
+#define TD_angle 0
+
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
 // Chaque pami à ses propres positions
 

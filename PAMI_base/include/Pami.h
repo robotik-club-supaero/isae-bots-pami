@@ -52,13 +52,13 @@ public:
     void go_to(float pos_target_x, float pos_target_y, int speed = SPEED);
     void avancer(float distance, int speed = SPEED);
     void reculer(float distance, int speed = SPEED);
+    void tourner(float angle_degres, float speed = SPEED);
 
     bool go_to_with_obstacle(float pos_target_x, float pos_target_y, int speed = SPEED);
     bool avancer_with_obstacle(float distance, int speed = SPEED);
     bool reculer_with_obstacle(float distance, int speed = SPEED);
 
     void allumer_moteur(float speed);
-    void tourner(float angle_degres, float speed = SPEED);
     void blink_servo(long temps_blink, int angle1, int angle2);
 
     double get_ultrason_distance();
