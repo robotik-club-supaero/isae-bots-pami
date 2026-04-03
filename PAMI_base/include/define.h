@@ -1,7 +1,6 @@
 /**
  * @file define.h
  * @brief fichier de configuration des pins pour la pami )
- * Voir avec l'elec pour les pins
  */
 
 // TODO REGLER LES PINS AVANT LA COUPE AVEC L'ELEC
