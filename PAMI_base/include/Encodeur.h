@@ -25,6 +25,11 @@ public:
     void setup();
 
     /**
+     * @brief Remet le compteur de l'encodeur à zéro
+     */
+    void clear_count();
+
+    /**
      * @brief Boucle de l'encodeur, ne sert que pour tester l'encodeur
      */
     void loop();

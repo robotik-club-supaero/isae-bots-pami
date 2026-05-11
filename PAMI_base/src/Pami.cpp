@@ -157,11 +157,12 @@ void Pami::setup()
 
     pinMode(PIN_TIRETTE, INPUT);
     pinMode(PIN_READEQUIPE, INPUT);
-    // pinMode(PIN_INT_PAMI_1, INPUT);
-    // pinMode(PIN_INT_PAMI_2, INPUT);
+    pinMode(PIN_INT_PAMI_1, INPUT);
+    pinMode(PIN_INT_PAMI_2, INPUT);
 
     this->config_start_position();
     Serial.println("Setup Done : Tirette & Equipe & PAMI");
+    // Faire une fonction log qui donne couleur équipe & numéro pami
 
     m_time_log = millis();
 
@@ -191,8 +192,9 @@ void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
         Serial.print("Distance target : ");
         Serial.println(distance_target);
 
-        // this->print_speed();
-        // this->print_position();
+        this->print_speed();
+        this->print_encodeur();
+        this->print_position();
 
         m_p_asserv->asserv_global(speed, speed, angle);
         delay(10);
@@ -224,7 +226,6 @@ void Pami::avancer(float distance, int speed)
         float dy = pos_y - start_pos_y;
 
         // 2. On projette ce déplacement sur l'axe du robot (produit scalaire)
-        // Comme le robot recule, cette valeur va devenir de plus en plus NÉGATIVE
         distance_traveled = abs(dx * cos(start_angle) + dy * sin(start_angle));
 
         Serial.print("distance parcourue : ");
@@ -575,8 +576,8 @@ void Pami::print_speed()
     if (millis() - m_time_log > 275)
     {
         m_p_mesure_pos->loop();
-        Serial.print("Vitesse droite : " + String(m_p_mesure_pos->vitesse_r) + " cm/s | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l) + " cm/s");
-        Serial.print(" | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l) + " cm/s | Vitesse en y : " + String(m_p_mesure_pos->vitesse_y) + " cm/s");
+        Serial.print("Vitesse droite : " + String(m_p_mesure_pos->vitesse_r / 10) + " cm/s | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l / 10) + " cm/s");
+        Serial.print(" | Vitesse en x : " + String(m_p_mesure_pos->vitesse_x / 10) + " cm/s | Vitesse en y : " + String(m_p_mesure_pos->vitesse_y / 10) + " cm/s");
         Serial.println(" | Vitesse angulaire : " + String(m_p_mesure_pos->vitesse_theta) + " rad/s");
     }
 }
@@ -589,8 +590,52 @@ void Pami::print_log()
         this->print_speed();
         this->print_position();
         this->print_encodeur();
+        this->print_infos_interrupteur();
 
         m_time_log = millis();
+    }
+}
+
+void Pami::print_infos_interrupteur()
+{
+    int equipe = digitalRead(PIN_READEQUIPE);
+    int tirette = digitalRead(PIN_TIRETTE);
+    int int_pami_1 = digitalRead(PIN_INT_PAMI_1);
+    int int_pami_2 = digitalRead(PIN_INT_PAMI_2);
+
+    if (tirette == 1)
+    {
+        Serial.println("Tirette : Mise en place");
+    }
+    else
+    {
+        Serial.println("Tirette : Enlevée");
+    }
+
+    if (equipe == 1)
+    {
+        Serial.println("Equipe : JAUNE");
+    }
+    else
+    {
+        Serial.println("Equipe : BLEUE");
+    }
+
+    if (int_pami_1 == 0 && int_pami_2 == 0)
+    {
+        Serial.println("PAMI n°1 - collé au mur");
+    }
+    else if (int_pami_1 == 0 && int_pami_2 == 1)
+    {
+        Serial.println("PAMI n°2");
+    }
+    else if (int_pami_1 == 1 && int_pami_2 == 0)
+    {
+        Serial.println("PAMI n°3");
+    }
+    else if (int_pami_1 == 1 && int_pami_2 == 1)
+    {
+        Serial.println("PAMI n°4 - plus éloigné du mur");
     }
 }
 

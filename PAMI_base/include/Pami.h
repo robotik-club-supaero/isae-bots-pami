@@ -47,6 +47,7 @@ public:
     void print_position();
     void print_encodeur();
     void print_speed();
+    void print_infos_interrupteur();
     void set_initial_position(float pos_initial_x, float pos_initial_y);
 
     void go_to(float pos_target_x, float pos_target_y, int speed = SPEED);

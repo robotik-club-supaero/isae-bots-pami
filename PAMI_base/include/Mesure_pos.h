@@ -6,6 +6,7 @@
 #ifndef MESURE_POS_H
 #define MESURE_POS_H
 #include <Arduino.h>
+#include <define.h>
 #include <Encodeur.h>
 
 class Mesure_pos
@@ -18,9 +19,9 @@ private:
      * Facteurs proportionnels entre encodeur et roue ( a determiner empiriquement )
      * Permet de passer de la mesure de l'encodeur à la distance parcourue par la roue et à l'angle de rotation
      */
-    float K_angle = 0.15; // TODO : regler les facteurs si on change la meca
-    float K_r = 0.0109;   // TODO : regler les facteurs si on change la meca
-    float K_l = 0.011;    // TODO : regler les facteurs si on change la meca
+    float K_angle = KP_angle; // TODO : regler les facteurs si on change la meca
+    float K_r = KP_r;         // TODO : regler les facteurs si on change la meca
+    float K_l = KP_l;         // TODO : regler les facteurs si on change la meca
     /**s
      * temps entre deux mesures
      */
@@ -62,7 +63,7 @@ public:
     float vitesse_theta;
 
     /**
-     * vitesse des roues droites et gauche
+     * vitesse des roues droites et gauche en mm/s
      */
     float vitesse_r;
     float vitesse_l;

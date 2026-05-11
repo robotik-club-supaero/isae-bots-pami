@@ -10,11 +10,11 @@
 /*
 ENCODEURS
 */
-#define CLK_R 4 // C1 RIGHT ENCODER
-#define DT_R 16 // C2 RIGHT ENCODER
+#define CLK_R 39 // C1 RIGHT ENCODER
+#define DT_R 36  // C2 RIGHT ENCODER
 
-#define CLK_L 19 // C1 LEFT ENCODER
-#define DT_L 18  // C2 LEFT ENCODER
+#define CLK_L 35 // C1 LEFT ENCODER
+#define DT_L 34  // C2 LEFT ENCODER
 
 /*
 A tester avec print_vitesse ou print_encodeur pour que les vitesses soient positives et que le robot avance
@@ -25,18 +25,18 @@ A tester avec print_vitesse ou print_encodeur pour que les vitesses soient posit
 #define INV_ENC_R 1 // Inversion du sens de rotation de l'encodeur gauche
 #define INV_MOT_R 1 // Inversion du sens de rotation du moteur gauche
 
-#define INV_ENC_L 1 // Inversion du sens de rotation de l'encodeur droit
+#define INV_ENC_L 0 // Inversion du sens de rotation de l'encodeur droit
 #define INV_MOT_L 0 // Inversion du sens de rotation du moteur gauche
 
 /*
 MOTEURS
 */
-#define EN_R 13  // M1 EN RIGHT MOTEUR
-#define IN1_R 12 // M1 IN1 RIGHT MOTEUR
-#define IN2_R 14 // M1 IN2 RIGHT MOTEUR
+#define EN_R 26  // M1 EN RIGHT MOTEUR
+#define IN1_R 25 // M1 IN1 RIGHT MOTEUR
+#define IN2_R 33 // M1 IN2 RIGHT MOTEUR
 
-#define EN_L 25  // M2 EN LEFT MOTEUR
-#define IN1_L 26 // M2 IN1 LEFT MOTEUR
+#define EN_L 32  // M2 EN LEFT MOTEUR
+#define IN1_L 14 // M2 IN1 LEFT MOTEUR
 #define IN2_L 27 // M2 IN2 LEFT MOTEUR
 
 /*
@@ -49,14 +49,14 @@ L'IR Sensor demande :
 #define ULTRASON_ECHO 0    // Ultrason echo pin
 #define ULTRASON_TRIGGER 0 // Ultrason trigger pin
 
-#define IR_SCL_PIN 5  // Ligne SCL de l'I2C du capteur ToF
-#define IR_SDA_PIN 17 // Ligne SDA de l'I2C du capteur ToF
-#define IR_LPN_PIN 2  // Ligne LPn du capteur ToF (pour le réveiller)
+#define IR_SCL_PIN 22 // Ligne SCL de l'I2C du capteur ToF
+#define IR_SDA_PIN 21 // Ligne SDA de l'I2C du capteur ToF
+#define IR_LPN_PIN 0  // Ligne LPn du capteur ToF (pour le réveiller) - Branché au 5V direct c'est plus simple
 
 /*
 SERVO
 */
-#define SERVPIN 15 // Broche du servo moteur sur D15
+#define SERVPIN 18 // Broche du servo moteur sur D15
 #define ANGLE1 0   // Valeur en degrés comprises entre 0° et 180° max
 #define ANGLE2 180
 #define TEMPS_BLINK 1000 // Temps clignotement (ms).
@@ -69,8 +69,8 @@ MACHINE A ETAT
 //  equipe = 0 : on est du coté droit (bleue).
 
 #define LED 2             // PIN LED pour le setup
-#define PIN_READEQUIPE 22 // PIN pour lire l'interrupteur qui defini l'équipe
-#define PIN_TIRETTE 21    // PIN de la tirette pour lancer le match
+#define PIN_READEQUIPE 19 // PIN pour lire l'interrupteur qui defini l'équipe
+#define PIN_TIRETTE 23    // PIN de la tirette pour lancer le match
 
 /*
     Low & Low : Première (collée au mur)
@@ -78,8 +78,8 @@ MACHINE A ETAT
     High & Low : Troisième
     High & High : Quatrième
 */
-#define PIN_INT_PAMI_1 110 // PIN interrupteur 1 pour le numéro de la PAMI
-#define PIN_INT_PAMI_2 110 // PIN interrupteur 2 pour le numéro de la PAMI
+#define PIN_INT_PAMI_1 16 // PIN interrupteur 1 pour le numéro de la PAMI
+#define PIN_INT_PAMI_2 17 // PIN interrupteur 2 pour le numéro de la PAMI
 
 /*
 Paramètres globaux
@@ -98,9 +98,9 @@ Paramètres de l'asservissement
     Ti : gain intégral, permet de corriger les erreurs persistantes en accumulant les erreurs passées, mais peut causer des oscillations si trop élevé.
     Td : gain dérivé, permet de réduire les oscillations en anticipant les erreurs futures, mais peut rendre le système instable si trop élevé.
 */
-#define KP_r 1
-#define KP_l 1
-#define KP_angle 5
+#define KP_r 0.085
+#define KP_l 0.090
+#define KP_angle 0.0083
 
 #define TI_r 0.1
 #define TI_l 0.1

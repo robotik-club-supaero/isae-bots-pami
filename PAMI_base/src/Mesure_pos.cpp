@@ -22,16 +22,26 @@ void Mesure_pos::setup()
     mesure_l = m_p_encoder_L->mesure();
     mesure_r = m_p_encoder_R->mesure();
 
-    // Evite
     m_time_millis = millis();
     m_time_micros = micros();
 }
 
 void Mesure_pos::reinitialise()
 {
+    m_p_encoder_L->clear_count();
+    m_p_encoder_R->clear_count();
+
     position_theta = 0;
     position_x = 0;
     position_y = 0;
+
+    mesure_l = 0;
+    mesure_r = 0;
+
+    m_time_millis = millis();
+    m_time_micros = micros();
+
+    Serial.println("Odométrie et encodeurs réinitialisés.");
 }
 
 void Mesure_pos::loop()

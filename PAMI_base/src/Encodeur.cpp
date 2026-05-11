@@ -19,6 +19,11 @@ long Encodeur::mesure()
     return (m_inv == true) ? -encoder.getCount() : encoder.getCount();
 }
 
+void Encodeur::clear_count()
+{
+    encoder.setCount(0); // Remet le compteur physique à zéro
+}
+
 void Encodeur::loop()
 {
     if (millis() - m_time > 100)
