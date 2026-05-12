@@ -8,13 +8,24 @@
 #define DEFINE_H
 
 /*
+MOTEURS
+*/
+#define EN_R 32  // M1 EN RIGHT MOTEUR
+#define IN1_R 14 // M1 IN1 RIGHT MOTEUR
+#define IN2_R 27 // M1 IN2 RIGHT MOTEUR
+
+#define EN_L 26  // M2 EN LEFT MOTEUR
+#define IN1_L 25 // M2 IN1 LEFT MOTEUR
+#define IN2_L 33 // M2 IN2 LEFT MOTEUR
+
+/*
 ENCODEURS
 */
-#define CLK_R 39 // C1 RIGHT ENCODER
-#define DT_R 36  // C2 RIGHT ENCODER
+#define CLK_L 39 // C1 RIGHT ENCODER
+#define DT_L 36  // C2 RIGHT ENCODER
 
-#define CLK_L 35 // C1 LEFT ENCODER
-#define DT_L 34  // C2 LEFT ENCODER
+#define CLK_R 35 // C1 LEFT ENCODER
+#define DT_R 34  // C2 LEFT ENCODER
 
 /*
 A tester avec print_vitesse ou print_encodeur pour que les vitesses soient positives et que le robot avance
@@ -23,21 +34,10 @@ A tester avec print_vitesse ou print_encodeur pour que les vitesses soient posit
 # Mention abominable
 */
 #define INV_ENC_R 1 // Inversion du sens de rotation de l'encodeur gauche
-#define INV_MOT_R 1 // Inversion du sens de rotation du moteur gauche
+#define INV_MOT_R 0 // Inversion du sens de rotation du moteur gauche
 
 #define INV_ENC_L 0 // Inversion du sens de rotation de l'encodeur droit
-#define INV_MOT_L 0 // Inversion du sens de rotation du moteur gauche
-
-/*
-MOTEURS
-*/
-#define EN_R 26  // M1 EN RIGHT MOTEUR
-#define IN1_R 25 // M1 IN1 RIGHT MOTEUR
-#define IN2_R 33 // M1 IN2 RIGHT MOTEUR
-
-#define EN_L 32  // M2 EN LEFT MOTEUR
-#define IN1_L 14 // M2 IN1 LEFT MOTEUR
-#define IN2_L 27 // M2 IN2 LEFT MOTEUR
+#define INV_MOT_L 1 // Inversion du sens de rotation du moteur gauche
 
 /*
 SENSORS (IR, Ultrason, ect...)
@@ -86,9 +86,9 @@ Paramètres globaux
 */
 #define GLOBALTIME 99000 // Temps global de la pami en ms (99s)
 #define START_TIME 2000  // Les pamis commencent dans les 15 dernières secondes.
-#define SPEED 150        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
+#define SPEED 200        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
-#define EPSP 1           // Incertitude position, cm
+#define EPSP 100         // Incertitude position, cm
 #define EPSA 0.1         // Incertitude position, radian
 
 /*

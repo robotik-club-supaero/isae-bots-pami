@@ -41,6 +41,8 @@ public:
 
     Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
 
+    void test(int mode);
+
     void config_start_position();
     void setup();
     void print_log();
@@ -59,7 +61,7 @@ public:
     bool avancer_with_obstacle(float distance, int speed = SPEED);
     bool reculer_with_obstacle(float distance, int speed = SPEED);
 
-    void allumer_moteur(float speed);
+    void set_speed(float speed);
     void blink_servo(long temps_blink, int angle1, int angle2);
 
     double get_ultrason_distance();

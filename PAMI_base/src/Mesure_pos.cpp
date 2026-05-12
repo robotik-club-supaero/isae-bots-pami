@@ -54,34 +54,36 @@ void Mesure_pos::loop()
         m_time_micros = current_micros;
         m_time_millis = millis();
 
-        float position_l = 0;
-        float position_r = 0;
+        long current_ticks_l = m_p_encoder_L->mesure();
+        long current_ticks_r = m_p_encoder_R->mesure();
 
-        position_l = m_p_encoder_L->mesure() - mesure_l;
-        position_r = m_p_encoder_R->mesure() - mesure_r;
+        // Serial.print("Ticks L : " + String(current_ticks_l) + " | Ticks R : " + String(current_ticks_r) + " | dt (ms) : " + String(real_dt_micros / 1000.0) + " ms\n");
+        // Serial.print("Mesure L : " + String(mesure_l) + " | Mesure R : " + String(mesure_r) + "\n");
 
-        // Positions
-        position_theta += (position_l * K_l - position_r * K_r) * K_angle;
-        position_x += ((position_l * K_l + position_r * K_r) / 2) * cos(position_theta);
-        position_y += ((position_l * K_l + position_r * K_r) / 2) * sin(position_theta);
+        float position_l = current_ticks_l - mesure_l;
+        float position_r = current_ticks_r - mesure_r;
 
-        // Vitesse
-        vitesse_x = (((position_l * K_l + position_r * K_r) / 2) * cos(position_theta) / real_dt_micros) * 1e6; // En cm par seconde
-        vitesse_y = (((position_l * K_l + position_r * K_r) / 2) * sin(position_theta) / real_dt_micros) * 1e6; // En cm par seconde
-        vitesse_theta = ((position_l - position_r) * K_angle / real_dt_micros) * 1e6;                           // En cm radian par seconde
+        position_theta += (position_r * K_r - position_l * K_l) * K_angle;
+        position_x += ((position_l * K_l + position_r * K_r) / 2.0) * cos(position_theta);
+        position_y += ((position_l * K_l + position_r * K_r) / 2.0) * sin(position_theta);
 
-        // Vitesse roue droite et gauche (en cm/s)
+        vitesse_x = (((position_l * K_l + position_r * K_r) / 2.0) * cos(position_theta) / real_dt_micros) * 1e6;
+        vitesse_y = (((position_l * K_l + position_r * K_r) / 2.0) * sin(position_theta) / real_dt_micros) * 1e6;
+
+        vitesse_theta = ((position_r * K_r - position_l * K_l) * K_angle / real_dt_micros) * 1e6;
         vitesse_l = (position_l / real_dt_micros * 1e6) * K_l;
         vitesse_r = (position_r / real_dt_micros * 1e6) * K_r;
+
+        mesure_l = current_ticks_l;
+        mesure_r = current_ticks_r;
 
         /**
          * Affichage des valeurs , a decommenter si on veut debug ,
          * NE PAS OUBLIER DE COMMENTER DANS LE CODE FINAL SINON LE TERMINAL SERIE INTERFERE AVEC L'ASSERVISSEMENT ET CA FAIT NIMP
          */
-
         // Serial.println("Position_x = " + String(position_x));
         // Serial.println("Position_y = " + String(position_y));
-        // Serial.println("Position_theta = " + String(position_theta));
+        // Serial.println("Position_theta = " + String(position_theta * 180 / PI));
 
         // Serial.println("vitesse_x = " + String(vitesse_x));
         // Serial.println("vitesse_y = " + String(vitesse_y));
@@ -90,9 +92,5 @@ void Mesure_pos::loop()
 
         // Serial.println("Mesure_r = " + String(mesure_r));
         // Serial.println("Mesure_l= " + String(mesure_l));
-
-        // Maj des mesures et temps ;
-        mesure_l = m_p_encoder_L->mesure();
-        mesure_r = m_p_encoder_R->mesure();
     }
 }

@@ -21,7 +21,7 @@ Asserv asserv = Asserv(&moteur_r, &moteur_l, &mesure_pos);
 Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos);
 
 // La pami en elle même
-Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv); // On n'utilise pas l'ultrason pour le moment
+Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
 
 float log_time = 0; // Variable global du temps
 int i = 0;
@@ -36,23 +36,30 @@ void setup()
 
     // On remet a 0 les positions car la roue tourne pendant l'upload (why ?)
     mesure_pos.reinitialise();
+    pami.pos_x = 0;
+    pami.pos_y = 0;
+    pami.angle = 0;
+    pami.distance_target = 0;
+
+    pami.test(5);
 }
 
 void loop()
 {
-    // pami.allumer_moteur(200);
-
+    // ir_sensor.loop();
     // Test servo
     // pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
 
     // Test moteur ici
-    pami.print_encodeur();
-    Serial.print("\n");
-    pami.print_speed();
-    Serial.print("\n");
-    pami.print_position();
-    Serial.print("\n");
-    Serial.print("\n");
+    // pami.allumer_moteur(SPEED);
+    // pami.set_speed(SPEED);
+    // pami.print_encodeur();
+    // Serial.print("\n");
+    // pami.print_speed();
+    // Serial.print("\n");
+    // pami.print_position();
+    // Serial.print("\n");
+    // Serial.print("\n");
     // Test capteur ir
     // int ir_distance = pami.get_IR_distance();
     // Serial.println("Distance IR: " + String(ir_distance) + " mm");
@@ -61,18 +68,16 @@ void loop()
     //     Serial.println("Obstacle détecté ! Distance : " + String(ir_distance) + " mm");
     // }
 
-    // Test de la fonction go_to
-
-    // pami.go_to(20, 20, SPEED);
+    // pami.go_to(300, 130, SPEED);
 
     // Test avancer ou reculer ou tourner
-    if (i == 0)
-    {
-        pami.avancer(30);
-        pami.print_encodeur();
-        pami.print_speed();
-        i = 1;
-    }
+    // if (i == 0)
+    // {
+    // pami.avancer(300);
+    // pami.print_encodeur();
+    // pami.print_position();
+    // i = 1;
+    // }
 
     delay(1000);
     // pami.print_log();

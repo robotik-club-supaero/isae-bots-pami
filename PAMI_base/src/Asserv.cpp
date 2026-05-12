@@ -60,10 +60,10 @@ void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, f
     float erreur_r = vitesse_r_consigne - m_p_mesure_pos->vitesse_r;
     float output_l = m_asservPID_l.computeOutput(erreur_l, micros());
     float output_r = m_asservPID_r.computeOutput(erreur_r, micros());
-    // Serial.println("erreur_l" + String(erreur_l));
-    // Serial.println("erreur_r" + String(erreur_r));
-    // Serial.println("output_l" + String(output_l));
-    // Serial.println("output_r" + String(output_r));
+    // Serial.println("\n\nerreur_l : " + String(erreur_l));
+    // Serial.println("erreur_r : " + String(erreur_r));
+    // Serial.println("output_l : " + String(output_l));
+    // Serial.println("output_r : " + String(output_r));
 
     float erreur_theta = theta_consigne - m_p_mesure_pos->position_theta;
 
@@ -79,8 +79,8 @@ void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, f
     }
 
     float output_theta = m_asservPID_angle.computeOutput(erreur_theta, micros());
-    float speed_l = output_theta * Kmot_angle + output_l * Kmot_l;
-    float speed_r = output_r * Kmot_r - output_theta * Kmot_angle;
+    float speed_l = output_l * Kmot_l - output_theta * Kmot_angle;
+    float speed_r = output_r * Kmot_r + output_theta * Kmot_angle;
 
     m_p_moteur_l->set_speed(speed_l);
     m_p_moteur_r->set_speed(speed_r);

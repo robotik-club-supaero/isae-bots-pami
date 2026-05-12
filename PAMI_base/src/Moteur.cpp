@@ -22,7 +22,7 @@ void Moteur::setup()
 
 void Moteur::set_speed(int vitesse)
 {
-    int vitesse_reelle = (m_inv == 1) ? -vitesse : vitesse;
+    int vitesse_reelle = (m_inv == true) ? -vitesse : vitesse;
 
     if (vitesse_reelle < 0)
     {

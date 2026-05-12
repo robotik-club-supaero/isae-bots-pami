@@ -19,6 +19,132 @@ Pami::Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encod
 float m_time_match = millis();
 
 /*
+Fonction de diagnostic général du robot
+Modes :
+1 = Interrupteurs & Tirette
+2 = Capteur IR (ToF)
+3 = Servomoteur
+4 = Moteurs (Puissance brute)
+5 = Encodeurs & Odométrie (À pousser à la main)
+*/
+void Pami::test(int mode)
+{
+    Serial.print("\n========== LANCEMENT DU TEST MODE : ");
+    Serial.print(mode);
+    Serial.println(" ==========");
+
+    switch (mode)
+    {
+    case 1: // --- TEST 1 : TIRETTE & INTERRUPTEURS ---
+    {
+        Serial.println("Test Interrupteurs... Modifiez leurs etats ! (Boucle infinie)");
+        while (true)
+        {
+            this->print_infos_interrupteur();
+            Serial.println("-------------------------");
+            delay(1000); // On attend 1s pour ne pas spammer le terminal
+        }
+        break;
+    }
+
+    case 2: // --- TEST 2 : CAPTEUR IR ---
+    {
+        Serial.println("Test Capteur IR... Passez votre main devant ! (Boucle infinie)");
+        while (true)
+        {
+            float dist = this->get_IR_distance();
+            Serial.print("Distance mesuree : ");
+            Serial.print(dist / 10.0);
+            Serial.println(" cm");
+            delay(200);
+        }
+        break;
+    }
+
+    case 3: // --- TEST 3 : SERVOMOTEUR ---
+    {
+        Serial.println("Test Servomoteur : Va-et-vient de 3 secondes");
+        while (true)
+        {
+            // Utilise les constantes ANGLE1 et ANGLE2 de ton define.h
+            this->blink_servo(1000, ANGLE1, ANGLE2);
+        }
+        Serial.println("Fin du test Servomoteur.");
+        break;
+    }
+
+    case 4: // --- TEST 4 : MOTEURS BRUTS ---
+    {
+        Serial.println("Test Moteurs : Attention, le robot va avancer puis reculer !");
+        delay(2000); // Laisse le temps de poser le robot ou de le lever
+
+        Serial.println("-> Marche Avant (Vitesse 100)");
+        this->set_speed(100);
+        delay(1500);
+
+        Serial.println("-> Arret");
+        this->set_speed(0);
+        delay(1000);
+
+        Serial.println("-> Marche Arriere (Vitesse -100)");
+        this->set_speed(-100);
+        delay(1500);
+
+        Serial.println("-> Arret Definitif");
+        this->set_speed(0);
+        Serial.println("Fin du test Moteurs.");
+        break;
+    }
+
+    case 5: // --- TEST 5 : ODOMETRIE ---
+    {
+        Serial.println("Test Encodeurs... Poussez le robot a la main ! (Boucle infinie)");
+        m_p_mesure_pos->reinitialise();
+        while (true)
+        {
+            m_p_mesure_pos->loop(); // Met a jour les calculs
+            this->print_encodeur();
+            this->print_position();
+            this->print_speed();
+            Serial.println("-------------------------");
+            delay(250);
+        }
+        break;
+    }
+    case 6: // Essais roue droite & gauche indépendament
+    {
+        Serial.println("Test Moteurs Individuels : Attention, le robot va tester chaque roue indépendamment !");
+
+        Serial.println("-> Test Roue Droite (Vitesse 200)");
+        m_p_moteur_d->set_speed(200);
+        m_p_moteur_g->set_speed(0);
+        delay(3000);
+
+        Serial.println("-> Arret");
+        m_p_moteur_d->set_speed(0);
+        delay(1000);
+
+        Serial.println("-> Test Roue Gauche (Vitesse 200)");
+        m_p_moteur_d->set_speed(0);
+        m_p_moteur_g->set_speed(200);
+        delay(3000);
+
+        Serial.println("-> Arret Definitif");
+        m_p_moteur_d->set_speed(0);
+        m_p_moteur_g->set_speed(0);
+        Serial.println("Fin du test Moteurs Individuels.");
+        break;
+    }
+
+    default:
+    {
+        Serial.println("Erreur : Mode de test inconnu ! (Choisissez entre 1 et 6)");
+        break;
+    }
+    }
+}
+
+/*
 Mise à jour des positions initiales et finales de la pami en fonction de l'équipe et de sa position
 */
 void Pami::config_start_position()
@@ -170,7 +296,7 @@ void Pami::setup()
 }
 
 /*
-Fonction de test pour aller a une position (x, y) du plateau
+Fonction de test pour aller a une position (x, y) [mm & mm] du plateau
 */
 void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
 {
@@ -192,8 +318,8 @@ void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
         Serial.print("Distance target : ");
         Serial.println(distance_target);
 
-        this->print_speed();
-        this->print_encodeur();
+        // this->print_speed();
+        // this->print_encodeur();
         this->print_position();
 
         m_p_asserv->asserv_global(speed, speed, angle);
@@ -201,9 +327,8 @@ void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
     }
 
     // On s'arrête quand on est arrivés
-    this->allumer_moteur(0);
+    this->set_speed(0);
 }
-
 /*
 Fonction de test pour avancer d'une certaine distance
 */
@@ -231,12 +356,14 @@ void Pami::avancer(float distance, int speed)
         Serial.print("distance parcourue : ");
         Serial.println(distance_traveled);
 
+        Serial.println("dx : " + String(dx) + " | dy : " + String(dy));
+
         m_p_asserv->asserv_global(speed, speed, start_angle);
         delay(10);
     }
 
     // On s'arrête quand on est arrivés
-    this->allumer_moteur(0);
+    this->set_speed(0);
 }
 
 /*
@@ -272,7 +399,7 @@ void Pami::reculer(float distance, int speed)
     }
 
     // On s'arrête quand on est arrivés
-    this->allumer_moteur(0);
+    this->set_speed(0);
 }
 
 /*
@@ -310,7 +437,7 @@ void Pami::tourner(float angle_degres, float speed)
         delay(10);
     }
 
-    this->allumer_moteur(0);
+    this->set_speed(0);
 }
 
 /*
@@ -328,7 +455,7 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
         // 1. Sécurité temps de match
         if (millis() - m_time_match >= GLOBALTIME)
         {
-            this->allumer_moteur(0);
+            this->set_speed(0);
             return false; // Fin du match, on force la sortie !
         }
 
@@ -340,7 +467,7 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
 
             if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
             {
-                this->allumer_moteur(0);
+                this->set_speed(0);
                 Serial.println("Obstacle !");
                 delay(10);
                 continue; // Repart au début du "do" sans avancer
@@ -355,19 +482,38 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
         // 4. Déplacement
         distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
         angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
+        angle = fmod(angle, 2 * PI);
+        if (angle > PI)
+            angle -= 2 * PI;
+        else if (angle < -PI)
+            angle += 2 * PI;
+
+        float erreur_angle = angle - m_p_mesure_pos->position_theta;
+        erreur_angle = fmod(erreur_angle, 2 * PI);
+        if (erreur_angle > PI)
+            erreur_angle -= 2 * PI;
+        else if (erreur_angle < -PI)
+            erreur_angle += 2 * PI;
 
         Serial.print("Distance target : ");
         Serial.println(distance_target);
+        Serial.print("erreur_angle : ");
+        Serial.println(erreur_angle);
 
-        // this->print_speed();
-        // this->print_position();
-
-        m_p_asserv->asserv_global(speed, speed, angle);
+        // Si l'angle est trop éloigné, on tourne sur place avant d'avancer.
+        if (abs(erreur_angle) > 0.25)
+        {
+            m_p_asserv->asserv_global(0, 0, angle);
+        }
+        else
+        {
+            m_p_asserv->asserv_global(speed, speed, angle);
+        }
         delay(10);
     }
 
     // On s'arrête quand on est arrivés
-    this->allumer_moteur(0);
+    this->set_speed(0);
     return true;
 }
 
@@ -425,7 +571,7 @@ bool Pami::avancer_with_obstacle(float distance, int speed)
     }
 
     // On s'arrête quand on est arrivés
-    this->allumer_moteur(0);
+    this->set_speed(0);
     return true;
 }
 
@@ -483,7 +629,7 @@ bool Pami::reculer_with_obstacle(float distance, int speed)
     }
 
     // On s'arrête quand on est arrivés
-    this->allumer_moteur(0);
+    this->set_speed(0);
     return true;
 }
 
@@ -499,7 +645,7 @@ void Pami::set_initial_position(float pos_initial_x, float pos_initial_y)
 /*
 Allume les deux moteurs à une vitesse en (entre 0 et 255)
 */
-void Pami::allumer_moteur(float speed)
+void Pami::set_speed(float speed)
 {
     // Si on règle les gains askip c'est mieux
     // m_p_asserv->asservissement(speed, speed);
@@ -556,9 +702,9 @@ void Pami::print_position()
     if (millis() - m_time_log > 250)
     {
         m_p_mesure_pos->loop();
-        Serial.print("Pos X :" + String(m_p_mesure_pos->position_x));
-        Serial.print(" | Pos Y :" + String(m_p_mesure_pos->position_y));
-        Serial.println(" | Theta :" + String(m_p_mesure_pos->position_theta * (180.0 / PI)) + "°");
+        Serial.print("Pos X : " + String(m_p_mesure_pos->position_x / 10) + " cm");
+        Serial.print(" | Pos Y : " + String(m_p_mesure_pos->position_y / 10) + " cm");
+        Serial.println(" | Theta : " + String(m_p_mesure_pos->position_theta * (180.0 / PI)) + "°");
     }
 }
 
@@ -566,8 +712,8 @@ void Pami::print_encodeur()
 {
     if (millis() - m_time_log > 250)
     {
-        Serial.print("Encodeur droit : " + String(m_p_encodeur_d->mesure()));
-        Serial.println(" | Encodeur gauche : " + String(m_p_encodeur_g->mesure()));
+        Serial.print("Encodeur gauche : " + String(m_p_encodeur_g->mesure()));
+        Serial.println(" | Encodeur droit : " + String(m_p_encodeur_d->mesure()));
     }
 }
 
@@ -646,7 +792,7 @@ void Pami::start_match()
     while (digitalRead(PIN_TIRETTE) == 1)
     {
         this->config_start_position();
-        this->allumer_moteur(0);
+        this->set_speed(0);
         delay(10);
     }
 
@@ -717,7 +863,7 @@ void Pami::start_match()
 void Pami::end_match()
 {
     Serial.println("Fin du match (Temps écoulé !)");
-    this->allumer_moteur(0);
+    this->set_speed(0);
 
     while (true)
     {
