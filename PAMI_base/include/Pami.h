@@ -53,6 +53,10 @@ public:
     void set_initial_position(float pos_initial_x, float pos_initial_y);
 
     void go_to(float pos_target_x, float pos_target_y, int speed = SPEED);
+    void avancer_asserv(float distance, int speed = SPEED);
+    void reculer_asserv(float distance, int speed = SPEED);
+    void tourner_asserv(float angle_degres, float speed = SPEED);
+
     void avancer(float distance, int speed = SPEED);
     void reculer(float distance, int speed = SPEED);
     void tourner(float angle_degres, float speed = SPEED);

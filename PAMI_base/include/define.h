@@ -10,13 +10,13 @@
 /*
 MOTEURS
 */
-#define EN_R 32  // M1 EN RIGHT MOTEUR
-#define IN1_R 14 // M1 IN1 RIGHT MOTEUR
-#define IN2_R 27 // M1 IN2 RIGHT MOTEUR
+#define EN_L 32  // M1 EN RIGHT MOTEUR
+#define IN1_L 14 // M1 IN1 RIGHT MOTEUR
+#define IN2_L 27 // M1 IN2 RIGHT MOTEUR
 
-#define EN_L 26  // M2 EN LEFT MOTEUR
-#define IN1_L 25 // M2 IN1 LEFT MOTEUR
-#define IN2_L 33 // M2 IN2 LEFT MOTEUR
+#define EN_R 26  // M2 EN LEFT MOTEUR
+#define IN1_R 25 // M2 IN1 LEFT MOTEUR
+#define IN2_R 33 // M2 IN2 LEFT MOTEUR
 
 /*
 ENCODEURS
@@ -90,6 +90,12 @@ Paramètres globaux
 #define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
 #define EPSA 0.1         // Incertitude position, radian
+
+/*
+Gains naifs pour réellement avancer de 10cm avec un delay
+*/
+#define K_NAIF 1.402
+#define K_ANGLE_NAIF 2.753
 
 /*
 Paramètres de l'asservissement

@@ -27,6 +27,7 @@ Modes :
 4 = Moteurs (Puissance brute)
 5 = Encodeurs & Odométrie (À pousser à la main)
 6 = Moteurs Individuels (Puissance brute)
+7 = Homologation : Avance et s'arrête en fonction du capteur IR
 */
 void Pami::test(int mode)
 {
@@ -144,6 +145,30 @@ void Pami::test(int mode)
         }
         break;
     }
+    case 7: // Homologation
+    {
+        Serial.println("Homologation : Le robot avance et s'arrête lorsque le capteur IR détecte un obstacle à moins de 5 cm (Boucle infinie)");
+
+        while (true)
+        {
+            float dist = this->get_IR_distance();
+            Serial.print("Distance mesuree : ");
+            Serial.print(dist / 10.0);
+            Serial.println(" cm");
+
+            if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+            {
+                Serial.println("Obstacle détecté ! Arrêt du robot.");
+                this->set_speed(0);
+            }
+            else
+            {
+                this->set_speed(SPEED);
+            }
+            delay(200);
+        }
+        break;
+    }
 
     default:
     {
@@ -257,7 +282,7 @@ void Pami::setup()
     Serial.println("---------- Setup starting ----------");
 
     // Setup ultrason
-    if (m_p_ultrason != nullptr) //pas d'ultrason cette année
+    if (m_p_ultrason != nullptr) // pas d'ultrason cette année
     {
         m_p_ultrason->setup();
         Serial.println("Setup Done : Ultrason");
@@ -305,6 +330,85 @@ void Pami::setup()
     Serial.println("\n---------- Setup over ----------\n\n");
 }
 
+void Pami::avancer(float distance, int speed)
+{
+    unsigned long function_start_time = millis();
+
+    float moving_time = K_NAIF * (distance / SPEED) * 1000;
+    Serial.print("Temps estimé pour avancer de ");
+    Serial.print(distance / 10.0);
+    Serial.print(" cm à la vitesse de ");
+    Serial.print(speed);
+    Serial.print(" : ");
+    Serial.print(moving_time);
+    Serial.println(" ms");
+
+    while (millis() - function_start_time < moving_time)
+    {
+        float dist = this->get_IR_distance();
+        Serial.print("Distance mesuree : ");
+        Serial.print(dist / 10.0);
+        Serial.println(" cm");
+
+        if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+        {
+            Serial.println("Obstacle détecté ! Arrêt du robot.");
+            this->set_speed(0);
+        }
+        else
+        {
+            this->set_speed(speed);
+        }
+        delay(200);
+    }
+    this->set_speed(0);
+}
+
+void Pami::reculer(float distance, int speed)
+{
+    unsigned long function_start_time = millis();
+
+    float moving_time = K_NAIF * (distance / SPEED) * 1000;
+    Serial.print("Temps estimé pour reculer de ");
+    Serial.print(distance / 10.0);
+    Serial.print(" cm à la vitesse de ");
+    Serial.print(speed);
+    Serial.print(" : ");
+    Serial.print(moving_time);
+    Serial.println(" ms");
+
+    while (millis() - function_start_time < moving_time)
+    {
+        float dist = this->get_IR_distance();
+        Serial.print("Distance mesuree : ");
+        Serial.print(dist / 10.0);
+        Serial.println(" cm");
+
+        if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+        {
+            Serial.println("Obstacle détecté ! Arrêt du robot.");
+            this->set_speed(0);
+        }
+        else
+        {
+            this->set_speed(-speed);
+        }
+        delay(200);
+    }
+    this->set_speed(0);
+}
+
+/*
+Tourner dans le sens trigo
+*/
+void Pami::tourner(float angle_degres, float speed)
+{
+    m_p_moteur_d->set_speed(speed);
+    m_p_moteur_g->set_speed(-speed);
+    delay(K_ANGLE_NAIF * (angle_degres / 360.0) * 1000);
+    this->set_speed(0);
+}
+
 /*
 Fonction de test pour aller a une position (x, y) [mm & mm] du plateau
 */
@@ -343,7 +447,7 @@ void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
 /*
 Fonction de test pour avancer d'une certaine distance
 */
-void Pami::avancer(float distance, int speed)
+void Pami::avancer_asserv(float distance, int speed)
 {
     m_p_mesure_pos->loop();
     float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
@@ -380,7 +484,7 @@ void Pami::avancer(float distance, int speed)
 /*
 Fonction de test pour reculer d'une distance en x et en y
 */
-void Pami::reculer(float distance, int speed)
+void Pami::reculer_asserv(float distance, int speed)
 {
     m_p_mesure_pos->loop();
     float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
@@ -416,7 +520,7 @@ void Pami::reculer(float distance, int speed)
 /*
 Fonction de test qui fait tourner la pami de [theta_target] degrés
 */
-void Pami::tourner(float angle_degres, float speed)
+void Pami::tourner_asserv(float angle_degres, float speed)
 {
     m_p_mesure_pos->loop();
 

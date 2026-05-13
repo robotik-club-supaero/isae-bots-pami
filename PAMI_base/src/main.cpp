@@ -29,7 +29,7 @@ int i = 0;
 void setup()
 {
     pami.setup();
-    delay(500);
+    delay(2000);
     pami.config_start_position();
     // pami.set_initial_position(0, 0); //juste pour test manuellement
 
@@ -40,17 +40,17 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
-<<<<<<< HEAD
-    // pami.test(5);
-    pami.avancer_with_obstacle(200, SPEED);
-=======
-    pami.test(1);
->>>>>>> e3b87f79059dbac3544f5b052841cbda5ef94952
+    // pami.test(6);
+    pami.avancer(500);
+    delay(2000);
+    pami.reculer(500);
+    delay(2000);
+    pami.tourner(180);
 }
 
 void loop()
 {
-    pami.go_to(450, -230, SPEED);
+    // pami.go_to(450, -230, SPEED);
 
     // Test avancer ou reculer ou tourner
     // if (i == 0)
