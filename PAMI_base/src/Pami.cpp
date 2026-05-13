@@ -157,7 +157,7 @@ void Pami::test(int mode)
             Serial.print(dist / 10.0);
             Serial.println(" cm");
 
-            if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+            if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
             {
                 Serial.println("Obstacle détecté ! Arrêt du robot.");
                 this->set_speed(0);
@@ -207,11 +207,11 @@ void Pami::config_start_position()
     if (read_num_pami != num_pami || read_equipe != equipe)
     {
         String color_equipe = (read_equipe == 1) ? "JAUNE" : "BLEUE";
-        Serial.print("Nouvelle Equipe : ");
-        Serial.println(color_equipe);
+        // Serial.print("Nouvelle Equipe : ");
+        // Serial.println(color_equipe);
 
-        Serial.print("PAMI n°");
-        Serial.println(num_pami);
+        // Serial.print("PAMI n°");
+        // Serial.println(num_pami);
 
         num_pami = read_num_pami; // On met à jour le numéro de la pami
 
@@ -361,7 +361,7 @@ void Pami::avancer(float distance, int speed)
         Serial.print(dist / 10.0);
         Serial.println(" cm");
 
-        if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+        if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
         {
             Serial.println("Obstacle détecté ! Arrêt du robot.");
             this->set_speed(0);
@@ -395,7 +395,7 @@ void Pami::reculer(float distance, int speed)
         Serial.print(dist / 10.0);
         Serial.println(" cm");
 
-        if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+        if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
         {
             Serial.println("Obstacle détecté ! Arrêt du robot.");
             this->set_speed(0);
@@ -912,89 +912,196 @@ void Pami::print_infos_interrupteur()
     }
 }
 
-void Pami::start_match()
+void Pami::action_match()
 {
-    // --- 1. PHASE INIT (Attente Tirette) ---
-    Serial.println("Attente de la tirette...");
-    while (digitalRead(PIN_TIRETTE) == 1)
-    {
-        this->config_start_position();
-        this->set_speed(0);
-        delay(10);
-    }
-
-    // --- 2. DEPART (La tirette est tirée) ---
-    Serial.println("Début du match");
-    m_time_match = millis(); // On lance le chrono de 100s
-
-    // On attend le délai de départ de la PAMI (ex: démarre à T+85s)
-    while (millis() - m_time_match < START_TIME)
-    {
-        delay(10);
-    }
-
     if (num_pami == 1)
     {
         if (equipe == 1)
         {
-            if (go_to_with_obstacle(J_POSITION_1_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
         else
         {
-            if (go_to_with_obstacle(B_POSITION_1_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
     }
     else if (num_pami == 2)
     {
         if (equipe == 1)
         {
-            if (go_to_with_obstacle(J_POSITION_2_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
         else
         {
-            if (go_to_with_obstacle(B_POSITION_2_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
     }
     else if (num_pami == 3)
     {
         if (equipe == 1)
         {
-            if (go_to_with_obstacle(J_POSITION_3_FINAL_X, J_POSITION_3_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
         else
         {
-            if (go_to_with_obstacle(B_POSITION_3_FINAL_X, B_POSITION_3_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
     }
     else if (num_pami == 4)
     {
         if (equipe == 1)
         {
-            if (go_to_with_obstacle(J_POSITION_4_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
         else
         {
-            if (go_to_with_obstacle(B_POSITION_4_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
+            this->avancer(200);
+            delay(100);
+            this->tourner(-45);
+            delay(100);
+            this->avancer(300);
+            delay(100);
+            this->tourner(45);
+            delay(100);
+            this->avancer(500);
+            delay(100);
         }
     }
 }
 
+void Pami::start_match()
+{
+    // 1. PHASE INIT (Attente Tirette)
+    if (!m_match_demarre)
+    {
+        if (digitalRead(PIN_TIRETTE) == 1)
+        {
+            this->config_start_position();
+            this->set_speed(0); // On s'assure qu'il ne bouge pas
+            Serial.println("------------------------");
+        }
+        else
+        {
+            Serial.println("Début du match ! Chrono 100s lancé.");
+            m_time_match = millis(); // On lance le chrono
+            m_match_demarre = true;
+        }
+        return; // On sort de la fonction sans bloquer
+    }
+
+    // 2. LE COUPE-CIRCUIT DES 100 SECONDES
+    // Quoi qu'il arrive, si on dépasse 100s, on passe en mode fin.
+    if (millis() - m_time_match >= 100000) // 100 000 ms = 100s
+    {
+        this->end_match();
+        return; // On empêche l'action_match de s'exécuter
+    }
+
+    // 3. GESTION DU DELAI AVANT DEMARRAGE (ex: T+85s)
+    if (millis() - m_time_match < START_TIME)
+    {
+        return; // C'est pas encore l'heure, on sort et on attend
+    }
+
+    // 4. ACTION !
+    // Si on arrive ici, c'est que la tirette est tirée,
+    // le START_TIME est passé, et on est à moins de 100s.
+    this->action_match();
+}
+
 void Pami::end_match()
 {
-    Serial.println("Fin du match (Temps écoulé !)");
+    // 1. Coupure immédiate des moteurs
     this->set_speed(0);
 
-    while (true)
+    // Message affiché une seule fois grâce à un booléen statique
+    static bool message_affiche = false;
+    if (!message_affiche)
     {
-        this->blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
-        delay(100);
+        Serial.println("Fin du match (100s) - Arrêt total !");
+        message_affiche = true;
+    }
+
+    // 2. Animation du drapeau (Servo) SANS bloquer
+    static unsigned long last_blink = 0;
+    static bool position_haute = true;
+
+    // Toutes les "TEMPS_BLINK" millisecondes, on change la position
+    if (millis() - last_blink >= TEMPS_BLINK)
+    {
+        last_blink = millis();
+        if (position_haute)
+        {
+            // Remplace par la commande directe de ton servo si blink_servo utilise des delays
+            this->blink_servo(0, ANGLE1, ANGLE1);
+        }
+        else
+        {
+            this->blink_servo(0, ANGLE2, ANGLE2);
+        }
+        position_haute = !position_haute;
     }
 }

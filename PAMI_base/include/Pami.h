@@ -23,6 +23,7 @@ public:
     Ultrason *m_p_ultrason;
     Irsensor *m_p_ir_sensor;
 
+    bool m_match_demarre = false;
     int tirette = 1;  // Etat par défaut de la tirette
     int equipe = 1;   // Equipe par défaut (1 = gauche = jaune)
     int num_pami = 1; // Numéro de la pami
@@ -71,6 +72,7 @@ public:
     double get_ultrason_distance();
     double get_IR_distance();
 
+    void action_match();
     void start_match();
     void end_match();
 };

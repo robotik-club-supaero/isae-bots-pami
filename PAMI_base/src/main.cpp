@@ -24,12 +24,13 @@ Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos);
 Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
 
 float log_time = 0; // Variable global du temps
+unsigned long time_start_match = 0;
 int i = 0;
 
 void setup()
 {
     pami.setup();
-    delay(2000);
+    delay(500);
     pami.config_start_position();
     // pami.set_initial_position(0, 0); //juste pour test manuellement
 
@@ -40,23 +41,50 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
-    // pami.test(6);
+    while (digitalRead(PIN_TIRETTE) == 1)
+    {
+        pami.print_infos_interrupteur();
+        delay(500);
+    }
+
+    time_start_match = millis();
 }
 
 void loop()
 {
-    pami.go_to(100, 0, SPEED);
+    if (millis() - time_start_match >= GLOBALTIME) // 100 000 ms = 100s
+    {
+        Serial.println("Temps de match écoulé - Arrêt du robot.");
+        pami.set_speed(0);
+        while (true)
+        {
+            pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
+            delay(1000);
+        }
+    }
 
-    // Test avancer ou reculer ou tourner
-    // if (i == 0)
-    // {
-    // pami.avancer(300);
-    // pami.print_encodeur();
-    // pami.print_position();
-    // i = 1;
-    // }
+    if ((millis() - time_start_match) > START_TIME and (millis() - time_start_match) <= GLOBALTIME)
+    {
+        float dist = pami.get_IR_distance();
+        Serial.print("Distance mesuree : ");
+        Serial.print(dist / 10.0);
+        Serial.println(" cm");
 
-    delay(1000);
-    // pami.print_log();
+        if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
+        {
+            Serial.println("Obstacle détecté ! Arrêt du robot.");
+            pami.set_speed(0);
+        }
+        else
+        {
+            pami.set_speed(SPEED);
+        }
+        delay(200);
+    }
+
     // pami.start_match();
+
+    pami.print_log();
+    Serial.println("------------- Time since start match : " + String((millis() - time_start_match) / 1000) + " s -------------");
+    delay(1000);
 }
