@@ -102,8 +102,8 @@ Paramètres de l'asservissement
 #define KP_l 0.090
 #define KP_angle 0.0083
 
-#define TI_r 0.1
-#define TI_l 0.1
+#define TI_r 100
+#define TI_l 100
 #define TI_angle 0
 
 #define TD_r 0

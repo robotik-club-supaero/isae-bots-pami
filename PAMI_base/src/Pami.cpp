@@ -257,7 +257,7 @@ void Pami::setup()
     Serial.println("---------- Setup starting ----------");
 
     // Setup ultrason
-    if (m_p_ultrason != nullptr)
+    if (m_p_ultrason != nullptr) //pas d'ultrason cette année
     {
         m_p_ultrason->setup();
         Serial.println("Setup Done : Ultrason");

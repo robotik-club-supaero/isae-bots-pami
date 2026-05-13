@@ -30,9 +30,8 @@ void setup()
 {
     pami.setup();
     delay(500);
-    // pami.config_start_position();
-
-    pami.set_initial_position(0, 0);
+    pami.config_start_position();
+    // pami.set_initial_position(0, 0); //juste pour test manuellement
 
     // On remet a 0 les positions car la roue tourne pendant l'upload (why ?)
     mesure_pos.reinitialise();
@@ -41,8 +40,12 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
+<<<<<<< HEAD
     // pami.test(5);
     pami.avancer_with_obstacle(200, SPEED);
+=======
+    pami.test(1);
+>>>>>>> e3b87f79059dbac3544f5b052841cbda5ef94952
 }
 
 void loop()
