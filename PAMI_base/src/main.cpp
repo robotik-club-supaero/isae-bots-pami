@@ -41,16 +41,11 @@ void setup()
     pami.distance_target = 0;
 
     // pami.test(6);
-    pami.avancer(500);
-    delay(2000);
-    pami.reculer(500);
-    delay(2000);
-    pami.tourner(180);
 }
 
 void loop()
 {
-    // pami.go_to(450, -230, SPEED);
+    pami.go_to(100, 0, SPEED);
 
     // Test avancer ou reculer ou tourner
     // if (i == 0)

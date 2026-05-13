@@ -28,6 +28,7 @@ Modes :
 5 = Encodeurs & Odométrie (À pousser à la main)
 6 = Moteurs Individuels (Puissance brute)
 7 = Homologation : Avance et s'arrête en fonction du capteur IR
+8 = Avancer, reculer, tourner (Sans asservissement, juste pour voir si les fonctions de base marchent &  régler les gains)
 */
 void Pami::test(int mode)
 {
@@ -168,6 +169,16 @@ void Pami::test(int mode)
             delay(200);
         }
         break;
+    }
+    case 8:
+    {
+        Serial.println("Test Avancer/Reculer/Tourner... Attention, le robot va avancer, reculer puis tourner !");
+
+        this->avancer(100);
+        delay(2000);
+        this->reculer(100);
+        delay(2000);
+        this->tourner(180);
     }
 
     default:
