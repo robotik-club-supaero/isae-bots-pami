@@ -41,34 +41,13 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
-    pami.test(5);
+    // pami.test(5);
+    pami.avancer_with_obstacle(200, SPEED);
 }
 
 void loop()
 {
-    // ir_sensor.loop();
-    // Test servo
-    // pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
-
-    // Test moteur ici
-    // pami.allumer_moteur(SPEED);
-    // pami.set_speed(SPEED);
-    // pami.print_encodeur();
-    // Serial.print("\n");
-    // pami.print_speed();
-    // Serial.print("\n");
-    // pami.print_position();
-    // Serial.print("\n");
-    // Serial.print("\n");
-    // Test capteur ir
-    // int ir_distance = pami.get_IR_distance();
-    // Serial.println("Distance IR: " + String(ir_distance) + " mm");
-    // if (ir_distance != -1 && ir_distance < DISTANCE_MIN)
-    // {
-    //     Serial.println("Obstacle détecté ! Distance : " + String(ir_distance) + " mm");
-    // }
-
-    // pami.go_to(300, 130, SPEED);
+    pami.go_to(450, -230, SPEED);
 
     // Test avancer ou reculer ou tourner
     // if (i == 0)

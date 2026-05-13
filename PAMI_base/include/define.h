@@ -113,7 +113,7 @@ Paramètres de l'asservissement
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
 // Chaque pami à ses propres positions
 
-// PAMI 1 (collée au mur)
+// PAMI 1 (collée au mur - ninja)
 #define J_POSITION_1_DEPART_X 0
 #define J_POSITION_1_DEPART_Y 0
 
@@ -143,8 +143,8 @@ Paramètres de l'asservissement
 #define J_POSITION_3_DEPART_X 0
 #define J_POSITION_3_DEPART_Y 0
 
-#define J_POSITION_3_FINAL_X 0
-#define J_POSITION_3_FINAL_Y 0
+#define J_POSITION_3_FINAL_X 940.0
+#define J_POSITION_3_FINAL_Y -450.0
 
 #define B_POSITION_3_DEPART_X 0
 #define B_POSITION_3_DEPART_Y 0

@@ -26,6 +26,7 @@ Modes :
 3 = Servomoteur
 4 = Moteurs (Puissance brute)
 5 = Encodeurs & Odométrie (À pousser à la main)
+6 = Moteurs Individuels (Puissance brute)
 */
 void Pami::test(int mode)
 {
@@ -78,16 +79,16 @@ void Pami::test(int mode)
         Serial.println("Test Moteurs : Attention, le robot va avancer puis reculer !");
         delay(2000); // Laisse le temps de poser le robot ou de le lever
 
-        Serial.println("-> Marche Avant (Vitesse 100)");
-        this->set_speed(100);
+        Serial.println("-> Marche Avant (Vitesse SPEED)");
+        this->set_speed(SPEED);
         delay(1500);
 
         Serial.println("-> Arret");
         this->set_speed(0);
         delay(1000);
 
-        Serial.println("-> Marche Arriere (Vitesse -100)");
-        this->set_speed(-100);
+        Serial.println("-> Marche Arriere (Vitesse -SPEED)");
+        this->set_speed(-SPEED);
         delay(1500);
 
         Serial.println("-> Arret Definitif");
@@ -115,24 +116,32 @@ void Pami::test(int mode)
     {
         Serial.println("Test Moteurs Individuels : Attention, le robot va tester chaque roue indépendamment !");
 
-        Serial.println("-> Test Roue Droite (Vitesse 200)");
-        m_p_moteur_d->set_speed(200);
-        m_p_moteur_g->set_speed(0);
-        delay(3000);
+        while (true)
+        {
+            Serial.println("\n-> Test Roue Droite (Vitesse 200)");
+            m_p_moteur_d->set_speed(SPEED);
+            m_p_moteur_g->set_speed(0);
+            this->print_speed();
+            this->print_encodeur();
+            delay(1500);
 
-        Serial.println("-> Arret");
-        m_p_moteur_d->set_speed(0);
-        delay(1000);
+            Serial.println("\n-> Arret");
+            m_p_moteur_d->set_speed(0);
+            delay(1500);
 
-        Serial.println("-> Test Roue Gauche (Vitesse 200)");
-        m_p_moteur_d->set_speed(0);
-        m_p_moteur_g->set_speed(200);
-        delay(3000);
+            Serial.println("\n-> Test Roue Gauche (Vitesse 200)");
+            m_p_moteur_d->set_speed(0);
+            m_p_moteur_g->set_speed(SPEED);
+            this->print_speed();
+            this->print_encodeur();
+            delay(1500);
 
-        Serial.println("-> Arret Definitif");
-        m_p_moteur_d->set_speed(0);
-        m_p_moteur_g->set_speed(0);
-        Serial.println("Fin du test Moteurs Individuels.");
+            Serial.println("\n-> Arret Definitif");
+            m_p_moteur_d->set_speed(0);
+            m_p_moteur_g->set_speed(0);
+            delay(1500);
+            Serial.println("Fin du test Moteurs Individuels.");
+        }
         break;
     }
 
@@ -289,6 +298,7 @@ void Pami::setup()
     this->config_start_position();
     Serial.println("Setup Done : Tirette & Equipe & PAMI");
     // Faire une fonction log qui donne couleur équipe & numéro pami
+    this->print_infos_interrupteur();
 
     m_time_log = millis();
 
@@ -329,6 +339,7 @@ void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
     // On s'arrête quand on est arrivés
     this->set_speed(0);
 }
+
 /*
 Fonction de test pour avancer d'une certaine distance
 */
@@ -543,9 +554,10 @@ bool Pami::avancer_with_obstacle(float distance, int speed)
         {
             float dist_obstacle = this->get_IR_distance();
 
-            if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
+            if (dist_obstacle > 0.01 && dist_obstacle < DISTANCE_MIN)
             {
-                m_p_asserv->asserv_global(0, 0, start_angle);
+                this->set_speed(0);
+                // m_p_asserv->asserv_global(0, 0, start_angle);
                 Serial.println("Obstacle !");
                 delay(10);
                 continue; // Repart au début du "do" sans avancer
