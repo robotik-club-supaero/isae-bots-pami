@@ -13,15 +13,15 @@
 class Pami
 {
 public:
-    Moteur *m_p_moteur_d;
-    Moteur *m_p_moteur_g;
-    Encodeur *m_p_encodeur_d;
-    Encodeur *m_p_encodeur_g;
+    Moteur *moteur_r;
+    Moteur *moteur_l;
+    Encodeur *encodeur_r;
+    Encodeur *encodeur_l;
     // Asserv *m_p_asserv;
-    Serv *m_p_servo;
-    Mesure_pos *m_p_mesure_pos;
-    Ultrason *m_p_ultrason;
-    Irsensor *m_p_ir_sensor;
+    Serv *servo;
+    Mesure_pos *mesure_pos;
+    Ultrason *ultrason;
+    Irsensor *ir_sensor;
 
     int tirette = 1;  // Etat par défaut de la tirette
     int equipe = 1;   // Equipe par défaut (1 = gauche = jaune)
@@ -37,6 +37,8 @@ public:
 
     Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
 
+    void trouver_gains_tout_droit(float dist_parcourue_g, float dist_parcourue_d);
+    void stop(float speed);
     void test(int mode);
 
     void setup();
@@ -58,7 +60,7 @@ public:
     bool avancer_with_obstacle(float distance, int speed = SPEED);
     bool reculer_with_obstacle(float distance, int speed = SPEED);
 
-    void set_speed(float speed);
+    void tout_droit(float speed);
     void blink_servo(long temps_blink, int angle1, int angle2);
 
     double get_ultrason_distance();

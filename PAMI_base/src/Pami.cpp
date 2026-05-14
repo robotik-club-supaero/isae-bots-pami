@@ -2,18 +2,120 @@
 #include <Pami.h>
 #include <cmath>
 
-Pami::Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
+Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
 {
-    m_p_moteur_d = p_moteur_d;
-    m_p_moteur_g = p_moteur_g;
-    m_p_encodeur_d = p_encodeur_d;
-    m_p_encodeur_g = p_encodeur_g;
-    m_p_mesure_pos = p_mesure_pos;
-    m_p_servo = p_servo;
-    m_p_ir_sensor = p_ir_sensor;
+    moteur_r = p_moteur_r;
+    moteur_l = p_moteur_l;
+    encodeur_r = p_encodeur_r;
+    encodeur_l = p_encodeur_l;
+    mesure_pos = p_mesure_pos;
+    servo = p_servo;
+    ir_sensor = p_ir_sensor;
 }
 
-float m_time_match = millis();
+// Fonction de réglage du robot pour trouver les coefficients avant la course
+
+void Pami::trouver_gains_tout_droit(float dist_mesuree_l,float dist_mesuree_r){
+    // On allume pendant 1 seconde et on regarde combien de fronts montants ont fait les encodeurs
+    encodeur_r->clear_count();
+    encodeur_l->clear_count(); //pas nécessaire normalement mais au cas où
+
+    moteur_r->set_speed(SPEED);
+    moteur_l->set_speed(SPEED);
+    delay(2000); // processus pas dans le loop donc osef du delay
+    this->stop(SPEED);
+
+    float dist_parcourue_r_encod = encodeur_r->mesure();
+    float dist_parcourue_l_encod = encodeur_l->mesure();
+
+    Serial.println("Encodeur r : " + String(dist_parcourue_r_encod));
+    Serial.println("Encodeur l : " + String(dist_parcourue_l_encod));
+
+    float gain_r;
+    float gain_l;
+    if (dist_parcourue_l_encod > dist_parcourue_r_encod){
+        gain_l = dist_parcourue_r_encod / dist_parcourue_l_encod;
+        gain_r = 1;
+    }else{
+        gain_r = dist_parcourue_l_encod/ dist_parcourue_r_encod;
+        gain_l = 1;
+    }
+
+    delay(5000);
+
+    // On réessaie avec un bon gain
+    float vitesse_r = SPEED*(gain_r-0.15);
+    float vitesse_l = SPEED*gain_l;
+
+    encodeur_r->clear_count();
+    encodeur_l->clear_count();
+
+    moteur_r->set_speed(vitesse_r);
+    moteur_l->set_speed(vitesse_l);
+    delay(1000); // processus pas dans le loop donc osef du delay
+    this->stop(SPEED);
+
+    dist_parcourue_r_encod = encodeur_r->mesure();
+    dist_parcourue_l_encod = encodeur_l->mesure();
+
+    Serial.println("Encodeur r : " + String(dist_parcourue_r_encod));
+    Serial.println("Encodeur l : " + String(dist_parcourue_l_encod));
+
+
+}
+
+
+/*
+Allume les deux moteurs à une vitesse en (entre 0 et 255)
+*/
+void Pami::tout_droit(float speed)
+{
+    // Si on règle les gains askip c'est mieux
+    moteur_r->set_speed(speed);
+    moteur_l->set_speed(speed);
+}
+
+
+void Pami::stop(float speed){
+    
+    
+    // float facteur_decrement = 1.0;
+    unsigned long local_time = millis();
+    // for (int i=0;i<10;i++){
+    //     moteur_r -> set_speed(speed*facteur_decrement);
+    //     moteur_l -> set_speed(speed*facteur_decrement);
+    //     while (millis() - local_time < 250){
+    //         ;
+    //     }
+    //     facteur_decrement -= 0.1;
+    // }
+    moteur_r -> set_speed(speed*(-0.5));
+    moteur_l -> set_speed(speed*(-0.5));
+    while (millis() - local_time < 250){
+        ;
+    }
+    moteur_r -> set_speed(0);
+    moteur_l -> set_speed(0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 Fonction de diagnostic général du robot
@@ -27,225 +129,164 @@ Modes :
 7 = Homologation : Avance et s'arrête en fonction du capteur IR
 8 = Avancer, reculer, tourner (Sans asservissement, juste pour voir si les fonctions de base marchent &  régler les gains)
 */
-void Pami::test(int mode)
-{
-    Serial.print("\n========== LANCEMENT DU TEST MODE : ");
-    Serial.print(mode);
-    Serial.println(" ==========");
+// void Pami::test(int mode)
+// {
+//     Serial.print("\n========== LANCEMENT DU TEST MODE : ");
+//     Serial.print(mode);
+//     Serial.println(" ==========");
 
-    switch (mode)
-    {
-    case 1: // --- TEST 1 : TIRETTE & INTERRUPTEURS ---
-    {
-        Serial.println("Test Interrupteurs... Modifiez leurs etats ! (Boucle infinie)");
-        while (true)
-        {
-            Serial.println("-------------------------");
-            delay(1000); // On attend 1s pour ne pas spammer le terminal
-        }
-        break;
-    }
+//     switch (mode)
+//     {
+//     case 1: // --- TEST 1 : TIRETTE & INTERRUPTEURS ---
+//     {
+//         Serial.println("Test Interrupteurs... Modifiez leurs etats ! (Boucle infinie)");
+//         while (true)
+//         {
+//             Serial.println("-------------------------");
+//             delay(1000); // On attend 1s pour ne pas spammer le terminal
+//         }
+//         break;
+//     }
 
-    case 2: // --- TEST 2 : CAPTEUR IR ---
-    {
-        Serial.println("Test Capteur IR... Passez votre main devant ! (Boucle infinie)");
-        while (true)
-        {
-            float dist = this->get_IR_distance();
-            Serial.print("Distance mesuree : ");
-            Serial.print(dist / 10.0);
-            Serial.println(" cm");
-            delay(200);
-        }
-        break;
-    }
+//     case 2: // --- TEST 2 : CAPTEUR IR ---
+//     {
+//         Serial.println("Test Capteur IR... Passez votre main devant ! (Boucle infinie)");
+//         while (true)
+//         {
+//             float dist = this->get_IR_distance();
+//             Serial.print("Distance mesuree : ");
+//             Serial.print(dist / 10.0);
+//             Serial.println(" cm");
+//             delay(200);
+//         }
+//         break;
+//     }
 
-    case 3: // --- TEST 3 : SERVOMOTEUR ---
-    {
-        Serial.println("Test Servomoteur : Va-et-vient de 3 secondes");
-        while (true)
-        {
-            // Utilise les constantes ANGLE1 et ANGLE2 de ton define.h
-            this->blink_servo(1000, ANGLE1, ANGLE2);
-        }
-        Serial.println("Fin du test Servomoteur.");
-        break;
-    }
+//     case 3: // --- TEST 3 : SERVOMOTEUR ---
+//     {
+//         Serial.println("Test Servomoteur : Va-et-vient de 3 secondes");
+//         while (true)
+//         {
+//             // Utilise les constantes ANGLE1 et ANGLE2 de ton define.h
+//             this->blink_servo(1000, ANGLE1, ANGLE2);
+//         }
+//         Serial.println("Fin du test Servomoteur.");
+//         break;
+//     }
 
-    case 4: // --- TEST 4 : MOTEURS BRUTS ---
-    {
-        Serial.println("Test Moteurs : Attention, le robot va avancer puis reculer !");
-        delay(2000); // Laisse le temps de poser le robot ou de le lever
+//     case 4: // --- TEST 4 : MOTEURS BRUTS ---
+//     {
+//         Serial.println("Test Moteurs : Attention, le robot va avancer puis reculer !");
+//         delay(2000); // Laisse le temps de poser le robot ou de le lever
 
-        Serial.println("-> Marche Avant (Vitesse SPEED)");
-        this->set_speed(SPEED);
-        delay(1500);
+//         Serial.println("-> Marche Avant (Vitesse SPEED)");
+//         this->tout_droit(SPEED);
+//         delay(1500);
 
-        Serial.println("-> Arret");
-        this->set_speed(0);
-        delay(1000);
+//         Serial.println("-> Arret");
+//         this->tout_droit(0);
+//         delay(1000);
 
-        Serial.println("-> Marche Arriere (Vitesse -SPEED)");
-        this->set_speed(-SPEED);
-        delay(1500);
+//         Serial.println("-> Marche Arriere (Vitesse -SPEED)");
+//         this->tout_droit(-SPEED);
+//         delay(1500);
 
-        Serial.println("-> Arret Definitif");
-        this->set_speed(0);
-        Serial.println("Fin du test Moteurs.");
-        break;
-    }
+//         Serial.println("-> Arret Definitif");
+//         this->tout_droit(0);
+//         Serial.println("Fin du test Moteurs.");
+//         break;
+//     }
 
-    case 5: // --- TEST 5 : ODOMETRIE ---
-    {
-        Serial.println("Test Encodeurs... Poussez le robot a la main ! (Boucle infinie)");
-        m_p_mesure_pos->reinitialise();
-        while (true)
-        {
-            m_p_mesure_pos->loop(); // Met a jour les calculs
-            this->print_encodeur();
-            this->print_position();
-            this->print_speed();
-            Serial.println("-------------------------");
-            delay(250);
-        }
-        break;
-    }
-    case 6: // Essais roue droite & gauche indépendament
-    {
-        Serial.println("Test Moteurs Individuels : Attention, le robot va tester chaque roue indépendamment !");
+//     case 5: // --- TEST 5 : ODOMETRIE ---
+//     {
+//         Serial.println("Test Encodeurs... Poussez le robot a la main ! (Boucle infinie)");
+//         m_p_mesure_pos->reinitialise();
+//         while (true)
+//         {
+//             m_p_mesure_pos->loop(); // Met a jour les calculs
+//             this->print_encodeur();
+//             this->print_position();
+//             this->print_speed();
+//             Serial.println("-------------------------");
+//             delay(250);
+//         }
+//         break;
+//     }
+//     case 6: // Essais roue droite & gauche indépendament
+//     {
+//         Serial.println("Test Moteurs Individuels : Attention, le robot va tester chaque roue indépendamment !");
 
-        while (true)
-        {
-            Serial.println("\n-> Test Roue Droite (Vitesse 200)");
-            m_p_moteur_d->set_speed(SPEED);
-            m_p_moteur_g->set_speed(0);
-            this->print_speed();
-            this->print_encodeur();
-            delay(1500);
+//         while (true)
+//         {
+//             Serial.println("\n-> Test Roue Droite (Vitesse 200)");
+//             m_p_moteur_d->set_speed(SPEED);
+//             m_p_moteur_g->set_speed(0);
+//             this->print_speed();
+//             this->print_encodeur();
+//             delay(1500);
 
-            Serial.println("\n-> Arret");
-            m_p_moteur_d->set_speed(0);
-            delay(1500);
+//             Serial.println("\n-> Arret");
+//             m_p_moteur_d->set_speed(0);
+//             delay(1500);
 
-            Serial.println("\n-> Test Roue Gauche (Vitesse 200)");
-            m_p_moteur_d->set_speed(0);
-            m_p_moteur_g->set_speed(SPEED);
-            this->print_speed();
-            this->print_encodeur();
-            delay(1500);
+//             Serial.println("\n-> Test Roue Gauche (Vitesse 200)");
+//             m_p_moteur_d->set_speed(0);
+//             m_p_moteur_g->set_speed(SPEED);
+//             this->print_speed();
+//             this->print_encodeur();
+//             delay(1500);
 
-            Serial.println("\n-> Arret Definitif");
-            m_p_moteur_d->set_speed(0);
-            m_p_moteur_g->set_speed(0);
-            delay(1500);
-            Serial.println("Fin du test Moteurs Individuels.");
-        }
-        break;
-    }
-    case 7: // Homologation
-    {
-        Serial.println("Homologation : Le robot avance et s'arrête lorsque le capteur IR détecte un obstacle à moins de 5 cm (Boucle infinie)");
+//             Serial.println("\n-> Arret Definitif");
+//             m_p_moteur_d->set_speed(0);
+//             m_p_moteur_g->set_speed(0);
+//             delay(1500);
+//             Serial.println("Fin du test Moteurs Individuels.");
+//         }
+//         break;
+//     }
+//     case 7: // Homologation
+//     {
+//         Serial.println("Homologation : Le robot avance et s'arrête lorsque le capteur IR détecte un obstacle à moins de 5 cm (Boucle infinie)");
 
-        while (true)
-        {
-            float dist = this->get_IR_distance(); // en mm
-            Serial.print("Distance mesuree : ");
-            Serial.print(dist / 10.0);
-            Serial.println(" cm");
+//         while (true)
+//         {
+//             float dist = this->get_IR_distance(); // en mm
+//             Serial.print("Distance mesuree : ");
+//             Serial.print(dist / 10.0);
+//             Serial.println(" cm");
 
-            if (dist < 120 && dist > 0.5) // Si un obstacle est détecté à moins de 8 cm
-            {
-                Serial.println("Obstacle détecté ! Arrêt du robot.");
-                this->set_speed(0);
-            }
-            else
-            {
-                this->set_speed(SPEED);
-            }
-            delay(200);
-        }
-        break;
-    }
-    case 8:
-    {
-        Serial.println("Test Avancer/Reculer/Tourner... Attention, le robot va avancer, reculer puis tourner !");
+//             if (dist < 120 && dist > 0.5) // Si un obstacle est détecté à moins de 8 cm
+//             {
+//                 Serial.println("Obstacle détecté ! Arrêt du robot.");
+//                 this->tout_droit(0);
+//             }
+//             else
+//             {
+//                 this->tout_droit(SPEED);
+//             }
+//             delay(200);
+//         }
+//         break;
+//     }
+//     case 8:
+//     {
+//         Serial.println("Test Avancer/Reculer/Tourner... Attention, le robot va avancer, reculer puis tourner !");
 
-        this->avancer(100);
-        delay(2000);
-        // this->reculer(100);
-        delay(2000);
-        this->tourner(180);
-    }
+//         this->avancer(100);
+//         delay(2000);
+//         // this->reculer(100);
+//         delay(2000);
+//         this->tourner(180);
+//     }
 
-    default:
-    {
-        Serial.println("Erreur : Mode de test inconnu ! (Choisissez entre 1 et 6)");
-        break;
-    }
-    }
-}
+//     default:
+//     {
+//         Serial.println("Erreur : Mode de test inconnu ! (Choisissez entre 1 et 6)");
+//         break;
+//     }
+//     }
+// }
 
-
-void Pami::setup()
-{
-    
-
-    // Setup capteur IR
-    // m_p_ir_sensor->setup();
-    // Serial.println("Setup Done : IR Sensor");
-
-    // Setup servo
-    // m_p_servo->setup();
-    // Serial.println("Setup Done : Servo");
-
-    // Setup mesure position
-    m_p_mesure_pos->setup();
-    Serial.println("Setup Done : Mesure de Position");
-
-    // Setup moteur droit & gauche
-    m_p_moteur_d->setup();
-    m_p_moteur_g->setup();
-    Serial.println("Setup Done : Moteurs");
-
-    // Setup asservissement
-    // m_p_asserv->setup();
-    // Serial.println("Setup Done : Asservissement");
-
-    // LED intégrée à l'ESP32 pour blink quand la configuration est finie
-    // pinMode(LED, OUTPUT);
-    // digitalWrite(LED, 1); // LED ON pour indiquer le setup réussi
-
-
-    // TIRETTE :
-    pinMode(PIN_TIRETTE, INPUT);
-    bool etat_tirette = digitalRead(PIN_TIRETTE);
-    Serial.print(etat_tirette==1 ? "Tirette en place \t" : "Tirette enlevée \t");
-
-    // Interrupteur choix équipe
-    pinMode(PIN_READEQUIPE, INPUT);
-    int read_equipe = digitalRead(PIN_READEQUIPE);
-    String color_equipe = (read_equipe == 1) ? "JAUNE" : "BLEUE"; 
-    Serial.print("Equipe : ");
-    Serial.print(color_equipe);
-    Serial.print("\t");
-
-    // Setup de la position
-    if (read_equipe == 1) // JAUNE
-    {
-        pos_init_x = J_POSITION_DEPART_X;
-        pos_init_y = J_POSITION_DEPART_Y;
-    }
-    else
-    {
-        pos_init_x = B_POSITION_DEPART_X;
-        pos_init_y = B_POSITION_DEPART_Y;
-    }
-    
-
-    m_time = millis();
-
-    Serial.println("\n---------- Setup over ----------\n\n");
-}
 
 // void Pami::avancer(float distance, int speed)
 // {
@@ -672,17 +713,9 @@ Fonction pour avancer d'une certaine distance
 // }
 
 
-/*
-Allume les deux moteurs à une vitesse en (entre 0 et 255)
-*/
-void Pami::set_speed(float speed)
-{
-    // Si on règle les gains askip c'est mieux
-    // m_p_asserv->asservissement(speed, speed);
-    m_p_moteur_d->set_speed(speed);
-    m_p_moteur_g->set_speed(speed);
-    delay(100);
-}
+
+
+
 
 /*
 Fonction pour bouger le servo entre deux angles en un temps donné

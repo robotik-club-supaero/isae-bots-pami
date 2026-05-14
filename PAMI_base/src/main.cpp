@@ -48,9 +48,11 @@ void setup()
     moteur_r.setup();
     Serial.println("Setup Done : Moteurs");
 
-    // Setup asservissement
-    // m_p_asserv->setup();
-    // Serial.println("Setup Done : Asservissement");
+    // Setup encodeur droit & gauche
+    encodeur_r.setup();
+    encodeur_l.setup();
+    Serial.println("Setup Done : Encodeurs");
+
 
     // LED intégrée à l'ESP32 pour blink quand la configuration est finie
     // pinMode(LED, OUTPUT);
@@ -85,15 +87,31 @@ void setup()
 
     // On remet a 0 les positions car la roue tourne pendant l'upload 
     // (car l'esp32 utilise le pin du moteur pendant l'upload)
-    mesure_pos.reinitialise();
+    
     angle=0;
-    // pami.distance_target = 0;
 
+    // On attends le début du match, on mettra ensuite toute la stratégie dans la loop qui tourne en continu
+    bool tirette_en_place = digitalRead(PIN_TIRETTE);
+    while(tirette_en_place){
+        delay(10);
+        tirette_en_place = digitalRead(PIN_TIRETTE);
+    }
+    Serial.println("Tirette enlevée, début du match");
+    // On commence le timer
+    mesure_pos.reinitialise();
+    global_time = millis();
+
+
+
+    pami.trouver_gains_tout_droit(19.0,21.5);
+    // pami.distance_target = 0;
     // pami.test(7);
 }
 
 void loop()
 {
+    
+
     // pami.go_to(100, 0, SPEED);
 
     // Test avancer ou reculer ou tourner
@@ -105,7 +123,8 @@ void loop()
     // i = 1;
     // }
 
-    // delay(1000);
+    
     // pami.print_log();
     // pami.start_match();
+
 }
