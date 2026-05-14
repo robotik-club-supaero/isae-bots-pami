@@ -129,8 +129,7 @@ void setup()
 
 void loop()
 {
-    float consigne_l = -200;
-    float consigne_r = -200;
+    
 
     if (etape_globale != 1){
         new_ticks_l=std::get<0>(resultat);
@@ -145,28 +144,58 @@ void loop()
     {
         case 0: // --- TEST 1 : TIRETTE & INTERRUPTEURS ---
         {
-
+            float consigne_l = 20;
+            float consigne_r = 20;
             resultat = pami.avancer_asservi(0,consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
-            
             break;
         }
-        case 1:
+        case 1 :
         {
+            if (millis()-oldtime > DELAY_TIME){
+                etape_globale=2; // suivant
+                break;
+            }
+        }
+        case 2:
+        {
+            resultat = pami.tourner_asservi(2,180,old_ticks_l,old_ticks_r,oldtime);
             Serial.print("ticks_l : ");
             Serial.print(encodeur_l.mesure());
             Serial.print("\t ticks_r : ");
             Serial.println(encodeur_r.mesure());
-            // if (millis()-oldtime > 1000){
-            //     etape_globale=2;
-            //     break;
-            // }
-            
+            break;
         }
-        // case 2:
-        // {
-        //     resultat = pami.avancer_asservi(2,2*consigne_l,2*consigne_r,old_ticks_l,old_ticks_r,oldtime);
-        //     break;
-        // }
+        case 3 :
+        {
+            if (millis()-oldtime > DELAY_TIME){
+                etape_globale=4;
+                break;
+            }
+        }
+        case 4:
+        {
+            float consigne_l = 20;
+            float consigne_r = 20;
+            resultat = pami.avancer_asservi(4,consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
+            break;
+        }
+        case 5 :
+        {
+            if (millis()-oldtime > DELAY_TIME){
+                etape_globale=6;
+                break;
+            }
+        }
+        case 6:
+        {
+            resultat = pami.tourner_asservi(6,-180,old_ticks_l,old_ticks_r,oldtime);
+            Serial.print("ticks_l : ");
+            Serial.print(encodeur_l.mesure());
+            Serial.print("\t ticks_r : ");
+            Serial.println(encodeur_r.mesure());
+            break;
+        }
+        
     }
         
     
