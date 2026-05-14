@@ -37,7 +37,7 @@ public:
     float pos_target_y;
     float distance_target = 0;
 
-    long m_time_log;
+    long m_time;
 
     Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
 

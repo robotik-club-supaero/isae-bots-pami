@@ -69,6 +69,7 @@ void Mesure_pos::loop()
         // https://math.stackexchange.com/questions/3962859/calculate-path-of-vehicle-with-two-wheels-parallel-to-each-other
 
         // Pour l'instant on va juste faire que des rotation roue et anti rotation d'une autre roue pour ne pas faire bouger le centre de gravité
+        // Mettre K_l = K_r pour neutraliser les formules nulles et 
         position_theta += (position_r * K_r - position_l * K_l) * K_angle;
         position_x += ((position_l * K_l + position_r * K_r) / 2.0) * cos(position_theta);
         position_y += ((position_l * K_l + position_r * K_r) / 2.0) * sin(position_theta);

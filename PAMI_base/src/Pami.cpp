@@ -152,12 +152,12 @@ void Pami::test(int mode)
 
         while (true)
         {
-            float dist = this->get_IR_distance();
+            float dist = this->get_IR_distance(); // en mm
             Serial.print("Distance mesuree : ");
             Serial.print(dist / 10.0);
             Serial.println(" cm");
 
-            if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+            if (dist < 120 && dist > 0.5) // Si un obstacle est détecté à moins de 8 cm
             {
                 Serial.println("Obstacle détecté ! Arrêt du robot.");
                 this->set_speed(0);
@@ -176,7 +176,7 @@ void Pami::test(int mode)
 
         this->avancer(100);
         delay(2000);
-        this->reculer(100);
+        // this->reculer(100);
         delay(2000);
         this->tourner(180);
     }
@@ -336,7 +336,7 @@ void Pami::setup()
     // Faire une fonction log qui donne couleur équipe & numéro pami
     this->print_infos_interrupteur();
 
-    m_time_log = millis();
+    m_time = millis();
 
     Serial.println("\n---------- Setup over ----------\n\n");
 }
@@ -416,7 +416,12 @@ void Pami::tourner(float angle_degres, float speed)
 {
     m_p_moteur_d->set_speed(speed);
     m_p_moteur_g->set_speed(-speed);
-    delay(K_ANGLE_NAIF * (angle_degres / 360.0) * 1000);
+    float delay_a_attendre = K_ANGLE_NAIF * (angle_degres / 360.0) * 1000;
+    delay(delay_a_attendre);
+    // if (millis()-m_time > delay_a_attendre){
+    //     this->set_speed(0);
+    //     m_time = millis();
+    // }
     this->set_speed(0);
 }
 
@@ -826,7 +831,7 @@ double Pami::get_IR_distance()
 
 void Pami::print_position()
 {
-    if (millis() - m_time_log > 250)
+    if (millis() - m_time > 250)
     {
         m_p_mesure_pos->loop();
         Serial.print("Pos X : " + String(m_p_mesure_pos->position_x / 10) + " cm");
@@ -837,7 +842,7 @@ void Pami::print_position()
 
 void Pami::print_encodeur()
 {
-    if (millis() - m_time_log > 250)
+    if (millis() - m_time > 250)
     {
         Serial.print("Encodeur gauche : " + String(m_p_encodeur_g->mesure()));
         Serial.println(" | Encodeur droit : " + String(m_p_encodeur_d->mesure()));
@@ -846,7 +851,7 @@ void Pami::print_encodeur()
 
 void Pami::print_speed()
 {
-    if (millis() - m_time_log > 275)
+    if (millis() - m_time > 275)
     {
         m_p_mesure_pos->loop();
         Serial.print("Vitesse droite : " + String(m_p_mesure_pos->vitesse_r / 10) + " cm/s | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l / 10) + " cm/s");
@@ -857,7 +862,7 @@ void Pami::print_speed()
 
 void Pami::print_log()
 {
-    if (m_time_log + 500 < millis()) // Log toutes les secondes
+    if (m_time + 500 < millis()) // Log toutes les secondes
     {
         Serial.println("Distance Ir: " + String(this->get_IR_distance()) + " mm");
         this->print_speed();
@@ -865,7 +870,7 @@ void Pami::print_log()
         this->print_encodeur();
         this->print_infos_interrupteur();
 
-        m_time_log = millis();
+        m_time = millis();
     }
 }
 

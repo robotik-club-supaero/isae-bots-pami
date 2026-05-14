@@ -40,7 +40,7 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
-    pami.test(4);
+    pami.test(7);
 }
 
 void loop()
