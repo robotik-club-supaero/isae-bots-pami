@@ -25,6 +25,9 @@ float pos_x;
 float pos_y;
 float angle;
 
+float new_ticks_l, new_ticks_r,newtime;
+float old_ticks_l,old_ticks_r,oldtime;
+
 void setup()
 {
     Serial.begin(115200); // Initialisation de la communication série
@@ -103,13 +106,10 @@ void setup()
 
 
 
-    pami.gains_asservis_en_vitesse_bof(19.0,21.5);
     // pami.distance_target = 0;
     // pami.test(7);
 
     //setup
-    unsigned long dernier_lancement_droite = millis();
-
 }
 
 
@@ -117,9 +117,16 @@ void loop()
 {
 
 
+    float tick_distance = 1200;
+    auto resultat = pami.avancer_asservi(tick_distance,old_ticks_l,old_ticks_r,oldtime);
     
-    (new_ticks_l,new_ticks_r,newtime) = pami.avancer_asservi(old_ticks_l,old_ticks_r,oldtime);
-    (old_ticks_l,old_ticks_r,oldtime)=(new_ticks_l,new_ticks_r,newtime);
+    new_ticks_l=std::get<0>(resultat);
+    new_ticks_r=std::get<1>(resultat);
+    newtime = std::get<2>(resultat);
+
+    old_ticks_l=new_ticks_l;
+    old_ticks_r = new_ticks_r;
+    oldtime=newtime;
     
     
 

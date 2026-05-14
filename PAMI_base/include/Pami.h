@@ -39,12 +39,7 @@ public:
 
     
     void test(int mode);
-    std::tuple<float, float, unsigned long>
-    avancer_asservi(float old_ticks_l,
-                    float old_ticks_r,
-                    unsigned long oldtime);
-    void gains_asservis_en_vitesse_bof(float dist_parcourue_g, float dist_parcourue_d);
-    void stop(float speed);
+    std::tuple<float, float, unsigned long> avancer_asservi(float tick_distance, float old_ticks_l,float old_ticks_r,unsigned long oldtime);
 
     void setup();
     void print_log();

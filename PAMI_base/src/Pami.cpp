@@ -13,115 +13,16 @@ Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encod
     ir_sensor = p_ir_sensor;
 }
 
-// Fonction de réglage du robot pour trouver les coefficients avant la course
-
-void Pami::gains_asservis_en_vitesse_bof(float dist_mesuree_l,float dist_mesuree_r){
-    // On allume pendant 1 seconde et on regarde combien de fronts montants ont fait les encodeurs
-    encodeur_r->clear_count();
-    encodeur_l->clear_count(); //pas nécessaire normalement mais au cas où
-
-    moteur_r->set_speed(SPEED);
-    moteur_l->set_speed(SPEED);
-    delay(2000); // processus pas dans le loop donc osef du delay
-    this->stop(SPEED);
-
-    float dist_parcourue_r_encod = encodeur_r->mesure();
-    float dist_parcourue_l_encod = encodeur_l->mesure();
-
-    Serial.println("Encodeur r : " + String(dist_parcourue_r_encod));
-    Serial.println("Encodeur l : " + String(dist_parcourue_l_encod));
-
-    float gain_r;
-    float gain_l;
-    if (dist_parcourue_l_encod > dist_parcourue_r_encod){
-        gain_l = dist_parcourue_r_encod / dist_parcourue_l_encod;
-        gain_r = 1;
-    }else{
-        gain_r = dist_parcourue_l_encod/ dist_parcourue_r_encod;
-        gain_l = 1;
-    }
-
-    delay(5000);
-
-    // On réessaie avec un bon gain
-    float vitesse_r = SPEED*(gain_r-0.15);
-    float vitesse_l = SPEED*gain_l;
-
-    encodeur_r->clear_count();
-    encodeur_l->clear_count();
-
-    moteur_r->set_speed(vitesse_r);
-    moteur_l->set_speed(vitesse_l);
-    delay(1000); // processus pas dans le loop donc osef du delay
-    this->stop(SPEED);
-
-    dist_parcourue_r_encod = encodeur_r->mesure();
-    dist_parcourue_l_encod = encodeur_l->mesure();
-
-    Serial.println("Encodeur r : " + String(dist_parcourue_r_encod));
-    Serial.println("Encodeur l : " + String(dist_parcourue_l_encod));
-
-
-}
-
 
 /*
 Allume les deux moteurs à une vitesse en (entre 0 et 255)
 */
-void Pami::tout_droit(float speed)
-{
-    // Si on règle les gains askip c'est mieux
-    moteur_r->set_speed(speed);
-    moteur_l->set_speed(speed);
-}
 
 /*
 Avancer en ligne droite, on veut juste que chaque moteur avance de tick_distance ticks
 */
-void Pami::avancer_asservi(float tick_distance, unsigned long oldtime){
-    
-    
-    if (millis()-oldtime>=interval_asserv){ // toutes les 50ms recalculer l'asservissement
-        float ticks_l = encodeur_l->mesure();
-        float ticks_r = encodeur_r->mesure();
-    }
-    
 
-    float consigne_l = old_ticks_l + tick_distance;
-    float consigne_r = old_ticks_r + tick_distance;
-
-    long erreur_l = consigne_l - ticks_l;
-    long erreur_r = consigne_r - ticks_r;
-
-    int pwmG = Kp * erreurG;
-    int pwmD = Kp * erreurD;
-
-    pwmG = constrain(pwmG, -255, 255);
-    pwmD = constrain(pwmD, -255, 255);
-
-    // Gestion du sens
-    if (pwmG >= 0) {
-        analogWrite(5, pwmG);
-    } else {
-        analogWrite(5, -pwmG);
-    }
-
-    if (pwmD >= 0) {
-        analogWrite(6, pwmD);
-    } else {
-        analogWrite(6, -pwmD);
-    }
-
-    // Arrêt quand les deux roues ont atteint la consigne
-    if (abs(erreurG) < 5 && abs(erreurD) < 5) {
-        analogWrite(5, 0);
-        analogWrite(6, 0);
-    }
-
-}
-
-std::tuple<float,float,unsigned long> 
-Pami::avancer_asservi(float old_ticks_l, float old_ticks_r, unsigned long oldtime)
+std::tuple<float,float,unsigned long> Pami::avancer_asservi(float tick_distance, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
 {
     /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
     En gros :
@@ -183,42 +84,8 @@ Pami::avancer_asservi(float old_ticks_l, float old_ticks_r, unsigned long oldtim
     }
 
     // On renvoie les nouvelles valeurs
-    return std::make_tuple(ticks_l, ticks_r, now);
+    return std::make_tuple(ticks_l, ticks_r, millis());
 }
-
-
-
-void Pami::stop(float speed){
-    
-    
-    // float facteur_decrement = 1.0;
-    unsigned long local_time = millis();
-    // for (int i=0;i<10;i++){
-    //     moteur_r -> set_speed(speed*facteur_decrement);
-    //     moteur_l -> set_speed(speed*facteur_decrement);
-    //     while (millis() - local_time < 250){
-    //         ;
-    //     }
-    //     facteur_decrement -= 0.1;
-    // }
-    moteur_r -> set_speed(speed*(-0.5));
-    moteur_l -> set_speed(speed*(-0.5));
-    while (millis() - local_time < 250){
-        ;
-    }
-    moteur_r -> set_speed(0);
-    moteur_l -> set_speed(0);
-}
-
-
-
-
-
-
-
-
-
-
 
 
 
