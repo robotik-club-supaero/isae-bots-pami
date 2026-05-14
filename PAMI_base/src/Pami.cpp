@@ -425,6 +425,14 @@ void Pami::tourner(float angle_degres, float speed)
     m_p_moteur_d->set_speed(speed);
     m_p_moteur_g->set_speed(-speed);
     delay(K_ANGLE_NAIF * (angle_degres / 360.0) * 1000);
+    Serial.print("Temps estimé pour tourner de ");
+    Serial.print(angle_degres);
+    Serial.print(" ° à la vitesse de ");
+    Serial.print(speed);
+    Serial.print(" : ");
+    Serial.print(K_ANGLE_NAIF * (angle_degres / 360.0) * 1000);
+    Serial.println(" ms");
+
     this->set_speed(0);
 }
 

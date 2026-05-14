@@ -37,7 +37,7 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
-    // pami.test(1);
+    // pami.test(7);
 
     while (digitalRead(PIN_TIRETTE) == 1)
     {
@@ -86,8 +86,40 @@ void loop()
                 if (pami.equipe == 0) // 0 = bleue, 1 = jaune
                 {
                     Serial.println("Action Match : PAMI 1 BLEUE");
-                    pami.avancer(700);
-                    // pami.go_to_with_obstacle(300, 300);
+                    pami.avancer(800, 150);
+                }
+                else
+                {
+                    Serial.println("Action Match : PAMI 1 JAUNE");
+                    pami.avancer(800, 150);
+                }
+            }
+            else if (pami.num_pami == 2)
+            {
+                delay(1000);
+                start_moving = true;
+                if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+                {
+                    // Serial.println("Action Match : PAMI 2 BLEUE");
+                    // pami.avancer(700, 150);
+                    // delay(200);
+                    // pami.tourner(-60);
+                    // delay(200);
+                    // pami.avancer(800, 150);
+                    while (true)
+                    {
+                        pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
+                        delay(1000);
+                    }
+                }
+                else
+                {
+                    // Serial.println("Action Match : PAMI 2 JAUNE");
+                    // pami.avancer(700, 150);
+                    // delay(200);
+                    // pami.tourner(60);
+                    // delay(200);
+                    // pami.avancer(800, 150);
                 }
             }
         }

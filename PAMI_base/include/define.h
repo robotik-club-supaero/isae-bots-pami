@@ -84,8 +84,8 @@ MACHINE A ETAT
 /*
 Paramètres globaux
 */
-#define GLOBALTIME 29000 // Temps global de la pami en ms (99s)
-#define START_TIME 2000  // Les pamis commencent dans les 15 dernières secondes.
+#define GLOBALTIME 99000 // Temps global de la pami en ms (99s)
+#define START_TIME 85000 // Les pamis commencent dans les 15 dernières secondes.
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
