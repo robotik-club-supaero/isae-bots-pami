@@ -37,9 +37,14 @@ public:
 
     Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
 
-    void trouver_gains_tout_droit(float dist_parcourue_g, float dist_parcourue_d);
-    void stop(float speed);
+    
     void test(int mode);
+    std::tuple<float, float, unsigned long>
+    avancer_asservi(float old_ticks_l,
+                    float old_ticks_r,
+                    unsigned long oldtime);
+    void gains_asservis_en_vitesse_bof(float dist_parcourue_g, float dist_parcourue_d);
+    void stop(float speed);
 
     void setup();
     void print_log();

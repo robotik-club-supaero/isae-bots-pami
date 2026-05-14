@@ -103,13 +103,24 @@ void setup()
 
 
 
-    pami.trouver_gains_tout_droit(19.0,21.5);
+    pami.gains_asservis_en_vitesse_bof(19.0,21.5);
     // pami.distance_target = 0;
     // pami.test(7);
+
+    //setup
+    unsigned long dernier_lancement_droite = millis();
+
 }
+
 
 void loop()
 {
+
+
+    
+    (new_ticks_l,new_ticks_r,newtime) = pami.avancer_asservi(old_ticks_l,old_ticks_r,oldtime);
+    (old_ticks_l,old_ticks_r,oldtime)=(new_ticks_l,new_ticks_r,newtime);
+    
     
 
     // pami.go_to(100, 0, SPEED);

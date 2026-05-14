@@ -15,7 +15,7 @@ Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encod
 
 // Fonction de réglage du robot pour trouver les coefficients avant la course
 
-void Pami::trouver_gains_tout_droit(float dist_mesuree_l,float dist_mesuree_r){
+void Pami::gains_asservis_en_vitesse_bof(float dist_mesuree_l,float dist_mesuree_r){
     // On allume pendant 1 seconde et on regarde combien de fronts montants ont fait les encodeurs
     encodeur_r->clear_count();
     encodeur_l->clear_count(); //pas nécessaire normalement mais au cas où
@@ -74,6 +74,118 @@ void Pami::tout_droit(float speed)
     moteur_r->set_speed(speed);
     moteur_l->set_speed(speed);
 }
+
+/*
+Avancer en ligne droite, on veut juste que chaque moteur avance de tick_distance ticks
+*/
+void Pami::avancer_asservi(float tick_distance, unsigned long oldtime){
+    
+    
+    if (millis()-oldtime>=interval_asserv){ // toutes les 50ms recalculer l'asservissement
+        float ticks_l = encodeur_l->mesure();
+        float ticks_r = encodeur_r->mesure();
+    }
+    
+
+    float consigne_l = old_ticks_l + tick_distance;
+    float consigne_r = old_ticks_r + tick_distance;
+
+    long erreur_l = consigne_l - ticks_l;
+    long erreur_r = consigne_r - ticks_r;
+
+    int pwmG = Kp * erreurG;
+    int pwmD = Kp * erreurD;
+
+    pwmG = constrain(pwmG, -255, 255);
+    pwmD = constrain(pwmD, -255, 255);
+
+    // Gestion du sens
+    if (pwmG >= 0) {
+        analogWrite(5, pwmG);
+    } else {
+        analogWrite(5, -pwmG);
+    }
+
+    if (pwmD >= 0) {
+        analogWrite(6, pwmD);
+    } else {
+        analogWrite(6, -pwmD);
+    }
+
+    // Arrêt quand les deux roues ont atteint la consigne
+    if (abs(erreurG) < 5 && abs(erreurD) < 5) {
+        analogWrite(5, 0);
+        analogWrite(6, 0);
+    }
+
+}
+
+std::tuple<float,float,unsigned long> 
+Pami::avancer_asservi(float old_ticks_l, float old_ticks_r, unsigned long oldtime)
+{
+    /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
+    En gros :
+    erreur = ticksG - ticksD
+    correction = Kp * erreur
+
+    Puis on ajuste le pwm : 
+    pwmG = pwmBase - correction
+    pwmD = pwmBase + correction
+    */
+
+    // TODO : à mettre dans un define
+    float Kp = 0.2;
+    float interval_asserv = 50;
+    float marge_erreur_ticks = 30;
+    float nb_ticks_par_sec_max = 1400;
+
+    
+    // Si l’intervalle n’est pas écoulé → on ne fait rien
+    if (millis() - oldtime < interval_asserv) {
+        return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
+    }
+
+    // Sinon, c'est qu'on vient de dépasser l'invervalle d'asservissement.
+    // --- Mesures actuelles ---
+    float ticks_l = encodeur_l->mesure();
+    float ticks_r = encodeur_r->mesure();
+
+    // --- Consignes (position) ---
+    float consigne_l = old_ticks_l + tick_distance;
+    float consigne_r = old_ticks_r + tick_distance;
+
+    // --- Erreurs ---
+    float erreur_l = consigne_l - ticks_l;
+    float erreur_r = consigne_r - ticks_r;
+
+    float erreur_l_normalisee = erreur_l/nb_ticks_par_sec_max;
+    float erreur_r_normalisee = erreur_r/nb_ticks_par_sec_max;
+
+    //l'erreur peut-être négative, et est entre 0 et 1
+    
+    // --- Correction ---
+    // on multiplie l'erreur par 255 pour avoir une erreur en vitesse pwm 
+    // et on multiplie aussi par Kp pour avoir la correction selon le principe de base du correcteur proportionnel
+    int pwmL = Kp * 255 * erreur_l_normalisee;
+    int pwmR = Kp * 255 * erreur_r_normalisee;
+
+    pwmL = constrain(pwmL, -255, 255); //par sécurité mais normalement ça dépasse pas
+    pwmR = constrain(pwmR, -255, 255);
+
+    // --- Commande moteurs ---
+    moteur_l->set_speed(pwmL);
+    moteur_r->set_speed(pwmR);
+
+    // --- Condition d’arrêt en ticks ---
+    if (abs(erreur_l) < marge_erreur_ticks && abs(erreur_r) < marge_erreur_ticks) {
+        moteur_l->set_speed(0);
+        moteur_r->set_speed(0);
+    }
+
+    // On renvoie les nouvelles valeurs
+    return std::make_tuple(ticks_l, ticks_r, now);
+}
+
 
 
 void Pami::stop(float speed){
