@@ -4,7 +4,7 @@ Encodeur::Encodeur(int clk, int dt, bool inv)
 {
     m_clk = clk;
     m_dt = dt;
-    m_inv = inv;
+    m_inv = inv; //pour si le moteur 
 }
 
 void Encodeur::setup()

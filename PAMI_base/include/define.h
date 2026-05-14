@@ -10,22 +10,22 @@
 /*
 MOTEURS
 */
-#define EN_L 32  // M1 EN RIGHT MOTEUR
-#define IN1_L 14 // M1 IN1 RIGHT MOTEUR
-#define IN2_L 27 // M1 IN2 RIGHT MOTEUR
+#define EN_L 27  // M1 EN LEFT MOTEUR
+#define IN1_L 26 // M1 IN1 LEFT MOTEUR
+#define IN2_L 25 // M1 IN2 LEFT MOTEUR
 
-#define EN_R 26  // M2 EN LEFT MOTEUR
-#define IN1_R 25 // M2 IN1 LEFT MOTEUR
-#define IN2_R 33 // M2 IN2 LEFT MOTEUR
+#define EN_R 33  // M2 EN RIGHT MOTEUR
+#define IN1_R 32 // M2 IN1 RIGHT MOTEUR
+#define IN2_R 14 // M2 IN2 RIGHT MOTEUR
 
 /*
 ENCODEURS
 */
-#define CLK_L 39 // C1 RIGHT ENCODER
-#define DT_L 36  // C2 RIGHT ENCODER
+#define CLK_L 36 // C1 LEFT ENCODER
+#define DT_L 39  // C2 LEFT ENCODER
 
-#define CLK_R 35 // C1 LEFT ENCODER
-#define DT_R 34  // C2 LEFT ENCODER
+#define CLK_R 34 // C1 RIGHT ENCODER
+#define DT_R 35  // C2 RIGHT ENCODER
 
 /*
 A tester avec print_vitesse ou print_encodeur pour que les vitesses soient positives et que le robot avance
@@ -51,7 +51,11 @@ L'IR Sensor demande :
 
 #define IR_SCL_PIN 22 // Ligne SCL de l'I2C du capteur ToF
 #define IR_SDA_PIN 21 // Ligne SDA de l'I2C du capteur ToF
-#define IR_LPN_PIN 0  // Ligne LPn du capteur ToF (pour le réveiller) - Branché au 5V direct c'est plus simple
+#define IR_LPN_PIN 0  // Ligne LPn du capteur ToF (pour le réveiller) - Branché au 3.3V direct c'est plus simple
+
+/*POMPE*/
+
+#define POMPE_PIN 17
 
 /*
 SERVO
