@@ -1,12 +1,12 @@
 #include <Pami.h>
 #include <cmath>
 
-Pami::Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
+Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
 {
-    m_p_moteur_r = p_moteur_d;
-    m_p_moteur_l = p_moteur_g;
-    m_p_encodeur_d = p_encodeur_d;
-    m_p_encodeur_g = p_encodeur_g;
+    m_p_moteur_r = p_moteur_r;
+    m_p_moteur_l = p_moteur_l;
+    m_p_encodeur_r = p_encodeur_r;
+    m_p_encodeur_l = p_encodeur_l;
     m_p_mesure_pos = p_mesure_pos;
     m_p_servo = p_servo;
     m_p_asserv = p_asserv;
@@ -696,8 +696,8 @@ void Pami::print_encodeur()
 {
     if (millis() - m_time_log > 250)
     {
-        Serial.print("Encodeur gauche : " + String(m_p_encodeur_g->mesure()));
-        Serial.println(" | Encodeur droit : " + String(m_p_encodeur_d->mesure()));
+        Serial.print("Encodeur gauche : " + String(m_p_encodeur_l->mesure()));
+        Serial.println(" | Encodeur droit : " + String(m_p_encodeur_r->mesure()));
     }
 }
 
@@ -767,4 +767,90 @@ void Pami::print_infos_interrupteur()
     {
         Serial.println("PAMI n°4 - plus éloigné du mur");
     }
+}
+
+std::tuple<float, float, unsigned long>
+Pami::avancer_asservi(float tick_distance, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
+{
+    /* But du gain proportionnel : faire une correction proportionnelle à l'erreur.
+    En gros :
+    erreur = ticksG - ticksD
+    correction = Kp * erreur
+
+    Puis on ajuste le pwm :
+    pwmG = pwmBase - correction
+    pwmD = pwmBase + correction
+    */
+
+    // Si l’intervalle n’est pas écoulé → on ne fait rien
+    if ((millis() - oldtime) < interval_asserv)
+    {
+        return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
+    }
+
+    // Sinon, c'est qu'on vient de dépasser l'invervalle d'asservissement.
+    // --- Mesures actuelles ---
+    float ticks_l = m_p_encodeur_l->mesure();
+    float ticks_r = m_p_encodeur_r->mesure();
+
+    Serial.print("\n\nTicks L : ");
+    Serial.print(ticks_l);
+    Serial.print(" | Ticks R : ");
+    Serial.println(ticks_r);
+
+    // --- Consignes (position) ---
+    float consigne_l = tick_distance + old_ticks_l;
+    float consigne_r = old_ticks_r + tick_distance;
+
+    Serial.print("Consigne L : ");
+    Serial.print(consigne_l);
+    Serial.print(" | Consigne R : ");
+    Serial.println(consigne_r);
+
+    // --- Erreurs ---
+    float erreur_l = consigne_l - ticks_l;
+    float erreur_r = consigne_r - ticks_r;
+
+    Serial.print("Erreur L : ");
+    Serial.print(erreur_l);
+    Serial.print(" | Erreur R : ");
+    Serial.println(erreur_r);
+
+    float erreur_l_normalisee = erreur_l / nb_ticks_par_sec_max;
+    float erreur_r_normalisee = erreur_r / nb_ticks_par_sec_max;
+
+    Serial.print("Erreur L normalisée : ");
+    Serial.print(erreur_l_normalisee);
+    Serial.print(" | Erreur R normalisée : ");
+    Serial.println(erreur_r_normalisee);
+
+    // l'erreur peut-être négative, et est entre 0 et 1
+
+    // --- Correction ---
+    // on multiplie l'erreur par 255 pour avoir une erreur en vitesse pwm
+    // et on multiplie aussi par Kp pour avoir la correction selon le principe de base du correcteur proportionnel
+    int pwmL = Kp * 255 * erreur_l_normalisee;
+    int pwmR = Kp * 255 * erreur_r_normalisee;
+
+    Serial.print("Correction L : ");
+    Serial.print(pwmL);
+    Serial.print(" | Correction R : ");
+    Serial.println(pwmR);
+
+    pwmL = constrain(pwmL, -255, 255); // par sécurité mais normalement ça dépasse pas
+    pwmR = constrain(pwmR, -255, 255);
+
+    // --- Commande moteurs ---
+    m_p_moteur_l->set_speed(pwmL);
+    m_p_moteur_r->set_speed(pwmR);
+
+    // --- Condition d’arrêt en ticks ---
+    if (abs(erreur_l) < marge_erreur_ticks && abs(erreur_r) < marge_erreur_ticks)
+    {
+        m_p_moteur_l->set_speed(0);
+        m_p_moteur_r->set_speed(0);
+    }
+
+    // On renvoie les nouvelles valeurs
+    return std::make_tuple(ticks_l, ticks_r, oldtime);
 }

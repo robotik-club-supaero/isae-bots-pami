@@ -91,9 +91,9 @@ MACHINE A ETAT
 Paramètres globaux
 */
 #define ENDTIME 99000    // Temps global de la pami en ms (99s)
-#define START_TIME 5000  // Les pamis commencent dans les 15 dernières secondes.
+#define START_TIME 85000 // Les pamis commencent dans les 15 dernières secondes.
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
-#define DISTANCE_MIN 200 // Distance minimale pour éviter un obstacle en mm
+#define DISTANCE_MIN 150 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
 #define EPSA 0.1         // Incertitude position, radian
 
@@ -110,6 +110,11 @@ Paramètres de l'asservissement
     Ti : gain intégral, permet de corriger les erreurs persistantes en accumulant les erreurs passées, mais peut causer des oscillations si trop élevé.
     Td : gain dérivé, permet de réduire les oscillations en anticipant les erreurs futures, mais peut rendre le système instable si trop élevé.
 */
+#define Kp 1.0
+#define interval_asserv 50
+#define marge_erreur_ticks 30
+#define nb_ticks_par_sec_max 1400
+
 #define GAIN 1.0
 
 #define KP_r 0.085
@@ -134,11 +139,11 @@ Paramètres de l'asservissement
 #define J_POSITION_1_FINAL_X 0
 #define J_POSITION_1_FINAL_Y 0
 
-#define B_POSITION_1_DEPART_X 0
-#define B_POSITION_1_DEPART_Y 0
+#define B_POSITION_1_DEPART_X 400
+#define B_POSITION_1_DEPART_Y 430
 
-#define B_POSITION_1_FINAL_X 0
-#define B_POSITION_1_FINAL_Y 0
+#define B_POSITION_1_FINAL_X 1500
+#define B_POSITION_1_FINAL_Y 1200
 
 // PAMI 2
 #define J_POSITION_2_DEPART_X 0

@@ -6,7 +6,6 @@
 #include <Pami.h>
 #include <Arduino.h>
 #include <ESP32Encoder.h>
-#include <Machine_etats.h>
 
 // Initialise les différents objets
 // Ultrason ultrason = Ultrason(ULTRASON_ECHO, ULTRASON_TRIGGER);
@@ -22,6 +21,9 @@ Asserv asserv = Asserv(&moteur_r, &moteur_l, &mesure_pos);
 
 // La pami en elle même
 Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
+
+float old_ticks_l, old_ticks_r, oldtime;
+float new_ticks_l, new_ticks_r, newtime;
 
 void setup()
 {
@@ -109,6 +111,17 @@ bool start_moving = false;
 
 void loop()
 {
+    //     float tick_distance = 1200;
+    //     auto result = pami.avancer_asservi(tick_distance, old_ticks_l, old_ticks_r, oldtime);
+
+    //     new_ticks_l = std::get<0>(result);
+    //     new_ticks_r = std::get<1>(result);
+    //     newtime = std::get<2>(result);
+
+    //     old_ticks_l = new_ticks_l;
+    //     old_ticks_r = new_ticks_r;
+    //     oldtime = newtime;
+
     static unsigned long time_last_log = 0;
     static unsigned long time_last_sensor = 0;
 
@@ -170,14 +183,14 @@ void loop()
                 {
                     Serial.println("Action Match : PAMI 3 BLEUE");
                     pami.avancer(1000);
-                    pami.tourner(-25);
+                    pami.tourner(-60);
                     pami.avancer(1200);
                 }
                 else
                 {
                     Serial.println("Action Match : PAMI 3 JAUNE");
-                    pami.avancer(800);
-                    pami.tourner(25);
+                    pami.avancer(1000);
+                    pami.tourner(60);
                     pami.avancer(1000);
                 }
             }

@@ -15,8 +15,8 @@ class Pami
 public:
     Moteur *m_p_moteur_r;
     Moteur *m_p_moteur_l;
-    Encodeur *m_p_encodeur_d;
-    Encodeur *m_p_encodeur_g;
+    Encodeur *m_p_encodeur_r;
+    Encodeur *m_p_encodeur_l;
     Asserv *m_p_asserv;
     Serv *m_p_servo;
     Mesure_pos *m_p_mesure_pos;
@@ -44,6 +44,8 @@ public:
     long m_time_match;
 
     Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
+
+    std::tuple<float, float, unsigned long> avancer_asservi(float tick_distance, float old_ticks_l, float old_ticks_r, unsigned long oldtime);
 
     void test(int mode);
 
