@@ -24,7 +24,28 @@ Asserv asserv = Asserv(&moteur_r, &moteur_l, &mesure_pos);
 Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
 
 void setup()
-{
+{   
+    Serial.begin(9600);
+
+    if (TEST){
+        pami.setup();
+        Serial.println("TEST");
+
+        while (true)
+        {   
+            Serial.print("Droit : ");
+            Serial.print(pami.m_p_encodeur_d->mesure());
+            Serial.print(" | Gauche : ");
+            Serial.println(pami.m_p_encodeur_g->mesure());
+            delay(200);
+            pami.m_p_moteur_d->stop();
+            pami.m_p_moteur_g->stop();
+            delay(200);
+            pami.tourner(-90);
+        }
+
+    }
+
     pami.setup();
     delay(500);
     pami.config_start_position();
@@ -64,6 +85,9 @@ bool start_moving = false;
 
 void loop()
 {
+    
+    if (TEST) {return ;}
+
     static unsigned long time_last_log = 0;
     static unsigned long time_last_sensor = 0;
 

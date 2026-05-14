@@ -22,24 +22,28 @@ void Moteur::setup()
 
 void Moteur::set_speed(int vitesse)
 {
-    int vitesse_reelle = (m_inv == true) ? -vitesse : vitesse;
+    if (m_inv){
+        vitesse = -vitesse ;
+    }
 
-    if (vitesse_reelle < 0)
+    if (abs(vitesse) > 255)
+    {
+        if (vitesse > 0) {vitesse = 255;}
+        else {vitesse = -255;}
+    }
+
+    if (vitesse < 0)
     {
         digitalWrite(m_IN1, 1); // set le sens de rotation
         digitalWrite(m_IN2, 0);
-        m_vitesse = -vitesse_reelle; // Setup la vitesse en valeur absolue
     }
     else
     {
         digitalWrite(m_IN1, 0); // set le sens de rotation
         digitalWrite(m_IN2, 1);
-        m_vitesse = vitesse_reelle; // Setup la vitesse en valeur absolue
     }
-    if (m_vitesse > 255)
-    {
-        m_vitesse = 255; // contraint la vitesse en valeur absolue
-    }
+    
+    m_vitesse = abs(vitesse); // Setup la vitesse en valeur absolue    
     analogWrite(m_EN, m_vitesse); // envoie la command de vitesse
 }
 

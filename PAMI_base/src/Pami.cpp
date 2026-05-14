@@ -289,7 +289,6 @@ void Pami::config_start_position()
 
 void Pami::setup()
 {
-    Serial.begin(115200); // Initialisation de la communication série
     Serial.println("---------- Setup starting ----------");
 
     pinMode(PIN_LED, OUTPUT);
@@ -357,9 +356,11 @@ void Pami::go_to(float distance_x, float distance_y, int speed)
 
 void Pami::avancer(float distance, int speed)
 {
-    unsigned long function_start_time = millis();
+    if (distance <  0.){
+        speed = -speed ;
+    }
 
-    float moving_time = K_NAIF * (distance / SPEED) * 1000;
+    float moving_time = K_NAIF * (abs(distance) / SPEED) * 1000;
     Serial.print("Temps estimé pour avancer de ");
     Serial.print(distance / 10.0);
     Serial.print(" cm à la vitesse de ");
@@ -368,6 +369,7 @@ void Pami::avancer(float distance, int speed)
     Serial.print(moving_time);
     Serial.println(" ms");
 
+    unsigned long function_start_time = millis();
     while (millis() - function_start_time < moving_time)
     {
         float dist = this->get_IR_distance();
@@ -381,7 +383,7 @@ void Pami::avancer(float distance, int speed)
         {
             this->set_speed(speed);
         }
-        delay(200);
+        delay(100);
     }
     this->set_speed(0);
 }
@@ -422,15 +424,17 @@ void Pami::reculer(float distance, int speed)
 
 void Pami::tourner(float angle_degres, float speed)
 {
+    if (angle_degres < 0){ speed = -speed ;}
+
     m_p_moteur_d->set_speed(speed);
     m_p_moteur_g->set_speed(-speed);
-    delay(K_ANGLE_NAIF * (angle_degres / 360.0) * 1000);
+    delay(K_ANGLE_NAIF * (abs(angle_degres) / 360.0) * 1000);
     Serial.print("Temps estimé pour tourner de ");
     Serial.print(angle_degres);
     Serial.print(" ° à la vitesse de ");
     Serial.print(speed);
     Serial.print(" : ");
-    Serial.print(K_ANGLE_NAIF * (angle_degres / 360.0) * 1000);
+    Serial.print(K_ANGLE_NAIF * (abs(angle_degres) / 360.0) * 1000);
     Serial.println(" ms");
 
     this->set_speed(0);
@@ -743,7 +747,7 @@ void Pami::set_speed(float speed)
     // m_p_asserv->asservissement(speed, speed);
     m_p_moteur_d->set_speed(speed);
     m_p_moteur_g->set_speed(speed);
-    delay(100);
+    //delay(100); // pk un delay ?
 }
 
 /*
@@ -777,6 +781,10 @@ Fonction qui retourne la distance minimal au prochain obstacle détectée par le
 */
 double Pami::get_IR_distance()
 {
+    if (DISABLE_OBS){
+        return -1 ;
+    }
+
     if (m_p_ir_sensor == nullptr)
     {
         Serial.println("Pas de capteur infrarouge");
