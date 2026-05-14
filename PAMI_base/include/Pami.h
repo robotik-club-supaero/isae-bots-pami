@@ -5,7 +5,6 @@
 #include <Mesure_pos.h>
 #include <Moteur.h>
 #include <Irsensor.h>
-#include <Asserv.h>
 #include <Ultrason.hpp>
 #include <Serv.h>
 #include <define.h>
@@ -13,15 +12,14 @@
 class Pami
 {
 public:
-    Moteur *m_p_moteur_r;
-    Moteur *m_p_moteur_l;
-    Encodeur *m_p_encodeur_r;
-    Encodeur *m_p_encodeur_l;
-    Asserv *m_p_asserv;
-    Serv *m_p_servo;
-    Mesure_pos *m_p_mesure_pos;
-    Ultrason *m_p_ultrason;
-    Irsensor *m_p_ir_sensor;
+    Moteur *p_moteur_r;
+    Moteur *p_moteur_l;
+    Encodeur *p_encodeur_r;
+    Encodeur *p_encodeur_l;
+    Serv *p_servo;
+    Mesure_pos *p_mesure_pos;
+    Ultrason *p_ultrason;
+    Irsensor *p_ir_sensor;
 
     bool m_match_demarre = false;
     int tirette = 1;    // Etat par défaut de la tirette
@@ -43,11 +41,13 @@ public:
     long m_time_log;
     long m_time_match;
 
-    Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
+    int *p_etape_globale;
 
-    std::tuple<float, float, unsigned long> avancer_asservi(float tick_distance, float old_ticks_l, float old_ticks_r, unsigned long oldtime);
+    Pami(int *etape_globale, Moteur *moteur_d, Moteur *moteur_g, Encodeur *encodeur_d, Encodeur *encodeur_g, Mesure_pos *mesure_pos, Serv *servo, Irsensor *ir_sensor = nullptr, Ultrason *ultrason = nullptr);
 
     void test(int mode);
+    std::tuple<float, float, unsigned long> avancer_asservi(int etape_d_appel, float consigne_cm_l, float consigne_cm_r, float old_ticks_l, float old_ticks_r, unsigned long oldtime);
+    std::tuple<float, float, unsigned long> tourner_asservi(int etape_d_appel, float consigne_angle, float old_ticks_l, float old_ticks_r, unsigned long oldtime);
 
     void config_start_position();
     void print_log();
@@ -61,16 +61,6 @@ public:
     void avancer(float distance, int speed = SPEED);
     void tourner(float angle_degres, float speed = SPEED);
     void stop();
-
-    // Avancer avec asservissement mais sans capteur ir
-    void go_to_asserv(float pos_target_x, float pos_target_y, int speed = SPEED);
-    void avancer_asserv(float distance, int speed = SPEED);
-    void reculer_asserv(float distance, int speed = SPEED);
-    void tourner_asserv(float angle_degres, float speed = SPEED);
-
-    // Avancer avec asservissement et capteur ir
-    bool go_to_with_obstacle(float pos_target_x, float pos_target_y, int speed = SPEED);
-    bool avancer_with_obstacle(float distance, int speed = SPEED);
 
     void set_speed(float speed);
     void blink_servo(long temps_blink, int angle1, int angle2);
