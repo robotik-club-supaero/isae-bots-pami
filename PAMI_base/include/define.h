@@ -62,9 +62,7 @@ SERVO
 #define ANGLE2 180
 #define TEMPS_BLINK 1000 // Temps clignotement (ms).
 
-/*
-MACHINE A ETAT
-*/
+
 // Le coté est défini quand on est face à la scène.
 //  equipe = 1 : on est du coté gauche (jaune).
 //  equipe = 0 : on est du coté droit (bleue).
@@ -76,12 +74,11 @@ MACHINE A ETAT
 /*
 Paramètres globaux
 */
-#define TOTAL_TIME 99000 // Temps total de la pami en ms (99s)
-#define START_TIME 2000  // Les pamis commencent dans les 15 dernières secondes.
+
 #define SPEED 200        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
-#define EPSP 100         // Incertitude position, cm
-#define EPSA 0.1         // Incertitude position, radian
+// #define EPSP 100         // Incertitude position, cm
+// #define EPSA 0.1         // Incertitude position, radian
 
 /*
 Gains naifs pour réellement avancer de 10cm avec un delay
@@ -93,10 +90,11 @@ Gains naifs pour réellement avancer de 10cm avec un delay
 Paramètres de l'asservissement
     A régler pour que le robot suive bien sa trajectoire
     Kp : gain proportionnel, plus il est grand plus le robot réagit vite à une erreur de position, mais peut causer des oscillations si trop élevé.
-    Ti : gain intégral, permet de corriger les erreurs persistantes en accumulant les erreurs passées, mais peut causer des oscillations si trop élevé.
-    Td : gain dérivé, permet de réduire les oscillations en anticipant les erreurs futures, mais peut rendre le système instable si trop élevé.
 */
-#define GAIN_CM_TO_TICKS 5000 / 47
+#define KP 1
+#define INTERVAL_ASSERV 50 // en ms
+#define MARGE_ERREUR_TICKS 200
+#define GAIN_CM_TO_TICKS 20809 / 208
 
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLEU (droite))

@@ -1,6 +1,6 @@
 #include "esp32-hal-gpio.h"
 #include <Pami.h>
-#include <cmath>
+#include <define.h>
 
 Pami::Pami(int *p_etape_globale, Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
 {
@@ -40,14 +40,11 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,fl
     pwmD = pwmBase + correction
     */
 
-    // TODO : à mettre dans un define
-    float Kp = 1;
-    float interval_asserv = 50; // en ms
-    float marge_erreur_ticks = 500;
-    float nb_ticks_par_sec_max = 1;
+    
+    
 
     // Si l’intervalle n’est pas écoulé -> on ne fait rien
-    if (millis() - oldtime < interval_asserv) {
+    if (millis() - oldtime < INTERVAL_ASSERV) {
         return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
     }
     else {
@@ -63,26 +60,22 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,fl
         // Serial.print(ticks_r);
 
         // --- Erreurs ---
-        // float erreur_l = consigne_l - ticks_l;
-        // float erreur_r = consigne_r - ticks_r;
 
         float erreur = ticks_l - ticks_r;
 
-        // float erreur_l_normalisee = erreur_l/nb_ticks_par_sec_max;
-        // float erreur_r_normalisee = erreur_r/nb_ticks_par_sec_max;
-
-        float erreur_normalisee = erreur / nb_ticks_par_sec_max;
 
         //l'erreur peut-être négative, et est entre 0 et 1
         
-        // --- Correction ---
-        // on multiplie l'erreur par 255 pour avoir une erreur en vitesse pwm 
-        // et on multiplie aussi par Kp pour avoir la correction selon le principe de base du correcteur proportionnel
-        // int pwmL = Kp * SPEED * erreur_l_normalisee;
-        // int pwmR = Kp * SPEED * erreur_r_normalisee;
-
-        int pwmR = SPEED + Kp*erreur_normalisee;
-        int pwmL = SPEED - Kp*erreur_normalisee;
+        // --- Correction --
+        // si on avance
+        int pwmR = SPEED + KP*erreur;
+        int pwmL = SPEED - KP*erreur;
+        // si on recule, on remplace les valeurs
+        if (consigne_cm_l < 0 || consigne_cm_r < 0){
+            pwmR = - SPEED + KP*erreur;
+            pwmL = - SPEED - KP*erreur;
+        }
+        
 
         pwmL = constrain(pwmL, -255, 255); 
         pwmR = constrain(pwmR, -255, 255);
@@ -101,9 +94,10 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,fl
         // --- Commande moteurs ---
         moteur_l->set_speed(pwmL);
         moteur_r->set_speed(pwmR);
+        
 
         // --- Condition d’arrêt en ticks ---
-        if (abs(consigne_cm_l*GAIN_CM_TO_TICKS - ticks_l) < marge_erreur_ticks && abs(consigne_cm_r*GAIN_CM_TO_TICKS-ticks_r) < marge_erreur_ticks ) {
+        if (abs(consigne_cm_l*GAIN_CM_TO_TICKS - ticks_l) < MARGE_ERREUR_TICKS && abs(consigne_cm_r*GAIN_CM_TO_TICKS-ticks_r) < MARGE_ERREUR_TICKS ) {
             // ON RENTRE !!
             moteur_l->set_speed(0);
             moteur_r->set_speed(0);
@@ -295,73 +289,6 @@ Modes :
 // }
 
 
-// void Pami::avancer(float distance, int speed)
-// {
-//     unsigned long function_start_time = millis();
-
-//     float moving_time = K_NAIF * (distance / SPEED) * 1000;
-//     Serial.print("Temps estimé pour avancer de ");
-//     Serial.print(distance / 10.0);
-//     Serial.print(" cm à la vitesse de ");
-//     Serial.print(speed);
-//     Serial.print(" : ");
-//     Serial.print(moving_time);
-//     Serial.println(" ms");
-
-//     while (millis() - function_start_time < moving_time)
-//     {
-//         float dist = this->get_IR_distance();
-//         Serial.print("Distance mesuree : ");
-//         Serial.print(dist / 10.0);
-//         Serial.println(" cm");
-
-//         if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
-//         {
-//             Serial.println("Obstacle détecté ! Arrêt du robot.");
-//             this->set_speed(0);
-//         }
-//         else
-//         {
-//             this->set_speed(speed);
-//         }
-//         delay(200);
-//     }
-//     this->set_speed(0);
-// }
-
-// void Pami::reculer(float distance, int speed)
-// {
-//     unsigned long function_start_time = millis();
-
-//     float moving_time = K_NAIF * (distance / SPEED) * 1000;
-//     Serial.print("Temps estimé pour reculer de ");
-//     Serial.print(distance / 10.0);
-//     Serial.print(" cm à la vitesse de ");
-//     Serial.print(speed);
-//     Serial.print(" : ");
-//     Serial.print(moving_time);
-//     Serial.println(" ms");
-
-//     while (millis() - function_start_time < moving_time)
-//     {
-//         float dist = this->get_IR_distance();
-//         Serial.print("Distance mesuree : ");
-//         Serial.print(dist / 10.0);
-//         Serial.println(" cm");
-
-//         if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
-//         {
-//             Serial.println("Obstacle détecté ! Arrêt du robot.");
-//             this->set_speed(0);
-//         }
-//         else
-//         {
-//             this->set_speed(-speed);
-//         }
-//         delay(200);
-//     }
-//     this->set_speed(0);
-// }
 
 /*
 Tourner dans le sens trigo
