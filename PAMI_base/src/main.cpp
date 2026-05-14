@@ -129,9 +129,9 @@ void setup()
 
 void loop()
 {
-    float consigne_l = 5000;
-    float consigne_r = 5000;
-    
+    float consigne_l = 20;
+    float consigne_r = 20;
+
     if (etape_globale != 1){
         new_ticks_l=std::get<0>(resultat);
         new_ticks_r=std::get<1>(resultat);
@@ -149,19 +149,19 @@ void loop()
             resultat = pami.avancer_asservi(0,consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
             break;
         }
-        case 1:
-        {
-            if (millis()-oldtime > 1000){
-                etape_globale=2;
-                break;
-            }
+        // case 1:
+        // {
+        //     if (millis()-oldtime > 1000){
+        //         etape_globale=2;
+        //         break;
+        //     }
             
-        }
-        case 2:
-        {
-            resultat = pami.avancer_asservi(2,2*consigne_l,2*consigne_r,old_ticks_l,old_ticks_r,oldtime);
-            break;
-        }
+        // }
+        // case 2:
+        // {
+        //     resultat = pami.avancer_asservi(2,2*consigne_l,2*consigne_r,old_ticks_l,old_ticks_r,oldtime);
+        //     break;
+        // }
     }
         
     Serial.print("Etape_globale : \t");

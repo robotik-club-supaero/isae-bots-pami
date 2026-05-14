@@ -23,14 +23,13 @@ Allume les deux moteurs à une vitesse en (entre 0 et 255)
 Avancer en ligne droite, on veut juste que chaque moteur avance de tick_distance ticks
 */
 // TODO : rajouter un flag pour dire si on doit exécuter la fonction ou pas car si on l'appelle deux fois elle va péter son crane
-std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,float consigne_l, float consigne_r, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
+std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,float consigne_cm_l, float consigne_cm_r, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
 {   
     // Si c'est pas l'étape à laquelle on veut l'appeler, 
     // aucune des variables du main n'est modifiée
     if (etape_d_appel != *etape_globale){
         return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
     }
-    Serial.println("etape" + String(etape_d_appel));
     /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
     En gros :s
     erreur = ticksG - ticksD
@@ -58,10 +57,10 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,fl
         // --- Mesures actuelles ---
         float ticks_l = encodeur_l->mesure();
         float ticks_r = encodeur_r->mesure();
-        Serial.print("ticks_l : ");
-        Serial.print(ticks_l);
-        Serial.print("\t ticks_r : ");
-        Serial.print(ticks_r);
+        // Serial.print("ticks_l : ");
+        // Serial.print(ticks_l);
+        // Serial.print("\t ticks_r : ");
+        // Serial.print(ticks_r);
 
         // --- Erreurs ---
         // float erreur_l = consigne_l - ticks_l;
@@ -92,19 +91,19 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,fl
         // Serial.print("Erreur l : ");
         // Serial.print(erreur_l_normalisee);
         
-        Serial.print("\tErreur : ");
-        Serial.print(erreur_normalisee);
-        Serial.print("\tpwmL : ");
-        Serial.print(pwmL);
-        Serial.print("\tpwmR : ");
-        Serial.println(pwmR);
+        // Serial.print("\tErreur : ");
+        // Serial.print(erreur_normalisee);
+        // Serial.print("\tpwmL : ");
+        // Serial.print(pwmL);
+        // Serial.print("\tpwmR : ");
+        // Serial.println(pwmR);
 
         // --- Commande moteurs ---
         moteur_l->set_speed(pwmL);
         moteur_r->set_speed(pwmR);
 
         // --- Condition d’arrêt en ticks ---
-        if (abs(consigne_l-ticks_l) < marge_erreur_ticks && abs(consigne_r-ticks_r) < marge_erreur_ticks ) {
+        if (abs(consigne_cm_l*GAIN_CM_TO_TICKS - ticks_l) < marge_erreur_ticks && abs(consigne_cm_r*GAIN_CM_TO_TICKS-ticks_r) < marge_erreur_ticks ) {
             // ON RENTRE !!
             moteur_l->set_speed(0);
             moteur_r->set_speed(0);

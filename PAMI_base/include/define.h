@@ -96,17 +96,8 @@ Paramètres de l'asservissement
     Ti : gain intégral, permet de corriger les erreurs persistantes en accumulant les erreurs passées, mais peut causer des oscillations si trop élevé.
     Td : gain dérivé, permet de réduire les oscillations en anticipant les erreurs futures, mais peut rendre le système instable si trop élevé.
 */
-#define KP_r 0.085
-#define KP_l 0.090
-#define KP_angle 0.0083
+#define GAIN_CM_TO_TICKS 5000 / 47
 
-#define TI_r 100
-#define TI_l 100
-#define TI_angle 0
-
-#define TD_r 0
-#define TD_l 0
-#define TD_angle 0
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLEU (droite))
 
