@@ -21,8 +21,8 @@ Allume les deux moteurs à une vitesse en (entre 0 et 255)
 /*
 Avancer en ligne droite, on veut juste que chaque moteur avance de tick_distance ticks
 */
-
-std::tuple<float,float,unsigned long> Pami::avancer_asservi(float tick_distance, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
+// TODO : rajouter un flag pour dire si on doit exécuter la fonction ou pas car si on l'appelle deux fois elle va péter son crane
+std::tuple<float,float,unsigned long> Pami::avancer_asservi(float consigne_l, float consigne_r, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
 {
     /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
     En gros :
@@ -35,56 +35,67 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(float tick_distance,
     */
 
     // TODO : à mettre dans un define
-    float Kp = 0.2;
-    float interval_asserv = 50;
+    float Kp = 0.5;
+    float interval_asserv = 50; // en ms
     float marge_erreur_ticks = 30;
     float nb_ticks_par_sec_max = 1400;
 
     
-    // Si l’intervalle n’est pas écoulé → on ne fait rien
+    // Si l’intervalle n’est pas écoulé -> on ne fait rien
     if (millis() - oldtime < interval_asserv) {
         return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
     }
+    else {
+        Serial.print("Asserv \t");
+        // Sinon, c'est qu'on vient de dépasser l'invervalle d'asservissement.
+        // il faut donc asservir de nouveau
 
-    // Sinon, c'est qu'on vient de dépasser l'invervalle d'asservissement.
-    // --- Mesures actuelles ---
-    float ticks_l = encodeur_l->mesure();
-    float ticks_r = encodeur_r->mesure();
+        // --- Mesures actuelles ---
+        float ticks_l = encodeur_l->mesure();
+        float ticks_r = encodeur_r->mesure();
 
-    // --- Consignes (position) ---
-    float consigne_l = old_ticks_l + tick_distance;
-    float consigne_r = old_ticks_r + tick_distance;
+        // --- Erreurs ---
+        float erreur_l = consigne_l - ticks_l;
+        float erreur_r = consigne_r - ticks_r;
 
-    // --- Erreurs ---
-    float erreur_l = consigne_l - ticks_l;
-    float erreur_r = consigne_r - ticks_r;
+        float erreur_l_normalisee = erreur_l/nb_ticks_par_sec_max;
+        float erreur_r_normalisee = erreur_r/nb_ticks_par_sec_max;
 
-    float erreur_l_normalisee = erreur_l/nb_ticks_par_sec_max;
-    float erreur_r_normalisee = erreur_r/nb_ticks_par_sec_max;
+        
+        //l'erreur peut-être négative, et est entre 0 et 1
+        
+        // --- Correction ---
+        // on multiplie l'erreur par 255 pour avoir une erreur en vitesse pwm 
+        // et on multiplie aussi par Kp pour avoir la correction selon le principe de base du correcteur proportionnel
+        int pwmL = Kp * SPEED * erreur_l_normalisee;
+        int pwmR = Kp * SPEED * erreur_r_normalisee;
 
-    //l'erreur peut-être négative, et est entre 0 et 1
-    
-    // --- Correction ---
-    // on multiplie l'erreur par 255 pour avoir une erreur en vitesse pwm 
-    // et on multiplie aussi par Kp pour avoir la correction selon le principe de base du correcteur proportionnel
-    int pwmL = Kp * 255 * erreur_l_normalisee;
-    int pwmR = Kp * 255 * erreur_r_normalisee;
+        pwmL = constrain(pwmL, -255, 255); //par sécurité mais normalement ça dépasse pas
+        pwmR = constrain(pwmR, -255, 255);
+        
+        
+        Serial.print("Erreur l : ");
+        Serial.print(erreur_l_normalisee);
+        Serial.print("\tpwmL : ");
+        Serial.print(pwmL);
+        Serial.print("\tErreur r : ");
+        Serial.print(erreur_r_normalisee);
+        Serial.print("\tpwmR : ");
+        Serial.println(pwmR);
 
-    pwmL = constrain(pwmL, -255, 255); //par sécurité mais normalement ça dépasse pas
-    pwmR = constrain(pwmR, -255, 255);
+        // --- Commande moteurs ---
+        moteur_l->set_speed(pwmL);
+        moteur_r->set_speed(pwmR);
 
-    // --- Commande moteurs ---
-    moteur_l->set_speed(pwmL);
-    moteur_r->set_speed(pwmR);
+        // --- Condition d’arrêt en ticks ---
+        if (abs(erreur_l) < marge_erreur_ticks && abs(erreur_r) < marge_erreur_ticks) {
+            moteur_l->set_speed(0);
+            moteur_r->set_speed(0);
+        }
 
-    // --- Condition d’arrêt en ticks ---
-    if (abs(erreur_l) < marge_erreur_ticks && abs(erreur_r) < marge_erreur_ticks) {
-        moteur_l->set_speed(0);
-        moteur_r->set_speed(0);
+        // On renvoie les nouvelles valeurs
+        return std::make_tuple(ticks_l, ticks_r, millis());
     }
-
-    // On renvoie les nouvelles valeurs
-    return std::make_tuple(ticks_l, ticks_r, millis());
 }
 
 

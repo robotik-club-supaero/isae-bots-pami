@@ -39,7 +39,7 @@ public:
 
     
     void test(int mode);
-    std::tuple<float, float, unsigned long> avancer_asservi(float tick_distance, float old_ticks_l,float old_ticks_r,unsigned long oldtime);
+    std::tuple<float, float, unsigned long> avancer_asservi(float consigne_l, float consigne_r,float old_ticks_l,float old_ticks_r,unsigned long oldtime);
 
     void setup();
     void print_log();
