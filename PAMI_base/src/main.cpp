@@ -16,14 +16,19 @@ Moteur moteur_l = Moteur(EN_L, IN1_L, IN2_L, INV_MOT_L);
 Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
 Mesure_pos mesure_pos = Mesure_pos(&encodeur_r, &encodeur_l);
-Asserv asserv = Asserv(&moteur_r, &moteur_l, &mesure_pos);
-// Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos);
 
+int etape_globale = 0;
+std::tuple<float, float, unsigned long> resultat;
 // La pami en elle même
-Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
+Pami pami = Pami(&etape_globale, &moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &ir_sensor);
 
-float old_ticks_l, old_ticks_r, oldtime;
+float global_time = 0; // Variable global du temps
+float pos_x;
+float pos_y;
+float angle;
+
 float new_ticks_l, new_ticks_r, newtime;
+float old_ticks_l, old_ticks_r, oldtime;
 
 void setup()
 {
@@ -52,10 +57,6 @@ void setup()
     moteur_r.setup();
     moteur_l.setup();
     Serial.println("Setup Done : Moteurs");
-
-    // Setup asservissement
-    asserv.setup();
-    Serial.println("Setup Done : Asservissement");
 
     pinMode(PIN_TIRETTE, INPUT);
     pinMode(PIN_READEQUIPE, INPUT);
@@ -104,24 +105,19 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
+    // initialisation de la strat avec les étapes à 0
+    oldtime = millis();
+    newtime = millis();
+    resultat = std::make_tuple(0, 0, 0);
+
     pami.m_time_match = millis();
+    Serial.println("Fin setup");
 }
 
 bool start_moving = false;
 
 void loop()
 {
-    //     float tick_distance = 1200;
-    //     auto result = pami.avancer_asservi(tick_distance, old_ticks_l, old_ticks_r, oldtime);
-
-    //     new_ticks_l = std::get<0>(result);
-    //     new_ticks_r = std::get<1>(result);
-    //     newtime = std::get<2>(result);
-
-    //     old_ticks_l = new_ticks_l;
-    //     old_ticks_r = new_ticks_r;
-    //     oldtime = newtime;
-
     static unsigned long time_last_log = 0;
     static unsigned long time_last_sensor = 0;
 
@@ -138,68 +134,111 @@ void loop()
         }
     }
 
-    if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
+    if (etape_globale != 1)
     {
-        if (!start_moving)
-        {
-            start_moving = true;
-            if (pami.num_pami == 1)
-            {
-                start_moving = true;
-                if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-                {
-                    Serial.println("Action Match : PAMI 1 BLEUE");
-                    pami.avancer(B_POSITION_1_FINAL_Y - B_POSITION_1_DEPART_Y);
-                    pami.tourner(-90);
-                    pami.avancer(B_POSITION_1_FINAL_X - B_POSITION_1_DEPART_X);
-                }
-                else
-                {
-                    Serial.println("Action Match : PAMI 1 JAUNE");
-                    pami.avancer(J_POSITION_1_FINAL_Y - J_POSITION_1_DEPART_Y);
-                    pami.tourner(90);
-                    pami.avancer(J_POSITION_1_FINAL_X - J_POSITION_1_DEPART_X);
-                }
-            }
-            else if (pami.num_pami == 2)
-            {
-                delay(1000);
-                start_moving = true;
-                if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-                {
-                    Serial.println("Action Match : PAMI 2 BLEUE");
-                    pami.avancer(B_POSITION_2_FINAL_Y - B_POSITION_2_DEPART_Y);
-                    pami.tourner(-90);
-                    pami.avancer(B_POSITION_2_FINAL_X - B_POSITION_2_DEPART_X);
-                }
-                else
-                {
-                    Serial.println("Action Match : PAMI 2 JAUNE");
-                    pami.avancer(B_POSITION_2_FINAL_Y - B_POSITION_2_DEPART_Y);
-                    pami.tourner(90);
-                    pami.avancer(B_POSITION_2_FINAL_X - B_POSITION_2_DEPART_X);
-                }
-            }
-            else if (pami.num_pami == 3)
-            {
-                delay(2000);
-                if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-                {
-                    Serial.println("Action Match : PAMI 3 BLEUE");
-                    pami.avancer(B_POSITION_3_FINAL_Y - B_POSITION_3_DEPART_Y);
-                    pami.tourner(-90);
-                    pami.avancer(B_POSITION_3_FINAL_X - B_POSITION_3_DEPART_X);
-                }
-                else
-                {
-                    Serial.println("Action Match : PAMI 3 JAUNE");
-                    pami.avancer(B_POSITION_3_FINAL_Y - B_POSITION_3_DEPART_Y);
-                    pami.tourner(90);
-                    pami.avancer(B_POSITION_3_FINAL_X - B_POSITION_3_DEPART_X);
-                }
-            }
-        }
+        new_ticks_l = std::get<0>(resultat);
+        new_ticks_r = std::get<1>(resultat);
+        newtime = std::get<2>(resultat);
+        old_ticks_l = new_ticks_l;
+        old_ticks_r = new_ticks_r;
+        oldtime = newtime;
     }
+
+    switch (etape_globale)
+    {
+    case 0:
+    {
+        float consigne = B_POSITION_1_FINAL_Y + (old_ticks_l + old_ticks_r) / 2;
+        resultat = pami.avancer_asservi(0, consigne, consigne, old_ticks_l, old_ticks_r, oldtime);
+        break;
+    }
+    // delay non bloquant
+    // case 1:
+    // {
+    //     if (millis() - oldtime > 1000)
+    //     {
+    //         etape_globale = 2;
+    //         break;
+    //     }
+    // }
+    case 1:
+    {
+        // tourner
+        float consigne_angle = 30;
+        resultat = pami.tourner_asservi(1, consigne_angle, old_ticks_l, old_ticks_r, oldtime);
+        break;
+    }
+    case 2:
+    {
+        // avancer part.2
+        float consigne = B_POSITION_1_FINAL_X;
+        resultat = pami.avancer_asservi(2, consigne, consigne, old_ticks_l, old_ticks_r, oldtime);
+        break;
+    }
+    }
+
+    // if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
+    // {
+    //     if (!start_moving)
+    //     {
+    //         start_moving = true;
+    //         if (pami.num_pami == 1)
+    //         {
+    //             start_moving = true;
+    //             if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+    //             {
+    //                 Serial.println("Action Match : PAMI 1 BLEUE");
+    //                 pami.avancer(B_POSITION_1_FINAL_Y - B_POSITION_1_DEPART_Y);
+    //                 pami.tourner(-90);
+    //                 pami.avancer(B_POSITION_1_FINAL_X - B_POSITION_1_DEPART_X);
+    //             }
+    //             else
+    //             {
+    //                 Serial.println("Action Match : PAMI 1 JAUNE");
+    //                 pami.avancer(J_POSITION_1_FINAL_Y - J_POSITION_1_DEPART_Y);
+    //                 pami.tourner(90);
+    //                 pami.avancer(J_POSITION_1_FINAL_X - J_POSITION_1_DEPART_X);
+    //             }
+    //         }
+    //         else if (pami.num_pami == 2)
+    //         {
+    //             delay(1000);
+    //             start_moving = true;
+    //             if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+    //             {
+    //                 Serial.println("Action Match : PAMI 2 BLEUE");
+    //                 pami.avancer(B_POSITION_2_FINAL_Y - B_POSITION_2_DEPART_Y);
+    //                 pami.tourner(-90);
+    //                 pami.avancer(B_POSITION_2_FINAL_X - B_POSITION_2_DEPART_X);
+    //             }
+    //             else
+    //             {
+    //                 Serial.println("Action Match : PAMI 2 JAUNE");
+    //                 pami.avancer(B_POSITION_2_FINAL_Y - B_POSITION_2_DEPART_Y);
+    //                 pami.tourner(90);
+    //                 pami.avancer(B_POSITION_2_FINAL_X - B_POSITION_2_DEPART_X);
+    //             }
+    //         }
+    //         else if (pami.num_pami == 3)
+    //         {
+    //             delay(2000);
+    //             if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+    //             {
+    //                 Serial.println("Action Match : PAMI 3 BLEUE");
+    //                 pami.avancer(B_POSITION_3_FINAL_Y - B_POSITION_3_DEPART_Y);
+    //                 pami.tourner(-90);
+    //                 pami.avancer(B_POSITION_3_FINAL_X - B_POSITION_3_DEPART_X);
+    //             }
+    //             else
+    //             {
+    //                 Serial.println("Action Match : PAMI 3 JAUNE");
+    //                 pami.avancer(B_POSITION_3_FINAL_Y - B_POSITION_3_DEPART_Y);
+    //                 pami.tourner(90);
+    //                 pami.avancer(B_POSITION_3_FINAL_X - B_POSITION_3_DEPART_X);
+    //             }
+    //         }
+    //     }
+    // }
 
     if (millis() - time_last_log >= 1000)
     {

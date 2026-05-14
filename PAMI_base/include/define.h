@@ -91,7 +91,7 @@ MACHINE A ETAT
 Paramètres globaux
 */
 #define ENDTIME 99000    // Temps global de la pami en ms (99s)
-#define START_TIME 5000 // Les pamis commencent dans les 15 dernières secondes.
+#define START_TIME 5000  // Les pamis commencent dans les 15 dernières secondes.
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 150 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
@@ -112,8 +112,9 @@ Paramètres de l'asservissement
 */
 #define Kp 1.0
 #define interval_asserv 50
-#define marge_erreur_ticks 30
-#define nb_ticks_par_sec_max 1400
+#define marge_erreur_ticks 500
+#define GAIN_CM_TO_TICKS 20800 / 200
+#define GAIN_ANGLE_TO_TICKS 1
 
 #define GAIN 1.0
 
@@ -130,46 +131,46 @@ Paramètres de l'asservissement
 #define TD_angle 100
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
-// Chaque pami à ses propres positions
+// Chaque pami à ses propres positions en cm
 
 // PAMI 1 (collée au mur - ninja)
-#define J_POSITION_1_DEPART_X 400
-#define J_POSITION_1_DEPART_Y 430
+#define J_POSITION_1_DEPART_X 40
+#define J_POSITION_1_DEPART_Y 43
 
-#define J_POSITION_1_FINAL_X 1400
-#define J_POSITION_1_FINAL_Y 1200
+#define J_POSITION_1_FINAL_X 140
+#define J_POSITION_1_FINAL_Y 120
 
-#define B_POSITION_1_DEPART_X 400
-#define B_POSITION_1_DEPART_Y 430
+#define B_POSITION_1_DEPART_X 40
+#define B_POSITION_1_DEPART_Y 43
 
-#define B_POSITION_1_FINAL_X 1400
-#define B_POSITION_1_FINAL_Y 1200
+#define B_POSITION_1_FINAL_X 140
+#define B_POSITION_1_FINAL_Y 120
 
 // PAMI 2
-#define J_POSITION_2_DEPART_X 400
-#define J_POSITION_2_DEPART_Y 280
+#define J_POSITION_2_DEPART_X 40
+#define J_POSITION_2_DEPART_Y 28
 
-#define J_POSITION_2_FINAL_X 680
-#define J_POSITION_2_FINAL_Y 1200
+#define J_POSITION_2_FINAL_X 68
+#define J_POSITION_2_FINAL_Y 120
 
-#define B_POSITION_2_DEPART_X 400
-#define B_POSITION_2_DEPART_Y 280
+#define B_POSITION_2_DEPART_X 40
+#define B_POSITION_2_DEPART_Y 28
 
-#define B_POSITION_2_FINAL_X 680
-#define B_POSITION_2_FINAL_Y 1200
+#define B_POSITION_2_FINAL_X 68
+#define B_POSITION_2_FINAL_Y 120
 
 // PAMI 3
-#define J_POSITION_3_DEPART_X 400
-#define J_POSITION_3_DEPART_Y 130
+#define J_POSITION_3_DEPART_X 40
+#define J_POSITION_3_DEPART_Y 13
 
-#define J_POSITION_3_FINAL_X 100
-#define J_POSITION_3_FINAL_Y 1200
+#define J_POSITION_3_FINAL_X 10
+#define J_POSITION_3_FINAL_Y 120
 
-#define B_POSITION_3_DEPART_X 400
-#define B_POSITION_3_DEPART_Y 130
+#define B_POSITION_3_DEPART_X 40
+#define B_POSITION_3_DEPART_Y 13
 
-#define B_POSITION_3_FINAL_X 100
-#define B_POSITION_3_FINAL_Y 1200
+#define B_POSITION_3_FINAL_X 10
+#define B_POSITION_3_FINAL_Y 120
 
 // PAMI 4
 #define J_POSITION_4_DEPART_X 0
