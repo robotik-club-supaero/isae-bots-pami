@@ -96,16 +96,16 @@ void Mesure_pos::loop()
          * Affichage des valeurs , a decommenter si on veut debug ,
          * NE PAS OUBLIER DE COMMENTER DANS LE CODE FINAL SINON LE TERMINAL SERIE INTERFERE AVEC L'ASSERVISSEMENT ET CA FAIT NIMP
          */
-        Serial.println("Position_x = " + String(position_x));
-        Serial.println("Position_y = " + String(position_y));
-        Serial.println("Position_theta = " + String(position_theta * 180 / PI));
+        //         Serial.println("Position_x = " + String(position_x));
+        //         Serial.println("Position_y = " + String(position_y));
+        //         Serial.println("Position_theta = " + String(position_theta * 180 / PI));
 
-        Serial.println("vitesse_x = " + String(vitesse_x));
-        Serial.println("vitesse_y = " + String(vitesse_y));
-        Serial.println("Vr=" + String(vitesse_r));
-        Serial.println("Vl=" + String(vitesse_l));
+        //         Serial.println("vitesse_x = " + String(vitesse_x));
+        //         Serial.println("vitesse_y = " + String(vitesse_y));
+        //         Serial.println("Vr=" + String(vitesse_r));
+        //         Serial.println("Vl=" + String(vitesse_l));
 
-        Serial.println("Mesure_r = " + String(mesure_r));
-        Serial.println("Mesure_l= " + String(mesure_l));
+        //         Serial.println("Mesure_r = " + String(mesure_r));
+        //         Serial.println("Mesure_l= " + String(mesure_l));
     }
 }

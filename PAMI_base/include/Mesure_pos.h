@@ -19,9 +19,9 @@ private:
      * Facteurs proportionnels entre encodeur et roue ( a determiner empiriquement )
      * Permet de passer de la mesure de l'encodeur à la distance parcourue par la roue et à l'angle de rotation
      */
-    float K_angle = 0.0069; // TODO : regler les facteurs si on change les roues & encodeurs
-    float K_r = 0.094;      // TODO : regler les facteurs si on change les roues & encodeurs
-    float K_l = 0.102;      // TODO : regler les facteurs si on change les roues & encodeurs
+    float K_angle = 0.0069;  // TODO : regler les facteurs si on change les roues & encodeurs
+    float K_l = 0.102 / 1.3; // TODO : regler les facteurs si on change les roues & encodeurs
+    float K_r = 0.094;       // TODO : regler les facteurs si on change les roues & encodeurs
 
     /**
      * temps entre deux mesures

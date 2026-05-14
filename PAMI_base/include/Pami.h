@@ -13,8 +13,8 @@
 class Pami
 {
 public:
-    Moteur *m_p_moteur_d;
-    Moteur *m_p_moteur_g;
+    Moteur *m_p_moteur_r;
+    Moteur *m_p_moteur_l;
     Encodeur *m_p_encodeur_d;
     Encodeur *m_p_encodeur_g;
     Asserv *m_p_asserv;
@@ -48,19 +48,17 @@ public:
     void test(int mode);
 
     void config_start_position();
-    void setup();
     void print_log();
     void print_position();
     void print_encodeur();
     void print_speed();
     void print_infos_interrupteur();
-    void set_initial_position(float pos_initial_x, float pos_initial_y);
 
     // Avancer basiquement sans asserv
     void go_to(float distance_x, float distance_y, int speed = SPEED);
     void avancer(float distance, int speed = SPEED);
-    void reculer(float distance, int speed = SPEED);
     void tourner(float angle_degres, float speed = SPEED);
+    void stop();
 
     // Avancer avec asservissement mais sans capteur ir
     void go_to_asserv(float pos_target_x, float pos_target_y, int speed = SPEED);
@@ -77,10 +75,6 @@ public:
 
     double get_ultrason_distance();
     double get_IR_distance();
-
-    void action_match();
-    void start_match();
-    void end_match();
 };
 
 #endif

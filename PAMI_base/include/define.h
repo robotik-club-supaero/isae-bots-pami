@@ -8,7 +8,7 @@
 #define DEFINE_H
 
 #define TEST 1
-#define DISABLE_OBS 1
+#define DISABLE_OBS 0
 
 #define EMPATEMENT 140.0 // Distance entre les roues en mm
 #define RAYON_ROUE 48    // Rayon des roues en mm
@@ -91,17 +91,17 @@ MACHINE A ETAT
 Paramètres globaux
 */
 #define GLOBALTIME 99000 // Temps global de la pami en ms (99s)
-#define START_TIME 85000 // Les pamis commencent dans les 15 dernières secondes.
+#define START_TIME 5000  // Les pamis commencent dans les 15 dernières secondes.
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
-#define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
+#define DISTANCE_MIN 200 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
 #define EPSA 0.1         // Incertitude position, radian
 
 /*
 Gains naifs pour réellement avancer de 10cm avec un delay
 */
-#define K_NAIF 1.402
-#define K_ANGLE_NAIF 1.7
+#define K_NAIF 1.168
+#define K_ANGLE_NAIF 2.737
 
 /*
 Paramètres de l'asservissement
@@ -110,6 +110,8 @@ Paramètres de l'asservissement
     Ti : gain intégral, permet de corriger les erreurs persistantes en accumulant les erreurs passées, mais peut causer des oscillations si trop élevé.
     Td : gain dérivé, permet de réduire les oscillations en anticipant les erreurs futures, mais peut rendre le système instable si trop élevé.
 */
+#define GAIN 1.0
+
 #define KP_r 0.085
 #define KP_l 0.090
 #define KP_angle 0.0083

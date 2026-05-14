@@ -23,11 +23,13 @@ void Asserv::asservissement(float vitesse_l_consigne, float vitesse_r_consigne)
 {
     float erreur_l = vitesse_l_consigne - m_p_mesure_pos->vitesse_l;
     float erreur_r = vitesse_r_consigne - m_p_mesure_pos->vitesse_r;
-    float output_l = m_asservPID_l.computeOutput(erreur_l, micros());
-    float output_r = m_asservPID_r.computeOutput(erreur_r, micros());
+    // float output_l = m_asservPID_l.computeOutput(erreur_l, micros());
+    // float output_r = m_asservPID_r.computeOutput(erreur_r, micros());
 
-    float speed_l = output_l * Kmot_l;
-    float speed_r = output_r * Kmot_r;
+    // float speed_l = GAIN * output_l * Kmot_l;
+    // float speed_r = GAIN * output_r * Kmot_r;
+    float speed_l = GAIN * erreur_l * Kmot_l;
+    float speed_r = GAIN * erreur_r * Kmot_r;
 
     m_p_moteur_l->set_speed(speed_l);
     m_p_moteur_r->set_speed(speed_r);

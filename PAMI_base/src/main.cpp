@@ -24,43 +24,51 @@ Asserv asserv = Asserv(&moteur_r, &moteur_l, &mesure_pos);
 Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
 
 void setup()
-{   
+{
     Serial.begin(9600);
+    Serial.println("---------- Setup starting ----------");
 
-    if (TEST){
-        pami.setup();
-        Serial.println("TEST");
+    pinMode(PIN_LED, OUTPUT);
+    digitalWrite(PIN_LED, HIGH); // LED ON pour indiquer le début du setup
 
-        while (true)
-        {   
-            Serial.print("Droit : ");
-            Serial.print(pami.m_p_encodeur_d->mesure());
-            Serial.print(" | Gauche : ");
-            Serial.println(pami.m_p_encodeur_g->mesure());
-            delay(200);
-            pami.m_p_moteur_d->stop();
-            pami.m_p_moteur_g->stop();
-            delay(200);
-            pami.tourner(-90);
-        }
-
+    // Setup capteur IR
+    if (&ir_sensor != nullptr)
+    {
+        ir_sensor.setup();
+        Serial.println("Setup Done : IR Sensor");
     }
 
-    pami.setup();
-    delay(500);
+    // Setup servo
+    servo.setup();
+    Serial.println("Setup Done : Servo");
+
+    // Setup mesure position
+    mesure_pos.setup();
+    Serial.println("Setup Done : Mesure de Position");
+
+    // Setup moteur droit & gauche
+    moteur_r.setup();
+    moteur_l.setup();
+    Serial.println("Setup Done : Moteurs");
+
+    // Setup asservissement
+    asserv.setup();
+    Serial.println("Setup Done : Asservissement");
+
+    pinMode(PIN_TIRETTE, INPUT);
+    pinMode(PIN_READEQUIPE, INPUT);
+    pinMode(PIN_INT_PAMI_1, INPUT);
+    pinMode(PIN_INT_PAMI_2, INPUT);
+
     pami.config_start_position();
-    // pami.set_initial_position(0, 0); //juste pour test manuellement
 
-    // On remet a 0 les positions car la roue tourne pendant l'upload (why ?)
-    mesure_pos.reinitialise();
-    pami.pos_x = 0;
-    pami.pos_y = 0;
-    pami.angle = 0;
-    pami.distance_target = 0;
+    Serial.println("Setup Done : Tirette & Equipe & PAMI");
 
-    pami.test(7);
+    pami.m_time_log = millis();
 
-    // pami.go_to_asserv(0, 500);
+    Serial.println("\n---------- Setup over ----------\n\n");
+    digitalWrite(PIN_LED, LOW);
+    delay(500);
 
     while (digitalRead(PIN_TIRETTE) == 1)
     {
@@ -74,9 +82,25 @@ void setup()
         delay(10);
     }
 
+    // pami.test(7);
+
+    // pami.avancer(100);
+    // while (true)
+    // {
+    //     pami.print_log();
+    //     delay(300);
+    // }
+
     pami.tirette = digitalRead(PIN_TIRETTE);
     pami.equipe = digitalRead(PIN_READEQUIPE);
     pami.num_pami = (digitalRead(PIN_INT_PAMI_1) * 2) + digitalRead(PIN_INT_PAMI_2) + 1;
+
+    // On remet a 0 les positions car la roue tourne pendant l'upload (why ?)
+    mesure_pos.reinitialise();
+    pami.pos_x = 0;
+    pami.pos_y = 0;
+    pami.angle = 0;
+    pami.distance_target = 0;
 
     pami.m_time_match = millis();
 }
@@ -85,20 +109,19 @@ bool start_moving = false;
 
 void loop()
 {
-    
-    if (TEST) {return ;}
-
     static unsigned long time_last_log = 0;
     static unsigned long time_last_sensor = 0;
 
+    pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
+
     if (millis() - pami.m_time_match >= GLOBALTIME)
     {
-        pami.set_speed(0);
+        pami.stop();
         Serial.println("Temps de match écoulé - Arrêt du robot.");
         while (true)
         {
+            pami.set_speed(0);
             pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
-            delay(1000);
         }
     }
 
@@ -106,18 +129,19 @@ void loop()
     {
         if (!start_moving)
         {
+            start_moving = true;
             if (pami.num_pami == 1)
             {
                 start_moving = true;
                 if (pami.equipe == 0) // 0 = bleue, 1 = jaune
                 {
                     Serial.println("Action Match : PAMI 1 BLEUE");
-                    pami.avancer(800, 150);
+                    pami.avancer(1400);
                 }
                 else
                 {
                     Serial.println("Action Match : PAMI 1 JAUNE");
-                    pami.avancer(800, 150);
+                    pami.avancer(1400);
                 }
             }
             else if (pami.num_pami == 2)
@@ -126,26 +150,35 @@ void loop()
                 start_moving = true;
                 if (pami.equipe == 0) // 0 = bleue, 1 = jaune
                 {
-                    // Serial.println("Action Match : PAMI 2 BLEUE");
-                    // pami.avancer(700, 150);
-                    // delay(200);
-                    // pami.tourner(-60);
-                    // delay(200);
-                    // pami.avancer(800, 150);
-                    while (true)
-                    {
-                        pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
-                        delay(1000);
-                    }
+                    Serial.println("Action Match : PAMI 2 BLEUE");
+                    pami.avancer(1000);
+                    pami.tourner(-25);
+                    pami.avancer(1200);
                 }
                 else
                 {
-                    // Serial.println("Action Match : PAMI 2 JAUNE");
-                    // pami.avancer(700, 150);
-                    // delay(200);
-                    // pami.tourner(60);
-                    // delay(200);
-                    // pami.avancer(800, 150);
+                    Serial.println("Action Match : PAMI 2 JAUNE");
+                    pami.avancer(800);
+                    pami.tourner(25);
+                    pami.avancer(1000);
+                }
+            }
+            else if (pami.num_pami == 3)
+            {
+                delay(2000);
+                if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+                {
+                    Serial.println("Action Match : PAMI 3 BLEUE");
+                    pami.avancer(1000);
+                    pami.tourner(-25);
+                    pami.avancer(1200);
+                }
+                else
+                {
+                    Serial.println("Action Match : PAMI 3 JAUNE");
+                    pami.avancer(800);
+                    pami.tourner(25);
+                    pami.avancer(1000);
                 }
             }
         }

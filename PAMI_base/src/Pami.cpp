@@ -3,8 +3,8 @@
 
 Pami::Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
 {
-    m_p_moteur_d = p_moteur_d;
-    m_p_moteur_g = p_moteur_g;
+    m_p_moteur_r = p_moteur_d;
+    m_p_moteur_l = p_moteur_g;
     m_p_encodeur_d = p_encodeur_d;
     m_p_encodeur_g = p_encodeur_g;
     m_p_mesure_pos = p_mesure_pos;
@@ -24,7 +24,7 @@ Modes :
 1 = Interrupteurs & Tirette
 2 = Capteur IR (ToF)
 3 = Servomoteur
-4 = Moteurs (Puissance brute)
+4 =
 5 = Encodeurs & Odométrie (À pousser à la main)
 6 = Moteurs Individuels (Puissance brute)
 7 = Homologation : Avance et s'arrête en fonction du capteur IR
@@ -49,7 +49,6 @@ void Pami::test(int mode)
         }
         break;
     }
-
     case 2: // --- TEST 2 : CAPTEUR IR ---
     {
         Serial.println("Test Capteur IR... Passez votre main devant ! (Boucle infinie)");
@@ -63,7 +62,6 @@ void Pami::test(int mode)
         }
         break;
     }
-
     case 3: // --- TEST 3 : SERVOMOTEUR ---
     {
         Serial.println("Test Servomoteur : Va-et-vient de 3 secondes");
@@ -75,30 +73,6 @@ void Pami::test(int mode)
         Serial.println("Fin du test Servomoteur.");
         break;
     }
-
-    case 4: // --- TEST 4 : MOTEURS BRUTS ---
-    {
-        Serial.println("Test Moteurs : Attention, le robot va avancer puis reculer !");
-        delay(2000); // Laisse le temps de poser le robot ou de le lever
-
-        Serial.println("-> Marche Avant (Vitesse SPEED)");
-        this->set_speed(SPEED);
-        delay(1500);
-
-        Serial.println("-> Arret");
-        this->set_speed(0);
-        delay(1000);
-
-        Serial.println("-> Marche Arriere (Vitesse -SPEED)");
-        this->set_speed(-SPEED);
-        delay(1500);
-
-        Serial.println("-> Arret Definitif");
-        this->set_speed(0);
-        Serial.println("Fin du test Moteurs.");
-        break;
-    }
-
     case 5: // --- TEST 5 : ODOMETRIE ---
     {
         Serial.println("Test Encodeurs... Poussez le robot a la main ! (Boucle infinie)");
@@ -121,26 +95,26 @@ void Pami::test(int mode)
         while (true)
         {
             Serial.println("\n-> Test Roue Droite (Vitesse 200)");
-            m_p_moteur_d->set_speed(SPEED);
-            m_p_moteur_g->set_speed(0);
+            m_p_moteur_r->set_speed(SPEED);
+            m_p_moteur_l->stop();
             this->print_speed();
             this->print_encodeur();
             delay(1500);
 
             Serial.println("\n-> Arret");
-            m_p_moteur_d->set_speed(0);
+            m_p_moteur_r->stop();
             delay(1500);
 
             Serial.println("\n-> Test Roue Gauche (Vitesse 200)");
-            m_p_moteur_d->set_speed(0);
-            m_p_moteur_g->set_speed(SPEED);
+            m_p_moteur_r->stop();
+            m_p_moteur_l->set_speed(SPEED);
             this->print_speed();
             this->print_encodeur();
             delay(1500);
 
             Serial.println("\n-> Arret Definitif");
-            m_p_moteur_d->set_speed(0);
-            m_p_moteur_g->set_speed(0);
+            m_p_moteur_r->stop();
+            m_p_moteur_l->stop();
             delay(1500);
             Serial.println("Fin du test Moteurs Individuels.");
         }
@@ -160,7 +134,7 @@ void Pami::test(int mode)
             if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
             {
                 Serial.println("Obstacle détecté ! Arrêt du robot.");
-                this->set_speed(0);
+                this->stop();
             }
             else
             {
@@ -175,8 +149,6 @@ void Pami::test(int mode)
         Serial.println("Test Avancer/Reculer/Tourner... Attention, le robot va avancer, reculer puis tourner !");
 
         this->avancer(100);
-        delay(2000);
-        this->reculer(100);
         delay(2000);
         this->tourner(180);
     }
@@ -287,60 +259,6 @@ void Pami::config_start_position()
     }
 }
 
-void Pami::setup()
-{
-    Serial.println("---------- Setup starting ----------");
-
-    pinMode(PIN_LED, OUTPUT);
-    digitalWrite(PIN_LED, HIGH); // LED ON pour indiquer le début du setup
-
-    // Setup ultrason
-    if (m_p_ultrason != nullptr) // pas d'ultrason cette année
-    {
-        m_p_ultrason->setup();
-        Serial.println("Setup Done : Ultrason");
-    }
-
-    // Setup capteur IR
-    if (m_p_ir_sensor != nullptr)
-    {
-        m_p_ir_sensor->setup();
-        Serial.println("Setup Done : IR Sensor");
-    }
-
-    // Setup servo
-    m_p_servo->setup();
-    Serial.println("Setup Done : Servo");
-
-    // Setup mesure position
-    m_p_mesure_pos->setup();
-    Serial.println("Setup Done : Mesure de Position");
-
-    // Setup moteur droit & gauche
-    m_p_moteur_d->setup();
-    m_p_moteur_g->setup();
-    Serial.println("Setup Done : Moteurs");
-
-    // Setup asservissement
-    m_p_asserv->setup();
-    Serial.println("Setup Done : Asservissement");
-
-    pinMode(PIN_TIRETTE, INPUT);
-    pinMode(PIN_READEQUIPE, INPUT);
-    pinMode(PIN_INT_PAMI_1, INPUT);
-    pinMode(PIN_INT_PAMI_2, INPUT);
-
-    this->config_start_position();
-    this->print_infos_interrupteur();
-
-    Serial.println("Setup Done : Tirette & Equipe & PAMI");
-
-    m_time_log = millis();
-
-    Serial.println("\n---------- Setup over ----------\n\n");
-    digitalWrite(PIN_LED, LOW);
-}
-
 /*
 Fonctions de déplacement basiques (sans asservissement, juste pour tester les fonctions de base et régler les gains K_NAIF et K_ANGLE_NAIF
 */
@@ -356,8 +274,9 @@ void Pami::go_to(float distance_x, float distance_y, int speed)
 
 void Pami::avancer(float distance, int speed)
 {
-    if (distance <  0.){
-        speed = -speed ;
+    if (distance < 0.)
+    {
+        speed = -speed;
     }
 
     float moving_time = K_NAIF * (abs(distance) / SPEED) * 1000;
@@ -377,7 +296,7 @@ void Pami::avancer(float distance, int speed)
         if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
         {
             Serial.println("Obstacle détecté ! Arrêt du robot.");
-            this->set_speed(0);
+            this->stop();
         }
         else
         {
@@ -385,49 +304,18 @@ void Pami::avancer(float distance, int speed)
         }
         delay(100);
     }
-    this->set_speed(0);
-}
-
-void Pami::reculer(float distance, int speed)
-{
-    unsigned long function_start_time = millis();
-
-    float moving_time = K_NAIF * (distance / SPEED) * 1000;
-    Serial.print("Temps estimé pour reculer de ");
-    Serial.print(distance / 10.0);
-    Serial.print(" cm à la vitesse de ");
-    Serial.print(speed);
-    Serial.print(" : ");
-    Serial.print(moving_time);
-    Serial.println(" ms");
-
-    while (millis() - function_start_time < moving_time)
-    {
-        float dist = this->get_IR_distance();
-        Serial.print("Distance mesuree : ");
-        Serial.print(dist / 10.0);
-        Serial.println(" cm");
-
-        if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
-        {
-            Serial.println("Obstacle détecté ! Arrêt du robot.");
-            this->set_speed(0);
-        }
-        else
-        {
-            this->set_speed(-speed);
-        }
-        delay(200);
-    }
-    this->set_speed(0);
+    this->stop();
 }
 
 void Pami::tourner(float angle_degres, float speed)
 {
-    if (angle_degres < 0){ speed = -speed ;}
+    if (angle_degres < 0)
+    {
+        speed = -speed;
+    }
 
-    m_p_moteur_d->set_speed(speed);
-    m_p_moteur_g->set_speed(-speed);
+    m_p_moteur_r->set_speed(speed);
+    m_p_moteur_l->set_speed(-speed);
     delay(K_ANGLE_NAIF * (abs(angle_degres) / 360.0) * 1000);
     Serial.print("Temps estimé pour tourner de ");
     Serial.print(angle_degres);
@@ -437,7 +325,7 @@ void Pami::tourner(float angle_degres, float speed)
     Serial.print(K_ANGLE_NAIF * (abs(angle_degres) / 360.0) * 1000);
     Serial.println(" ms");
 
-    this->set_speed(0);
+    this->stop();
 }
 
 /*
@@ -458,7 +346,7 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
 
         if (millis() - m_time_match >= GLOBALTIME)
         {
-            this->set_speed(0);
+            this->stop();
             return;
         }
 
@@ -489,7 +377,13 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
     }
 
     // Arrêt total une fois la cible atteinte
-    this->set_speed(0);
+    this->stop();
+}
+
+void Pami::stop()
+{
+    m_p_moteur_r->stop();
+    m_p_moteur_l->stop();
 }
 
 /*
@@ -526,7 +420,7 @@ void Pami::avancer_asserv(float distance, int speed)
     }
 
     // On s'arrête quand on est arrivés
-    this->set_speed(0);
+    this->stop();
 }
 
 /*
@@ -562,7 +456,7 @@ void Pami::reculer_asserv(float distance, int speed)
     }
 
     // On s'arrête quand on est arrivés
-    this->set_speed(0);
+    this->stop();
 }
 
 /*
@@ -600,7 +494,7 @@ void Pami::tourner_asserv(float angle_degres, float speed)
         delay(10);
     }
 
-    this->set_speed(0);
+    this->stop();
 }
 
 /*
@@ -617,7 +511,7 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
     {
         if (millis() - m_time_match >= GLOBALTIME)
         {
-            this->set_speed(0);
+            this->stop();
             return false;
         }
 
@@ -627,7 +521,7 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
 
             if (dist_obstacle > 10.0 && dist_obstacle < DISTANCE_MIN)
             {
-                this->set_speed(0);
+                this->stop();
                 delay(10);
                 continue;
             }
@@ -664,7 +558,7 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
         delay(10);
     }
 
-    this->set_speed(0);
+    this->stop();
     return true;
 }
 
@@ -698,7 +592,7 @@ bool Pami::avancer_with_obstacle(float distance, int speed)
 
             if (dist_obstacle > 0.01 && dist_obstacle < DISTANCE_MIN)
             {
-                this->set_speed(0);
+                this->stop();
                 // m_p_asserv->asserv_global(0, 0, start_angle);
                 Serial.println("Arrêt du robot.");
                 delay(10);
@@ -725,17 +619,8 @@ bool Pami::avancer_with_obstacle(float distance, int speed)
     }
 
     // On s'arrête quand on est arrivés
-    this->set_speed(0);
+    this->stop();
     return true;
-}
-
-/*
-Modifie la position initiale en x et en y du robot
-*/
-void Pami::set_initial_position(float pos_initial_x, float pos_initial_y)
-{
-    pos_init_x = pos_initial_x;
-    pos_init_y = pos_initial_y;
 }
 
 /*
@@ -745,9 +630,8 @@ void Pami::set_speed(float speed)
 {
     // Si on règle les gains askip c'est mieux
     // m_p_asserv->asservissement(speed, speed);
-    m_p_moteur_d->set_speed(speed);
-    m_p_moteur_g->set_speed(speed);
-    //delay(100); // pk un delay ?
+    m_p_moteur_r->set_speed(speed);
+    m_p_moteur_l->set_speed(speed);
 }
 
 /*
@@ -756,7 +640,6 @@ Fonction pour bouger le servo entre deux angles en un temps donné
 void Pami::blink_servo(long temps_blink, int angle1, int angle2)
 {
     m_p_servo->blink(temps_blink, angle1, angle2);
-    delay(100);
 }
 
 /*
@@ -781,8 +664,9 @@ Fonction qui retourne la distance minimal au prochain obstacle détectée par le
 */
 double Pami::get_IR_distance()
 {
-    if (DISABLE_OBS){
-        return -1 ;
+    if (DISABLE_OBS)
+    {
+        return -1;
     }
 
     if (m_p_ir_sensor == nullptr)
@@ -882,194 +766,5 @@ void Pami::print_infos_interrupteur()
     else if (int_pami_1 == 1 && int_pami_2 == 1)
     {
         Serial.println("PAMI n°4 - plus éloigné du mur");
-    }
-}
-
-void Pami::action_match()
-{
-    num_pami = (digitalRead(PIN_INT_PAMI_1) * 2) + digitalRead(PIN_INT_PAMI_2) + 1;
-    equipe = digitalRead(PIN_READEQUIPE);
-
-    if (num_pami == 1)
-    {
-        if (equipe == 0)
-        {
-            Serial.println("Action Match : PAMI 1 BLEUE");
-            this->avancer(700);
-        }
-        else
-        {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
-        }
-    }
-    else if (num_pami == 2)
-    {
-        if (equipe == 0)
-        {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
-        }
-        else
-        {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
-        }
-    }
-    else if (num_pami == 3)
-    {
-        if (equipe == 0)
-        {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
-        }
-        else
-        {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
-        }
-    }
-    else if (num_pami == 4)
-    {
-        if (equipe == 0)
-        {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
-        }
-        else
-        {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
-        }
-    }
-}
-
-void Pami::start_match()
-{
-    // 1. PHASE INIT (Attente Tirette)
-    if (!m_match_demarre)
-    {
-        if (digitalRead(PIN_TIRETTE) == 1)
-        {
-            this->config_start_position();
-            this->set_speed(0); // On s'assure qu'il ne bouge pas
-            Serial.println("------------------------");
-        }
-        else
-        {
-            Serial.println("Début du match ! Chrono 100s lancé.");
-            m_time_match = millis(); // On lance le chrono
-            m_match_demarre = true;
-        }
-        return; // On sort de la fonction sans bloquer
-    }
-
-    // 2. LE COUPE-CIRCUIT DES 100 SECONDES
-    // Quoi qu'il arrive, si on dépasse 100s, on passe en mode fin.
-    if (millis() - m_time_match >= 100000) // 100 000 ms = 100s
-    {
-        this->end_match();
-        return; // On empêche l'action_match de s'exécuter
-    }
-
-    // 3. GESTION DU DELAI AVANT DEMARRAGE (ex: T+85s)
-    if (millis() - m_time_match < START_TIME)
-    {
-        return; // C'est pas encore l'heure, on sort et on attend
-    }
-
-    // 4. ACTION !
-    // Si on arrive ici, c'est que la tirette est tirée,
-    // le START_TIME est passé, et on est à moins de 100s.
-    this->action_match();
-}
-
-void Pami::end_match()
-{
-    // 1. Coupure immédiate des moteurs
-    this->set_speed(0);
-
-    // Message affiché une seule fois grâce à un booléen statique
-    static bool message_affiche = false;
-    if (!message_affiche)
-    {
-        Serial.println("Fin du match (100s) - Arrêt total !");
-        message_affiche = true;
-    }
-
-    // 2. Animation du drapeau (Servo) SANS bloquer
-    static unsigned long last_blink = 0;
-    static bool position_haute = true;
-
-    // Toutes les "TEMPS_BLINK" millisecondes, on change la position
-    if (millis() - last_blink >= TEMPS_BLINK)
-    {
-        last_blink = millis();
-        if (position_haute)
-        {
-            // Remplace par la commande directe de ton servo si blink_servo utilise des delays
-            this->blink_servo(0, ANGLE1, ANGLE1);
-        }
-        else
-        {
-            this->blink_servo(0, ANGLE2, ANGLE2);
-        }
-        position_haute = !position_haute;
     }
 }
