@@ -41,6 +41,7 @@ public:
     float distance_target = 0;
 
     long m_time_log;
+    long m_time_match;
 
     Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
 
@@ -67,7 +68,6 @@ public:
 
     bool go_to_with_obstacle(float pos_target_x, float pos_target_y, int speed = SPEED);
     bool avancer_with_obstacle(float distance, int speed = SPEED);
-    bool reculer_with_obstacle(float distance, int speed = SPEED);
 
     void set_speed(float speed);
     void blink_servo(long temps_blink, int angle1, int angle2);

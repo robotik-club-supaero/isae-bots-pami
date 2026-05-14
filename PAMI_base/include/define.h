@@ -85,7 +85,7 @@ MACHINE A ETAT
 Paramètres globaux
 */
 #define GLOBALTIME 29000 // Temps global de la pami en ms (99s)
-#define START_TIME 5000  // Les pamis commencent dans les 15 dernières secondes.
+#define START_TIME 2000  // Les pamis commencent dans les 15 dernières secondes.
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
@@ -110,11 +110,11 @@ Paramètres de l'asservissement
 
 #define TI_r 100
 #define TI_l 100
-#define TI_angle 0
+#define TI_angle 100
 
-#define TD_r 0
-#define TD_l 0
-#define TD_angle 0
+#define TD_r 100
+#define TD_l 100
+#define TD_angle 100
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
 // Chaque pami à ses propres positions

@@ -18,14 +18,10 @@ Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
 Mesure_pos mesure_pos = Mesure_pos(&encodeur_r, &encodeur_l);
 Asserv asserv = Asserv(&moteur_r, &moteur_l, &mesure_pos);
-Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos);
+// Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos);
 
 // La pami en elle même
 Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
-
-float log_time = 0; // Variable global du temps
-unsigned long time_start_match = 0;
-int i = 0;
 
 void setup()
 {
@@ -41,19 +37,25 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
+    // pami.test(1);
+
     while (digitalRead(PIN_TIRETTE) == 1)
     {
-        pami.print_infos_interrupteur();
-        delay(500);
+        pami.config_start_position();
+        static unsigned long last_diag = 0;
+        if (millis() - last_diag > 500)
+        {
+            pami.print_infos_interrupteur();
+            last_diag = millis();
+        }
+        delay(10);
     }
-
-    // pami.test(8);
 
     pami.tirette = digitalRead(PIN_TIRETTE);
     pami.equipe = digitalRead(PIN_READEQUIPE);
     pami.num_pami = (digitalRead(PIN_INT_PAMI_1) * 2) + digitalRead(PIN_INT_PAMI_2) + 1;
 
-    time_start_match = millis();
+    pami.m_time_match = millis();
 }
 
 bool start_moving = false;
@@ -63,7 +65,7 @@ void loop()
     static unsigned long time_last_log = 0;
     static unsigned long time_last_sensor = 0;
 
-    if (millis() - time_start_match >= GLOBALTIME)
+    if (millis() - pami.m_time_match >= GLOBALTIME)
     {
         pami.set_speed(0);
         Serial.println("Temps de match écoulé - Arrêt du robot.");
@@ -74,18 +76,18 @@ void loop()
         }
     }
 
-    if ((millis() - time_start_match) > START_TIME && (millis() - time_start_match) < GLOBALTIME)
+    if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < GLOBALTIME)
     {
         if (!start_moving)
         {
             if (pami.num_pami == 1)
             {
+                start_moving = true;
                 if (pami.equipe == 0) // 0 = bleue, 1 = jaune
                 {
                     Serial.println("Action Match : PAMI 1 BLEUE");
-                    // pami.avancer(700);
-                    pami.go_to(700, 700);
-                    start_moving = true;
+                    pami.avancer(700);
+                    // pami.go_to_with_obstacle(300, 300);
                 }
             }
         }
@@ -94,7 +96,7 @@ void loop()
     if (millis() - time_last_log >= 1000)
     {
         pami.print_log();
-        Serial.println("------------- Time since start match : " + String((millis() - time_start_match) / 1000) + " s -------------");
+        Serial.println("------------- Time since start match : " + String((millis() - pami.m_time_match) / 1000) + " s -------------");
 
         time_last_log = millis();
     }

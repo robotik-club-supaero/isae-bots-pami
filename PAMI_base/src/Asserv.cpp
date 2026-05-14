@@ -37,14 +37,14 @@ void Asserv::asserv_angle(float theta_consigne)
 {
     float erreur = theta_consigne - m_p_mesure_pos->position_theta;
     erreur = fmod(erreur, 2 * PI);
-    // if (erreur > PI)
-    // {
-    //     erreur -= 2 * PI;
-    // }
-    // else if (erreur < -PI)
-    // {
-    //     erreur += 2 * PI;
-    // }
+    if (erreur > PI)
+    {
+        erreur -= 2 * PI;
+    }
+    else if (erreur < -PI)
+    {
+        erreur += 2 * PI;
+    }
 
     float output = m_asservPID_angle.computeOutput(erreur, micros());
     float speed_l = -output * Kmot_angle;

@@ -343,9 +343,7 @@ void Pami::setup()
 }
 
 /*
-
 Fonctions de déplacement basiques (sans asservissement, juste pour tester les fonctions de base et régler les gains K_NAIF et K_ANGLE_NAIF
-
 */
 void Pami::go_to(float distance_x, float distance_y, int speed)
 {
@@ -442,7 +440,14 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
 
     while (distance_target > EPSP)
     {
-        // 1. Mise à jour des capteurs & de la position
+        // 1. Coupe-circuit de sécurité (Temps de match)
+        if (millis() - m_time_match >= GLOBALTIME)
+        {
+            this->set_speed(0);
+            return;
+        }
+
+        // 2. Mise à jour de la position
         m_p_mesure_pos->loop();
         pos_x = m_p_mesure_pos->position_x + pos_init_x;
         pos_y = m_p_mesure_pos->position_y + pos_init_y;
@@ -450,18 +455,37 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
         distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
         angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
 
-        Serial.print("Distance target : ");
-        Serial.println(distance_target);
+        // 3. Calcul propre de l'erreur d'angle (entre -PI et PI)
+        float erreur_angle = angle - m_p_mesure_pos->position_theta;
+        erreur_angle = fmod(erreur_angle, 2 * PI);
+        if (erreur_angle > PI)
+            erreur_angle -= 2 * PI;
+        else if (erreur_angle < -PI)
+            erreur_angle += 2 * PI;
 
-        // this->print_speed();
-        // this->print_encodeur();
-        this->print_position();
+        // 4. Profil de vitesse
+        float vitesse_avance = speed;
 
-        m_p_asserv->asserv_global(speed, speed, angle);
+        // Si on est à moins de 50 mm, on ralentit pour éviter l'overshoot (orbite)
+        if (distance_target < 50.0)
+        {
+            vitesse_avance = speed / 2.0;
+        }
+
+        // Si on n'est pas aligné avec la cible (> ~25 degrés), on stoppe l'avancement
+        // L'asservissement va utiliser "angle" pour faire pivoter le robot sur place
+        if (abs(erreur_angle) > 0.45)
+        {
+            vitesse_avance = 0;
+        }
+
+        // 5. Envoi à ton nouvel asservissement proportionnel
+        m_p_asserv->asserv_global(vitesse_avance, vitesse_avance, angle);
+
         delay(10);
     }
 
-    // On s'arrête quand on est arrivés
+    // Arrêt total une fois la cible atteinte
     this->set_speed(0);
 }
 
@@ -588,41 +612,30 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
 
     while (distance_target > EPSP)
     {
-        // 1. Sécurité temps de match
         if (millis() - m_time_match >= GLOBALTIME)
         {
             this->set_speed(0);
-            return false; // Fin du match, on force la sortie !
+            return false;
         }
 
-        // 2. Distance au prochain obstacle
         if (m_p_ir_sensor != nullptr)
         {
-            // Condition d'évitement pour capteur ir
             float dist_obstacle = this->get_IR_distance();
 
-            if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
+            if (dist_obstacle > 10.0 && dist_obstacle < DISTANCE_MIN)
             {
                 this->set_speed(0);
-                Serial.println("Obstacle !");
                 delay(10);
-                continue; // Repart au début du "do" sans avancer
+                continue;
             }
         }
 
-        // 3. Position actuelle
         m_p_mesure_pos->loop();
         pos_x = m_p_mesure_pos->position_x + pos_init_x;
         pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-        // 4. Déplacement
         distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
         angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
-        angle = fmod(angle, 2 * PI);
-        if (angle > PI)
-            angle -= 2 * PI;
-        else if (angle < -PI)
-            angle += 2 * PI;
 
         float erreur_angle = angle - m_p_mesure_pos->position_theta;
         erreur_angle = fmod(erreur_angle, 2 * PI);
@@ -631,24 +644,23 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
         else if (erreur_angle < -PI)
             erreur_angle += 2 * PI;
 
-        Serial.print("Distance target : ");
-        Serial.println(distance_target);
-        Serial.print("erreur_angle : ");
-        Serial.println(erreur_angle);
+        float vitesse_avance = speed;
 
-        // Si l'angle est trop éloigné, on tourne sur place avant d'avancer.
-        if (abs(erreur_angle) > 0.25)
+        if (distance_target < 50.0)
         {
-            m_p_asserv->asserv_global(0, 0, angle);
+            vitesse_avance = speed / 2.0;
         }
-        else
+
+        if (abs(erreur_angle) > 0.45)
         {
-            m_p_asserv->asserv_global(speed, speed, angle);
+            vitesse_avance = 0;
         }
+
+        m_p_asserv->asserv_global(vitesse_avance, vitesse_avance, angle);
+
         delay(10);
     }
 
-    // On s'arrête quand on est arrivés
     this->set_speed(0);
     return true;
 }
@@ -678,12 +690,14 @@ bool Pami::avancer_with_obstacle(float distance, int speed)
         if (m_p_ir_sensor != nullptr)
         {
             float dist_obstacle = this->get_IR_distance();
+            Serial.print("Distance obstacle : ");
+            Serial.print(dist_obstacle / 10.0);
 
             if (dist_obstacle > 0.01 && dist_obstacle < DISTANCE_MIN)
             {
                 this->set_speed(0);
                 // m_p_asserv->asserv_global(0, 0, start_angle);
-                Serial.println("Obstacle !");
+                Serial.println("Arrêt du robot.");
                 delay(10);
                 continue; // Repart au début du "do" sans avancer
             }
@@ -704,64 +718,6 @@ bool Pami::avancer_with_obstacle(float distance, int speed)
         Serial.println(distance_parcourue);
 
         m_p_asserv->asserv_global(speed, speed, start_angle);
-        delay(10);
-    }
-
-    // On s'arrête quand on est arrivés
-    this->set_speed(0);
-    return true;
-}
-
-/*
-Fonction pour reculer d'une distance en x et en y
-*/
-bool Pami::reculer_with_obstacle(float distance, int speed)
-{
-    m_p_mesure_pos->loop();
-    float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
-    float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
-    float start_angle = m_p_mesure_pos->position_theta;
-
-    float distance_parcourue = 0.0;
-
-    while (distance_parcourue < distance)
-    {
-        // 1. Sécurité temps de match
-        if (millis() - m_time_match >= GLOBALTIME)
-        {
-            m_p_asserv->asserv_global(0, 0, start_angle);
-            return false;
-        }
-
-        // 2. Distance au prochain obstacle
-        if (m_p_ir_sensor != nullptr)
-        {
-            float dist_obstacle = this->get_IR_distance();
-
-            if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
-            {
-                m_p_asserv->asserv_global(0, 0, start_angle);
-                Serial.println("Obstacle !");
-                delay(10);
-                continue; // Repart au début du "do" sans avancer
-            }
-        }
-
-        // 3. Mise à jour des capteurs
-        m_p_mesure_pos->loop();
-        float pos_x = m_p_mesure_pos->position_x + pos_init_x;
-        float pos_y = m_p_mesure_pos->position_y + pos_init_y;
-
-        // 4. Déplacement
-        float dx = pos_x - start_pos_x;
-        float dy = pos_y - start_pos_y;
-
-        distance_parcourue = abs(dx * cos(start_angle) + dy * sin(start_angle));
-
-        Serial.print("Distance parcourue (à l'envers) : ");
-        Serial.println(distance_parcourue);
-
-        m_p_asserv->asserv_global(-speed, -speed, start_angle);
         delay(10);
     }
 
