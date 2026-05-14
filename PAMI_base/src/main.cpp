@@ -110,6 +110,8 @@ void setup()
     // pami.test(7);
 
     //setup
+    encodeur_l.clear_count();
+    encodeur_r.clear_count();
 }
 
 
@@ -119,6 +121,7 @@ void loop()
 
     float consigne_l = 10000;
     float consigne_r = 10000;
+    
     auto resultat = pami.avancer_asservi(consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
     
     new_ticks_l=std::get<0>(resultat);

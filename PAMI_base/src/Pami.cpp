@@ -35,10 +35,10 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(float consigne_l, fl
     */
 
     // TODO : à mettre dans un define
-    float Kp = 0.5;
+    float Kp = 1;
     float interval_asserv = 50; // en ms
-    float marge_erreur_ticks = 30;
-    float nb_ticks_par_sec_max = 1400;
+    float marge_erreur_ticks = 500;
+    float nb_ticks_par_sec_max = 1;
 
     
     // Si l’intervalle n’est pas écoulé -> on ne fait rien
@@ -46,40 +46,50 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(float consigne_l, fl
         return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
     }
     else {
-        Serial.print("Asserv \t");
         // Sinon, c'est qu'on vient de dépasser l'invervalle d'asservissement.
         // il faut donc asservir de nouveau
 
         // --- Mesures actuelles ---
         float ticks_l = encodeur_l->mesure();
         float ticks_r = encodeur_r->mesure();
+        Serial.print("ticks_l : ");
+        Serial.print(ticks_l);
+        Serial.print("\t ticks_r : ");
+        Serial.print(ticks_r);
 
         // --- Erreurs ---
-        float erreur_l = consigne_l - ticks_l;
-        float erreur_r = consigne_r - ticks_r;
+        // float erreur_l = consigne_l - ticks_l;
+        // float erreur_r = consigne_r - ticks_r;
 
-        float erreur_l_normalisee = erreur_l/nb_ticks_par_sec_max;
-        float erreur_r_normalisee = erreur_r/nb_ticks_par_sec_max;
+        float erreur = ticks_l - ticks_r;
 
-        
+        // float erreur_l_normalisee = erreur_l/nb_ticks_par_sec_max;
+        // float erreur_r_normalisee = erreur_r/nb_ticks_par_sec_max;
+
+        float erreur_normalisee = erreur / nb_ticks_par_sec_max;
+
         //l'erreur peut-être négative, et est entre 0 et 1
         
         // --- Correction ---
         // on multiplie l'erreur par 255 pour avoir une erreur en vitesse pwm 
         // et on multiplie aussi par Kp pour avoir la correction selon le principe de base du correcteur proportionnel
-        int pwmL = Kp * SPEED * erreur_l_normalisee;
-        int pwmR = Kp * SPEED * erreur_r_normalisee;
+        // int pwmL = Kp * SPEED * erreur_l_normalisee;
+        // int pwmR = Kp * SPEED * erreur_r_normalisee;
 
-        pwmL = constrain(pwmL, -255, 255); //par sécurité mais normalement ça dépasse pas
+        int pwmR = SPEED + Kp*erreur_normalisee;
+        int pwmL = SPEED - Kp*erreur_normalisee;
+
+        pwmL = constrain(pwmL, -255, 255); 
         pwmR = constrain(pwmR, -255, 255);
         
         
-        Serial.print("Erreur l : ");
-        Serial.print(erreur_l_normalisee);
+        // Serial.print("Erreur l : ");
+        // Serial.print(erreur_l_normalisee);
+        
+        Serial.print("\tErreur : ");
+        Serial.print(erreur_normalisee);
         Serial.print("\tpwmL : ");
         Serial.print(pwmL);
-        Serial.print("\tErreur r : ");
-        Serial.print(erreur_r_normalisee);
         Serial.print("\tpwmR : ");
         Serial.println(pwmR);
 
@@ -88,7 +98,8 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(float consigne_l, fl
         moteur_r->set_speed(pwmR);
 
         // --- Condition d’arrêt en ticks ---
-        if (abs(erreur_l) < marge_erreur_ticks && abs(erreur_r) < marge_erreur_ticks) {
+        if (abs(consigne_l-ticks_l) < marge_erreur_ticks && abs(consigne_r-ticks_r) < marge_erreur_ticks ) {
+            // ON RENTRE !!
             moteur_l->set_speed(0);
             moteur_r->set_speed(0);
         }
