@@ -7,6 +7,9 @@
 #ifndef DEFINE_H
 #define DEFINE_H
 
+#define EMPATEMENT 140.0 // Distance entre les roues en mm
+#define RAYON_ROUE 48    // Rayon des roues en mm
+
 /*
 MOTEURS
 */

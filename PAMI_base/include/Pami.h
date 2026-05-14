@@ -56,16 +56,19 @@ public:
     void print_infos_interrupteur();
     void set_initial_position(float pos_initial_x, float pos_initial_y);
 
-    void go_to_asserv(float pos_target_x, float pos_target_y, int speed = SPEED);
-    void avancer_asserv(float distance, int speed = SPEED);
-    void reculer_asserv(float distance, int speed = SPEED);
-    void tourner_asserv(float angle_degres, float speed = SPEED);
-
+    // Avancer basiquement sans asserv
     void go_to(float distance_x, float distance_y, int speed = SPEED);
     void avancer(float distance, int speed = SPEED);
     void reculer(float distance, int speed = SPEED);
     void tourner(float angle_degres, float speed = SPEED);
 
+    // Avancer avec asservissement mais sans capteur ir
+    void go_to_asserv(float pos_target_x, float pos_target_y, int speed = SPEED);
+    void avancer_asserv(float distance, int speed = SPEED);
+    void reculer_asserv(float distance, int speed = SPEED);
+    void tourner_asserv(float angle_degres, float speed = SPEED);
+
+    // Avancer avec asservissement et capteur ir
     bool go_to_with_obstacle(float pos_target_x, float pos_target_y, int speed = SPEED);
     bool avancer_with_obstacle(float distance, int speed = SPEED);
 

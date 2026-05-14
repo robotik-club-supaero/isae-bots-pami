@@ -37,7 +37,9 @@ void setup()
     pami.angle = 0;
     pami.distance_target = 0;
 
-    // pami.test(7);
+    pami.test(7);
+
+    // pami.go_to_asserv(0, 500);
 
     while (digitalRead(PIN_TIRETTE) == 1)
     {

@@ -448,14 +448,16 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
 
     while (distance_target > EPSP)
     {
-        // 1. Coupe-circuit de sécurité (Temps de match)
+        Serial.print("Distance : ");
+        Serial.print(distance_target / 10.0);
+        Serial.println(" cm");
+
         if (millis() - m_time_match >= GLOBALTIME)
         {
             this->set_speed(0);
             return;
         }
 
-        // 2. Mise à jour de la position
         m_p_mesure_pos->loop();
         pos_x = m_p_mesure_pos->position_x + pos_init_x;
         pos_y = m_p_mesure_pos->position_y + pos_init_y;
@@ -463,7 +465,6 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
         distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
         angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
 
-        // 3. Calcul propre de l'erreur d'angle (entre -PI et PI)
         float erreur_angle = angle - m_p_mesure_pos->position_theta;
         erreur_angle = fmod(erreur_angle, 2 * PI);
         if (erreur_angle > PI)
@@ -471,23 +472,13 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
         else if (erreur_angle < -PI)
             erreur_angle += 2 * PI;
 
-        // 4. Profil de vitesse
         float vitesse_avance = speed;
 
-        // Si on est à moins de 50 mm, on ralentit pour éviter l'overshoot (orbite)
         if (distance_target < 50.0)
         {
             vitesse_avance = speed / 2.0;
         }
 
-        // Si on n'est pas aligné avec la cible (> ~25 degrés), on stoppe l'avancement
-        // L'asservissement va utiliser "angle" pour faire pivoter le robot sur place
-        if (abs(erreur_angle) > 0.45)
-        {
-            vitesse_avance = 0;
-        }
-
-        // 5. Envoi à ton nouvel asservissement proportionnel
         m_p_asserv->asserv_global(vitesse_avance, vitesse_avance, angle);
 
         delay(10);

@@ -23,7 +23,6 @@ void Mesure_pos::setup()
     mesure_r = m_p_encoder_R->mesure();
 
     m_time_millis = millis();
-    m_time_micros = micros();
 }
 
 void Mesure_pos::reinitialise()
@@ -38,8 +37,10 @@ void Mesure_pos::reinitialise()
     mesure_l = 0;
     mesure_r = 0;
 
+    position_x_prec = 0;
+    position_y_prec = 0;
+
     m_time_millis = millis();
-    m_time_micros = micros();
 
     Serial.println("Odométrie et encodeurs réinitialisés.");
 }
@@ -48,31 +49,45 @@ void Mesure_pos::loop()
 {
     if (millis() - m_time_millis >= dt)
     {
-        unsigned long current_micros = micros();
-        unsigned long real_dt_micros = current_micros - m_time_micros;
-
-        m_time_micros = current_micros;
-        m_time_millis = millis();
+        unsigned long real_dt = millis() - m_time_millis;
 
         long current_ticks_l = m_p_encoder_L->mesure();
         long current_ticks_r = m_p_encoder_R->mesure();
 
-        // Serial.print("Ticks L : " + String(current_ticks_l) + " | Ticks R : " + String(current_ticks_r) + " | dt (ms) : " + String(real_dt_micros / 1000.0) + " ms\n");
-        // Serial.print("Mesure L : " + String(mesure_l) + " | Mesure R : " + String(mesure_r) + "\n");
-
+        // Position depuis la dernière mesure
         float position_l = current_ticks_l - mesure_l;
         float position_r = current_ticks_r - mesure_r;
 
-        position_theta += (position_r * K_r - position_l * K_l) * K_angle;
-        position_x += ((position_l * K_l + position_r * K_r) / 2.0) * cos(position_theta);
-        position_y += ((position_l * K_l + position_r * K_r) / 2.0) * sin(position_theta);
+        if (abs(abs(vitesse_l) - abs(vitesse_r)) < 1e6)
+        {
+            position_x += ((position_l * K_l + position_r * K_r) / 2.0) * cos(position_theta);
+            position_y += ((position_l * K_l + position_r * K_r) / 2.0) * sin(position_theta);
+            position_theta += (position_r * K_r - position_l * K_l) * K_angle;
 
-        vitesse_x = (((position_l * K_l + position_r * K_r) / 2.0) * cos(position_theta) / real_dt_micros) * 1e6;
-        vitesse_y = (((position_l * K_l + position_r * K_r) / 2.0) * sin(position_theta) / real_dt_micros) * 1e6;
+            vitesse_theta = ((position_r * K_r - position_l * K_l) * K_angle / real_dt) * 1e6;
+            vitesse_l = (position_l / real_dt * 1e6) * K_l;
+            vitesse_r = (position_r / real_dt * 1e6) * K_r;
+        }
+        else
+        {
+            float s = 0.5 * EMPATEMENT * ((vitesse_r - vitesse_l) / (vitesse_r + vitesse_l));
 
-        vitesse_theta = ((position_r * K_r - position_l * K_l) * K_angle / real_dt_micros) * 1e6;
-        vitesse_l = (position_l / real_dt_micros * 1e6) * K_l;
-        vitesse_r = (position_r / real_dt_micros * 1e6) * K_r;
+            position_x_r += s * cos((vitesse_r * dt) / (0.5 * EMPATEMENT + s)) - s;
+            position_x_l += s * cos((vitesse_l * dt) / (0.5 * EMPATEMENT - s)) - s;
+            position_x = (position_x_r + position_x_l) / 2.0;
+
+            position_y_r += s * sin((vitesse_r * dt) / (0.5 * EMPATEMENT + s));
+            position_y_l += s * sin((vitesse_l * dt) / (0.5 * EMPATEMENT - s));
+            position_y = (position_y_r + position_y_l) / 2.0;
+
+            vitesse_theta = ((position_r * K_r - position_l * K_l) * K_angle / real_dt) * 1e6;
+            vitesse_l = (position_l / real_dt * 1e6) * K_l;
+            vitesse_r = (position_r / real_dt * 1e6) * K_r;
+
+            position_theta_r += vitesse_r * dt / (0.5 * EMPATEMENT + s);
+            position_theta_l += vitesse_l * dt / (0.5 * EMPATEMENT - s);
+            position_theta = (position_theta_r + position_theta_l) / 2.0;
+        }
 
         mesure_l = current_ticks_l;
         mesure_r = current_ticks_r;
@@ -81,16 +96,16 @@ void Mesure_pos::loop()
          * Affichage des valeurs , a decommenter si on veut debug ,
          * NE PAS OUBLIER DE COMMENTER DANS LE CODE FINAL SINON LE TERMINAL SERIE INTERFERE AVEC L'ASSERVISSEMENT ET CA FAIT NIMP
          */
-        // Serial.println("Position_x = " + String(position_x));
-        // Serial.println("Position_y = " + String(position_y));
-        // Serial.println("Position_theta = " + String(position_theta * 180 / PI));
+        Serial.println("Position_x = " + String(position_x));
+        Serial.println("Position_y = " + String(position_y));
+        Serial.println("Position_theta = " + String(position_theta * 180 / PI));
 
-        // Serial.println("vitesse_x = " + String(vitesse_x));
-        // Serial.println("vitesse_y = " + String(vitesse_y));
-        // Serial.println("Vr=" + String(vitesse_r));
-        // Serial.println("Vl=" + String(vitesse_l));
+        Serial.println("vitesse_x = " + String(vitesse_x));
+        Serial.println("vitesse_y = " + String(vitesse_y));
+        Serial.println("Vr=" + String(vitesse_r));
+        Serial.println("Vl=" + String(vitesse_l));
 
-        // Serial.println("Mesure_r = " + String(mesure_r));
-        // Serial.println("Mesure_l= " + String(mesure_l));
+        Serial.println("Mesure_r = " + String(mesure_r));
+        Serial.println("Mesure_l= " + String(mesure_l));
     }
 }
