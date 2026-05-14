@@ -114,7 +114,7 @@ void loop()
 
     pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
 
-    if (millis() - pami.m_time_match >= GLOBALTIME)
+    if (millis() - pami.m_time_match >= ENDTIME)
     {
         pami.stop();
         Serial.println("Temps de match écoulé - Arrêt du robot.");
@@ -125,7 +125,7 @@ void loop()
         }
     }
 
-    if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < GLOBALTIME)
+    if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
     {
         if (!start_moving)
         {

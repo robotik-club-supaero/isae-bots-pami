@@ -142,7 +142,7 @@ void Machine_etats::loop()
             break;
 
         case MOVE:
-            if (millis() - m_time_global >= GLOBALTIME)
+            if (millis() - m_time_global >= ENDTIME)
             { // Si le match est terminé (T >= 100s)
                 m_p_asserv->asserv_global(0, 0, angle);
                 etat = END;
@@ -182,7 +182,7 @@ void Machine_etats::loop()
             break;
 
         case OBSTACLE:
-            if (millis() - m_time_global >= GLOBALTIME)
+            if (millis() - m_time_global >= ENDTIME)
             {
                 m_p_asserv->asserv_global(0, 0, angle);
                 etat = END;
@@ -201,7 +201,7 @@ void Machine_etats::loop()
             break;
 
         case STOP:
-            if (millis() - m_time_global >= GLOBALTIME)
+            if (millis() - m_time_global >= ENDTIME)
             {
                 m_p_asserv->asserv_global(0, 0, angle);
                 etat = END;

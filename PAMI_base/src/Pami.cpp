@@ -344,7 +344,7 @@ void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
         Serial.print(distance_target / 10.0);
         Serial.println(" cm");
 
-        if (millis() - m_time_match >= GLOBALTIME)
+        if (millis() - m_time_match >= ENDTIME)
         {
             this->stop();
             return;
@@ -509,7 +509,7 @@ bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
 
     while (distance_target > EPSP)
     {
-        if (millis() - m_time_match >= GLOBALTIME)
+        if (millis() - m_time_match >= ENDTIME)
         {
             this->stop();
             return false;
@@ -577,7 +577,7 @@ bool Pami::avancer_with_obstacle(float distance, int speed)
     while (distance_parcourue < distance)
     {
         // 1. Sécurité temps de match
-        if (millis() - m_time_match >= GLOBALTIME)
+        if (millis() - m_time_match >= ENDTIME)
         {
             m_p_asserv->asserv_global(0, 0, start_angle);
             return false;
