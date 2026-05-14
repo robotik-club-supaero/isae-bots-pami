@@ -149,12 +149,16 @@ void loop()
                 if (pami.equipe == 0) // 0 = bleue, 1 = jaune
                 {
                     Serial.println("Action Match : PAMI 1 BLEUE");
-                    pami.avancer(1400);
+                    pami.avancer(B_POSITION_1_FINAL_Y - B_POSITION_1_DEPART_Y);
+                    pami.tourner(-90);
+                    pami.avancer(B_POSITION_1_FINAL_X - B_POSITION_1_DEPART_X);
                 }
                 else
                 {
                     Serial.println("Action Match : PAMI 1 JAUNE");
-                    pami.avancer(1400);
+                    pami.avancer(J_POSITION_1_FINAL_Y - J_POSITION_1_DEPART_Y);
+                    pami.tourner(90);
+                    pami.avancer(J_POSITION_1_FINAL_X - J_POSITION_1_DEPART_X);
                 }
             }
             else if (pami.num_pami == 2)
@@ -164,16 +168,16 @@ void loop()
                 if (pami.equipe == 0) // 0 = bleue, 1 = jaune
                 {
                     Serial.println("Action Match : PAMI 2 BLEUE");
-                    pami.avancer(1000);
-                    pami.tourner(-25);
-                    pami.avancer(1200);
+                    pami.avancer(B_POSITION_2_FINAL_Y - B_POSITION_2_DEPART_Y);
+                    pami.tourner(-90);
+                    pami.avancer(B_POSITION_2_FINAL_X - B_POSITION_2_DEPART_X);
                 }
                 else
                 {
                     Serial.println("Action Match : PAMI 2 JAUNE");
-                    pami.avancer(800);
-                    pami.tourner(25);
-                    pami.avancer(1000);
+                    pami.avancer(B_POSITION_2_FINAL_Y - B_POSITION_2_DEPART_Y);
+                    pami.tourner(90);
+                    pami.avancer(B_POSITION_2_FINAL_X - B_POSITION_2_DEPART_X);
                 }
             }
             else if (pami.num_pami == 3)
@@ -182,16 +186,16 @@ void loop()
                 if (pami.equipe == 0) // 0 = bleue, 1 = jaune
                 {
                     Serial.println("Action Match : PAMI 3 BLEUE");
-                    pami.avancer(1000);
-                    pami.tourner(-60);
-                    pami.avancer(1200);
+                    pami.avancer(B_POSITION_3_FINAL_Y - B_POSITION_3_DEPART_Y);
+                    pami.tourner(-90);
+                    pami.avancer(B_POSITION_3_FINAL_X - B_POSITION_3_DEPART_X);
                 }
                 else
                 {
                     Serial.println("Action Match : PAMI 3 JAUNE");
-                    pami.avancer(1000);
-                    pami.tourner(60);
-                    pami.avancer(1000);
+                    pami.avancer(B_POSITION_3_FINAL_Y - B_POSITION_3_DEPART_Y);
+                    pami.tourner(90);
+                    pami.avancer(B_POSITION_3_FINAL_X - B_POSITION_3_DEPART_X);
                 }
             }
         }

@@ -91,7 +91,7 @@ MACHINE A ETAT
 Paramètres globaux
 */
 #define ENDTIME 99000    // Temps global de la pami en ms (99s)
-#define START_TIME 85000 // Les pamis commencent dans les 15 dernières secondes.
+#define START_TIME 5000 // Les pamis commencent dans les 15 dernières secondes.
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 150 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
@@ -100,8 +100,8 @@ Paramètres globaux
 /*
 Gains naifs pour réellement avancer de 10cm avec un delay
 */
-#define K_NAIF 1.168
-#define K_ANGLE_NAIF 2.737
+#define K_NAIF 1.25
+#define K_ANGLE_NAIF 1.41
 
 /*
 Paramètres de l'asservissement
@@ -133,43 +133,43 @@ Paramètres de l'asservissement
 // Chaque pami à ses propres positions
 
 // PAMI 1 (collée au mur - ninja)
-#define J_POSITION_1_DEPART_X 0
-#define J_POSITION_1_DEPART_Y 0
+#define J_POSITION_1_DEPART_X 400
+#define J_POSITION_1_DEPART_Y 430
 
-#define J_POSITION_1_FINAL_X 0
-#define J_POSITION_1_FINAL_Y 0
+#define J_POSITION_1_FINAL_X 1400
+#define J_POSITION_1_FINAL_Y 1200
 
 #define B_POSITION_1_DEPART_X 400
 #define B_POSITION_1_DEPART_Y 430
 
-#define B_POSITION_1_FINAL_X 1500
+#define B_POSITION_1_FINAL_X 1400
 #define B_POSITION_1_FINAL_Y 1200
 
 // PAMI 2
-#define J_POSITION_2_DEPART_X 0
-#define J_POSITION_2_DEPART_Y 0
+#define J_POSITION_2_DEPART_X 400
+#define J_POSITION_2_DEPART_Y 280
 
-#define J_POSITION_2_FINAL_X 0
-#define J_POSITION_2_FINAL_Y 0
+#define J_POSITION_2_FINAL_X 680
+#define J_POSITION_2_FINAL_Y 1200
 
-#define B_POSITION_2_DEPART_X 0
-#define B_POSITION_2_DEPART_Y 0
+#define B_POSITION_2_DEPART_X 400
+#define B_POSITION_2_DEPART_Y 280
 
-#define B_POSITION_2_FINAL_X 0
-#define B_POSITION_2_FINAL_Y 0
+#define B_POSITION_2_FINAL_X 680
+#define B_POSITION_2_FINAL_Y 1200
 
 // PAMI 3
-#define J_POSITION_3_DEPART_X 0
-#define J_POSITION_3_DEPART_Y 0
+#define J_POSITION_3_DEPART_X 400
+#define J_POSITION_3_DEPART_Y 130
 
-#define J_POSITION_3_FINAL_X 940.0
-#define J_POSITION_3_FINAL_Y -450.0
+#define J_POSITION_3_FINAL_X 100
+#define J_POSITION_3_FINAL_Y 1200
 
-#define B_POSITION_3_DEPART_X 0
-#define B_POSITION_3_DEPART_Y 0
+#define B_POSITION_3_DEPART_X 400
+#define B_POSITION_3_DEPART_Y 130
 
-#define B_POSITION_3_FINAL_X 0
-#define B_POSITION_3_FINAL_Y 0
+#define B_POSITION_3_FINAL_X 100
+#define B_POSITION_3_FINAL_Y 1200
 
 // PAMI 4
 #define J_POSITION_4_DEPART_X 0
