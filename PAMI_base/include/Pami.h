@@ -17,7 +17,7 @@ public:
     Moteur *m_p_moteur_g;
     Encodeur *m_p_encodeur_d;
     Encodeur *m_p_encodeur_g;
-    Asserv *m_p_asserv;
+    // Asserv *m_p_asserv;
     Serv *m_p_servo;
     Mesure_pos *m_p_mesure_pos;
     Ultrason *m_p_ultrason;
@@ -25,7 +25,6 @@ public:
 
     int tirette = 1;  // Etat par défaut de la tirette
     int equipe = 1;   // Equipe par défaut (1 = gauche = jaune)
-    int num_pami = 1; // Numéro de la pami
 
     float pos_x;
     float pos_y;
@@ -33,24 +32,18 @@ public:
 
     float pos_init_x;
     float pos_init_y;
-    float pos_target_x;
-    float pos_target_y;
-    float distance_target = 0;
 
     long m_time;
 
-    Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
+    Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
 
     void test(int mode);
 
-    void config_start_position();
     void setup();
     void print_log();
     void print_position();
     void print_encodeur();
     void print_speed();
-    void print_infos_interrupteur();
-    void set_initial_position(float pos_initial_x, float pos_initial_y);
 
     void go_to(float pos_target_x, float pos_target_y, int speed = SPEED);
     void avancer_asserv(float distance, int speed = SPEED);

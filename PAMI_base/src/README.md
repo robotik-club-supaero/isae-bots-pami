@@ -14,7 +14,6 @@ Décomposé en plusieurs fichiers (une classe - une fonction)
     - Irsensor          : Capteur ToF (VL53L5CX) - Récupère la distance aux obstacles (tableau de 8 valeurs - moyenne sur chaque colonne)
     - Ultrason          : Capteur ultrason (HC-SR04) - Récupère la distance aux obstacles
     - Serv              : Servomoteur - Fait bouger un servomoteur entre deux angles
-    - Machine_etat      : Stratégie du robot - on l'utilise plus
     - main              : A upload sur la pami, assemble toutes les fonctions
 
 Chaque fichier représente une classe qui possède au moins 2 fonctions

@@ -46,9 +46,6 @@ L'IR Sensor demande :
     - Pin AVDD & IOVDD à 3.3V (pas de 5V)
     - Pin LPn à 3.3V
 */
-#define ULTRASON_ECHO 0    // Ultrason echo pin
-#define ULTRASON_TRIGGER 0 // Ultrason trigger pin
-
 #define IR_SCL_PIN 22 // Ligne SCL de l'I2C du capteur ToF
 #define IR_SDA_PIN 21 // Ligne SDA de l'I2C du capteur ToF
 #define IR_LPN_PIN 0  // Ligne LPn du capteur ToF (pour le réveiller) - Branché au 3.3V direct c'est plus simple
@@ -77,18 +74,9 @@ MACHINE A ETAT
 #define PIN_TIRETTE 23    // PIN de la tirette pour lancer le match
 
 /*
-    Low & Low : Première (collée au mur)
-    Low & High : Deuxième
-    High & Low : Troisième
-    High & High : Quatrième
-*/
-#define PIN_INT_PAMI_1 16 // PIN interrupteur 1 pour le numéro de la PAMI
-#define PIN_INT_PAMI_2 17 // PIN interrupteur 2 pour le numéro de la PAMI
-
-/*
 Paramètres globaux
 */
-#define GLOBALTIME 99000 // Temps global de la pami en ms (99s)
+#define TOTAL_TIME 99000 // Temps total de la pami en ms (99s)
 #define START_TIME 2000  // Les pamis commencent dans les 15 dernières secondes.
 #define SPEED 200        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
@@ -120,59 +108,13 @@ Paramètres de l'asservissement
 #define TD_l 0
 #define TD_angle 0
 
-// Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
-// Chaque pami à ses propres positions
+// Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLEU (droite))
 
-// PAMI 1 (collée au mur - ninja)
-#define J_POSITION_1_DEPART_X 0
-#define J_POSITION_1_DEPART_Y 0
+#define J_POSITION_DEPART_X 0
+#define J_POSITION_DEPART_Y 0
 
-#define J_POSITION_1_FINAL_X 0
-#define J_POSITION_1_FINAL_Y 0
-
-#define B_POSITION_1_DEPART_X 0
-#define B_POSITION_1_DEPART_Y 0
-
-#define B_POSITION_1_FINAL_X 0
-#define B_POSITION_1_FINAL_Y 0
-
-// PAMI 2
-#define J_POSITION_2_DEPART_X 0
-#define J_POSITION_2_DEPART_Y 0
-
-#define J_POSITION_2_FINAL_X 0
-#define J_POSITION_2_FINAL_Y 0
-
-#define B_POSITION_2_DEPART_X 0
-#define B_POSITION_2_DEPART_Y 0
-
-#define B_POSITION_2_FINAL_X 0
-#define B_POSITION_2_FINAL_Y 0
-
-// PAMI 3
-#define J_POSITION_3_DEPART_X 0
-#define J_POSITION_3_DEPART_Y 0
-
-#define J_POSITION_3_FINAL_X 940.0
-#define J_POSITION_3_FINAL_Y -450.0
-
-#define B_POSITION_3_DEPART_X 0
-#define B_POSITION_3_DEPART_Y 0
-
-#define B_POSITION_3_FINAL_X 0
-#define B_POSITION_3_FINAL_Y 0
-
-// PAMI 4
-#define J_POSITION_4_DEPART_X 0
-#define J_POSITION_4_DEPART_Y 0
-
-#define J_POSITION_4_FINAL_X 0
-#define J_POSITION_4_FINAL_Y 0
-
-#define B_POSITION_4_DEPART_X 0
-#define B_POSITION_4_DEPART_Y 0
-
-#define B_POSITION_4_FINAL_X 0
-#define B_POSITION_4_FINAL_Y 0
+// TODO : changer les positions de départ pour bleu
+#define B_POSITION_DEPART_X 0
+#define B_POSITION_DEPART_Y 0
 
 #endif

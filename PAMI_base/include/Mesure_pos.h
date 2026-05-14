@@ -13,8 +13,8 @@ class Mesure_pos
 {
 
 private:
-    Encodeur *m_p_encoder_R;
-    Encodeur *m_p_encoder_L;
+    Encodeur *encoder_R;
+    Encodeur *encoder_L;
     /**
      * Facteurs proportionnels entre encodeur et roue ( a determiner empiriquement )
      * Permet de passer de la mesure de l'encodeur à la distance parcourue par la roue et à l'angle de rotation
@@ -45,15 +45,15 @@ public:
     /**
      * Mesure right & left encoder
      */
-    long mesure_r;
-    long mesure_l;
+    long mesure_encoder_r;
+    long mesure_encoder_l;
 
     /**
      * Position dans le plan x, y, et theta (angle de rotation), mis à jour à chaque boucle
      */
-    float position_x;
-    float position_y;
-    float position_theta;
+    float x_mesuree;
+    float y_mesuree;
+    float theta_mesuree;
 
     /**
      * Vitesse selon x , y et theta

@@ -6,7 +6,6 @@
 #include <Pami.h>
 #include <Arduino.h>
 #include <ESP32Encoder.h>
-#include <Machine_etats.h>
 
 // Initialise les différents objets
 // Ultrason ultrason = Ultrason(ULTRASON_ECHO, ULTRASON_TRIGGER);
@@ -17,30 +16,80 @@ Moteur moteur_l = Moteur(EN_L, IN1_L, IN2_L, INV_MOT_L);
 Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
 Mesure_pos mesure_pos = Mesure_pos(&encodeur_r, &encodeur_l);
-Asserv asserv = Asserv(&moteur_r, &moteur_l, &mesure_pos);
-Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos);
 
 // La pami en elle même
-Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &asserv, &ir_sensor); // On n'utilise pas l'ultrason pour le moment
+Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &ir_sensor);
 
-float log_time = 0; // Variable global du temps
-int i = 0;
+float global_time = 0; // Variable global du temps
+float pos_x;
+float pos_y;
+float angle;
 
 void setup()
 {
-    pami.setup();
-    delay(2000);
-    pami.config_start_position();
-    // pami.set_initial_position(0, 0); //juste pour test manuellement
+    Serial.begin(115200); // Initialisation de la communication série
+    delay(6000);
+    Serial.println("---------- Setup starting ----------");
+    
+    // Setup capteur IR
+    // m_p_ir_sensor->setup();
+    // Serial.println("Setup Done : IR Sensor");
 
-    // On remet a 0 les positions car la roue tourne pendant l'upload (why ?)
+    // Setup servo
+    // m_p_servo->setup();
+    // Serial.println("Setup Done : Servo");
+
+    // Setup mesure position
+    mesure_pos.setup();
+    Serial.println("Setup Done : Mesure de Position");
+
+    // Setup moteur droit & gauche
+    moteur_l.setup();
+    moteur_r.setup();
+    Serial.println("Setup Done : Moteurs");
+
+    // Setup asservissement
+    // m_p_asserv->setup();
+    // Serial.println("Setup Done : Asservissement");
+
+    // LED intégrée à l'ESP32 pour blink quand la configuration est finie
+    // pinMode(LED, OUTPUT);
+    // digitalWrite(LED, 1); // LED ON pour indiquer le setup réussi
+
+
+    // TIRETTE :
+    pinMode(PIN_TIRETTE, INPUT);
+    bool etat_tirette = digitalRead(PIN_TIRETTE);
+    Serial.print(etat_tirette==1 ? "Tirette en place \t" : "Tirette enlevée \t");
+
+    // Interrupteur choix équipe
+    pinMode(PIN_READEQUIPE, INPUT);
+    int read_equipe = digitalRead(PIN_READEQUIPE);
+    String color_equipe = (read_equipe == 1) ? "JAUNE" : "BLEUE"; 
+    Serial.print("Equipe : ");
+    Serial.println(color_equipe);
+
+    // Setup de la position
+    if (read_equipe == 1) // JAUNE
+    {
+        pos_x = J_POSITION_DEPART_X;
+        pos_y = J_POSITION_DEPART_Y;
+    }
+    else
+    {
+        pos_x = B_POSITION_DEPART_X;
+        pos_y = B_POSITION_DEPART_Y;
+    }
+
+    Serial.println("---------- Setup over ----------\n\n");
+
+    // On remet a 0 les positions car la roue tourne pendant l'upload 
+    // (car l'esp32 utilise le pin du moteur pendant l'upload)
     mesure_pos.reinitialise();
-    pami.pos_x = 0;
-    pami.pos_y = 0;
-    pami.angle = 0;
-    pami.distance_target = 0;
+    angle=0;
+    // pami.distance_target = 0;
 
-    pami.test(7);
+    // pami.test(7);
 }
 
 void loop()

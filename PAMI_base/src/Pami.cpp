@@ -1,7 +1,8 @@
+#include "esp32-hal-gpio.h"
 #include <Pami.h>
 #include <cmath>
 
-Pami::Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Asserv *p_asserv, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
+Pami::Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
 {
     m_p_moteur_d = p_moteur_d;
     m_p_moteur_g = p_moteur_g;
@@ -9,10 +10,6 @@ Pami::Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encod
     m_p_encodeur_g = p_encodeur_g;
     m_p_mesure_pos = p_mesure_pos;
     m_p_servo = p_servo;
-    m_p_asserv = p_asserv;
-
-    // Optionnels
-    m_p_ultrason = p_ultrason;
     m_p_ir_sensor = p_ir_sensor;
 }
 
@@ -43,7 +40,6 @@ void Pami::test(int mode)
         Serial.println("Test Interrupteurs... Modifiez leurs etats ! (Boucle infinie)");
         while (true)
         {
-            this->print_infos_interrupteur();
             Serial.println("-------------------------");
             delay(1000); // On attend 1s pour ne pas spammer le terminal
         }
@@ -189,126 +185,18 @@ void Pami::test(int mode)
     }
 }
 
-/*
-Mise à jour des positions initiales et finales de la pami en fonction de l'équipe et de sa position
-*/
-void Pami::config_start_position()
-{
-    float start_pos_x;
-    float start_pos_y;
-
-    // Equipe de la PAMI
-    int read_equipe = digitalRead(PIN_READEQUIPE);
-    // Position initiale de la PAMI avec deux interrupteurs;
-    int int_pami_1 = digitalRead(PIN_INT_PAMI_1);
-    int int_pami_2 = digitalRead(PIN_INT_PAMI_2);
-    int read_num_pami = (int_pami_1 * 2) + int_pami_2 + 1;
-
-    if (read_num_pami != num_pami || read_equipe != equipe)
-    {
-        String color_equipe = (read_equipe == 1) ? "JAUNE" : "BLEUE";
-        Serial.print("Nouvelle Equipe : ");
-        Serial.println(color_equipe);
-
-        Serial.print("PAMI n°");
-        Serial.println(num_pami);
-
-        num_pami = read_num_pami; // On met à jour le numéro de la pami
-
-        if (num_pami == 1)
-        {
-            if (read_equipe != 0)
-            {
-                equipe = read_equipe; // On met à jour l'équipe
-                pos_init_x = J_POSITION_1_DEPART_X;
-                pos_init_y = J_POSITION_1_DEPART_Y;
-                pos_target_x = J_POSITION_1_FINAL_X;
-                pos_target_y = J_POSITION_1_FINAL_Y;
-            }
-            else
-            {
-                pos_init_x = B_POSITION_1_DEPART_X;
-                pos_init_y = B_POSITION_1_DEPART_Y;
-                pos_target_x = B_POSITION_1_FINAL_X;
-                pos_target_y = B_POSITION_1_FINAL_Y;
-            }
-        }
-        else if (num_pami == 2)
-        {
-            if (read_equipe != 0)
-            {
-                pos_init_x = J_POSITION_2_DEPART_X;
-                pos_init_y = J_POSITION_2_DEPART_Y;
-                pos_target_x = J_POSITION_2_FINAL_X;
-                pos_target_y = J_POSITION_2_FINAL_Y;
-            }
-            else
-            {
-                pos_init_x = B_POSITION_2_DEPART_X;
-                pos_init_y = B_POSITION_2_DEPART_Y;
-                pos_target_x = B_POSITION_2_FINAL_X;
-                pos_target_y = B_POSITION_2_FINAL_Y;
-            }
-        }
-        else if (num_pami == 3)
-        {
-            if (read_equipe != 0)
-            {
-                pos_init_x = J_POSITION_3_DEPART_X;
-                pos_init_y = J_POSITION_3_DEPART_Y;
-                pos_target_x = J_POSITION_3_FINAL_X;
-                pos_target_y = J_POSITION_3_FINAL_Y;
-            }
-            else
-            {
-                pos_init_x = B_POSITION_3_DEPART_X;
-                pos_init_y = B_POSITION_3_DEPART_Y;
-                pos_target_x = B_POSITION_3_FINAL_X;
-                pos_target_y = B_POSITION_3_FINAL_Y;
-            }
-        }
-        else if (num_pami == 4)
-        {
-            if (read_equipe != 0)
-            {
-                pos_init_x = J_POSITION_4_DEPART_X;
-                pos_init_y = J_POSITION_4_DEPART_Y;
-                pos_target_x = J_POSITION_4_FINAL_X;
-                pos_target_y = J_POSITION_4_FINAL_Y;
-            }
-            else
-            {
-                pos_init_x = B_POSITION_4_DEPART_X;
-                pos_init_y = B_POSITION_4_DEPART_Y;
-                pos_target_x = B_POSITION_4_FINAL_X;
-                pos_target_y = B_POSITION_4_FINAL_Y;
-            }
-        }
-    }
-}
 
 void Pami::setup()
 {
-    Serial.begin(115200); // Initialisation de la communication série
-    Serial.println("---------- Setup starting ----------");
-
-    // Setup ultrason
-    if (m_p_ultrason != nullptr) // pas d'ultrason cette année
-    {
-        m_p_ultrason->setup();
-        Serial.println("Setup Done : Ultrason");
-    }
+    
 
     // Setup capteur IR
-    if (m_p_ir_sensor != nullptr)
-    {
-        m_p_ir_sensor->setup();
-        Serial.println("Setup Done : IR Sensor");
-    }
+    // m_p_ir_sensor->setup();
+    // Serial.println("Setup Done : IR Sensor");
 
     // Setup servo
-    m_p_servo->setup();
-    Serial.println("Setup Done : Servo");
+    // m_p_servo->setup();
+    // Serial.println("Setup Done : Servo");
 
     // Setup mesure position
     m_p_mesure_pos->setup();
@@ -320,459 +208,469 @@ void Pami::setup()
     Serial.println("Setup Done : Moteurs");
 
     // Setup asservissement
-    m_p_asserv->setup();
-    Serial.println("Setup Done : Asservissement");
+    // m_p_asserv->setup();
+    // Serial.println("Setup Done : Asservissement");
 
+    // LED intégrée à l'ESP32 pour blink quand la configuration est finie
     // pinMode(LED, OUTPUT);
     // digitalWrite(LED, 1); // LED ON pour indiquer le setup réussi
 
-    pinMode(PIN_TIRETTE, INPUT);
-    pinMode(PIN_READEQUIPE, INPUT);
-    pinMode(PIN_INT_PAMI_1, INPUT);
-    pinMode(PIN_INT_PAMI_2, INPUT);
 
-    this->config_start_position();
-    Serial.println("Setup Done : Tirette & Equipe & PAMI");
-    // Faire une fonction log qui donne couleur équipe & numéro pami
-    this->print_infos_interrupteur();
+    // TIRETTE :
+    pinMode(PIN_TIRETTE, INPUT);
+    bool etat_tirette = digitalRead(PIN_TIRETTE);
+    Serial.print(etat_tirette==1 ? "Tirette en place \t" : "Tirette enlevée \t");
+
+    // Interrupteur choix équipe
+    pinMode(PIN_READEQUIPE, INPUT);
+    int read_equipe = digitalRead(PIN_READEQUIPE);
+    String color_equipe = (read_equipe == 1) ? "JAUNE" : "BLEUE"; 
+    Serial.print("Equipe : ");
+    Serial.print(color_equipe);
+    Serial.print("\t");
+
+    // Setup de la position
+    if (read_equipe == 1) // JAUNE
+    {
+        pos_init_x = J_POSITION_DEPART_X;
+        pos_init_y = J_POSITION_DEPART_Y;
+    }
+    else
+    {
+        pos_init_x = B_POSITION_DEPART_X;
+        pos_init_y = B_POSITION_DEPART_Y;
+    }
+    
 
     m_time = millis();
 
     Serial.println("\n---------- Setup over ----------\n\n");
 }
 
-void Pami::avancer(float distance, int speed)
-{
-    unsigned long function_start_time = millis();
+// void Pami::avancer(float distance, int speed)
+// {
+//     unsigned long function_start_time = millis();
 
-    float moving_time = K_NAIF * (distance / SPEED) * 1000;
-    Serial.print("Temps estimé pour avancer de ");
-    Serial.print(distance / 10.0);
-    Serial.print(" cm à la vitesse de ");
-    Serial.print(speed);
-    Serial.print(" : ");
-    Serial.print(moving_time);
-    Serial.println(" ms");
+//     float moving_time = K_NAIF * (distance / SPEED) * 1000;
+//     Serial.print("Temps estimé pour avancer de ");
+//     Serial.print(distance / 10.0);
+//     Serial.print(" cm à la vitesse de ");
+//     Serial.print(speed);
+//     Serial.print(" : ");
+//     Serial.print(moving_time);
+//     Serial.println(" ms");
 
-    while (millis() - function_start_time < moving_time)
-    {
-        float dist = this->get_IR_distance();
-        Serial.print("Distance mesuree : ");
-        Serial.print(dist / 10.0);
-        Serial.println(" cm");
+//     while (millis() - function_start_time < moving_time)
+//     {
+//         float dist = this->get_IR_distance();
+//         Serial.print("Distance mesuree : ");
+//         Serial.print(dist / 10.0);
+//         Serial.println(" cm");
 
-        if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
-        {
-            Serial.println("Obstacle détecté ! Arrêt du robot.");
-            this->set_speed(0);
-        }
-        else
-        {
-            this->set_speed(speed);
-        }
-        delay(200);
-    }
-    this->set_speed(0);
-}
+//         if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+//         {
+//             Serial.println("Obstacle détecté ! Arrêt du robot.");
+//             this->set_speed(0);
+//         }
+//         else
+//         {
+//             this->set_speed(speed);
+//         }
+//         delay(200);
+//     }
+//     this->set_speed(0);
+// }
 
-void Pami::reculer(float distance, int speed)
-{
-    unsigned long function_start_time = millis();
+// void Pami::reculer(float distance, int speed)
+// {
+//     unsigned long function_start_time = millis();
 
-    float moving_time = K_NAIF * (distance / SPEED) * 1000;
-    Serial.print("Temps estimé pour reculer de ");
-    Serial.print(distance / 10.0);
-    Serial.print(" cm à la vitesse de ");
-    Serial.print(speed);
-    Serial.print(" : ");
-    Serial.print(moving_time);
-    Serial.println(" ms");
+//     float moving_time = K_NAIF * (distance / SPEED) * 1000;
+//     Serial.print("Temps estimé pour reculer de ");
+//     Serial.print(distance / 10.0);
+//     Serial.print(" cm à la vitesse de ");
+//     Serial.print(speed);
+//     Serial.print(" : ");
+//     Serial.print(moving_time);
+//     Serial.println(" ms");
 
-    while (millis() - function_start_time < moving_time)
-    {
-        float dist = this->get_IR_distance();
-        Serial.print("Distance mesuree : ");
-        Serial.print(dist / 10.0);
-        Serial.println(" cm");
+//     while (millis() - function_start_time < moving_time)
+//     {
+//         float dist = this->get_IR_distance();
+//         Serial.print("Distance mesuree : ");
+//         Serial.print(dist / 10.0);
+//         Serial.println(" cm");
 
-        if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
-        {
-            Serial.println("Obstacle détecté ! Arrêt du robot.");
-            this->set_speed(0);
-        }
-        else
-        {
-            this->set_speed(-speed);
-        }
-        delay(200);
-    }
-    this->set_speed(0);
-}
+//         if (dist < 80 && dist > 0.5) // Si un obstacle est détecté à moins de 5 cm
+//         {
+//             Serial.println("Obstacle détecté ! Arrêt du robot.");
+//             this->set_speed(0);
+//         }
+//         else
+//         {
+//             this->set_speed(-speed);
+//         }
+//         delay(200);
+//     }
+//     this->set_speed(0);
+// }
 
 /*
 Tourner dans le sens trigo
 */
-void Pami::tourner(float angle_degres, float speed)
-{
-    m_p_moteur_d->set_speed(speed);
-    m_p_moteur_g->set_speed(-speed);
-    float delay_a_attendre = K_ANGLE_NAIF * (angle_degres / 360.0) * 1000;
-    delay(delay_a_attendre);
-    // if (millis()-m_time > delay_a_attendre){
-    //     this->set_speed(0);
-    //     m_time = millis();
-    // }
-    this->set_speed(0);
-}
+// void Pami::tourner(float angle_degres, float speed)
+// {
+//     m_p_moteur_d->set_speed(speed);
+//     m_p_moteur_g->set_speed(-speed);
+//     float delay_a_attendre = K_ANGLE_NAIF * (angle_degres / 360.0) * 1000;
+//     delay(delay_a_attendre);
+//     // if (millis()-m_time > delay_a_attendre){
+//     //     this->set_speed(0);
+//     //     m_time = millis();
+//     // }
+//     this->set_speed(0);
+// }
 
 /*
 Fonction de test pour aller a une position (x, y) [mm & mm] du plateau
 */
-void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
-{
-    m_p_mesure_pos->loop();
-    pos_x = m_p_mesure_pos->position_x + pos_init_x;
-    pos_y = m_p_mesure_pos->position_y + pos_init_y;
-    distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
+// void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
+// {
+//     m_p_mesure_pos->loop();
+//     pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//     pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
 
-    while (distance_target > EPSP)
-    {
-        // 1. Mise à jour des capteurs & de la position
-        m_p_mesure_pos->loop();
-        pos_x = m_p_mesure_pos->position_x + pos_init_x;
-        pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     while (distance_target > EPSP)
+//     {
+//         // 1. Mise à jour des capteurs & de la position
+//         m_p_mesure_pos->loop();
+//         pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//         pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-        distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
-        angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
+//         distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
+//         angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
 
-        Serial.print("Distance target : ");
-        Serial.println(distance_target);
+//         Serial.print("Distance target : ");
+//         Serial.println(distance_target);
 
-        // this->print_speed();
-        // this->print_encodeur();
-        this->print_position();
+//         // this->print_speed();
+//         // this->print_encodeur();
+//         this->print_position();
 
-        m_p_asserv->asserv_global(speed, speed, angle);
-        delay(10);
-    }
+//         m_p_asserv->asserv_global(speed, speed, angle);
+//         delay(10);
+//     }
 
-    // On s'arrête quand on est arrivés
-    this->set_speed(0);
-}
+//     // On s'arrête quand on est arrivés
+//     this->set_speed(0);
+// }
 
 /*
 Fonction de test pour avancer d'une certaine distance
 */
-void Pami::avancer_asserv(float distance, int speed)
-{
-    m_p_mesure_pos->loop();
-    float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
-    float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
-    float start_angle = m_p_mesure_pos->position_theta;
+// void Pami::avancer_asserv(float distance, int speed)
+// {
+//     m_p_mesure_pos->loop();
+//     float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//     float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     float start_angle = m_p_mesure_pos->position_theta;
 
-    float distance_traveled = 0.0;
+//     float distance_traveled = 0.0;
 
-    while (distance_traveled < distance)
-    {
-        m_p_mesure_pos->loop();
-        float pos_x = m_p_mesure_pos->position_x + pos_init_x;
-        float pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     while (distance_traveled < distance)
+//     {
+//         m_p_mesure_pos->loop();
+//         float pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//         float pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-        float dx = pos_x - start_pos_x;
-        float dy = pos_y - start_pos_y;
+//         float dx = pos_x - start_pos_x;
+//         float dy = pos_y - start_pos_y;
 
-        // 2. On projette ce déplacement sur l'axe du robot (produit scalaire)
-        distance_traveled = abs(dx * cos(start_angle) + dy * sin(start_angle));
+//         // 2. On projette ce déplacement sur l'axe du robot (produit scalaire)
+//         distance_traveled = abs(dx * cos(start_angle) + dy * sin(start_angle));
 
-        Serial.print("distance parcourue : ");
-        Serial.println(distance_traveled);
+//         Serial.print("distance parcourue : ");
+//         Serial.println(distance_traveled);
 
-        Serial.println("dx : " + String(dx) + " | dy : " + String(dy));
+//         Serial.println("dx : " + String(dx) + " | dy : " + String(dy));
 
-        m_p_asserv->asserv_global(speed, speed, start_angle);
-        delay(10);
-    }
+//         m_p_asserv->asserv_global(speed, speed, start_angle);
+//         delay(10);
+//     }
 
-    // On s'arrête quand on est arrivés
-    this->set_speed(0);
-}
+//     // On s'arrête quand on est arrivés
+//     this->set_speed(0);
+// }
 
-/*
-Fonction de test pour reculer d'une distance en x et en y
-*/
-void Pami::reculer_asserv(float distance, int speed)
-{
-    m_p_mesure_pos->loop();
-    float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
-    float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
-    float start_angle = m_p_mesure_pos->position_theta;
+// /*
+// Fonction de test pour reculer d'une distance en x et en y
+// */
+// void Pami::reculer_asserv(float distance, int speed)
+// {
+//     m_p_mesure_pos->loop();
+//     float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//     float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     float start_angle = m_p_mesure_pos->position_theta;
 
-    float distance_traveled = 0.0;
+//     float distance_traveled = 0.0;
 
-    while (distance_traveled < distance)
-    {
-        m_p_mesure_pos->loop();
-        float pos_x = m_p_mesure_pos->position_x + pos_init_x;
-        float pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     while (distance_traveled < distance)
+//     {
+//         m_p_mesure_pos->loop();
+//         float pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//         float pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-        float dx = pos_x - start_pos_x;
-        float dy = pos_y - start_pos_y;
+//         float dx = pos_x - start_pos_x;
+//         float dy = pos_y - start_pos_y;
 
-        // 2. On projette ce déplacement sur l'axe du robot (produit scalaire)
-        // Comme le robot recule, cette valeur va devenir de plus en plus NÉGATIVE
-        distance_traveled = abs(dx * cos(start_angle) + dy * sin(start_angle));
+//         // 2. On projette ce déplacement sur l'axe du robot (produit scalaire)
+//         // Comme le robot recule, cette valeur va devenir de plus en plus NÉGATIVE
+//         distance_traveled = abs(dx * cos(start_angle) + dy * sin(start_angle));
 
-        Serial.print("Distance parcourue (à l'envers) : ");
-        Serial.println(distance_traveled);
+//         Serial.print("Distance parcourue (à l'envers) : ");
+//         Serial.println(distance_traveled);
 
-        m_p_asserv->asserv_global(-speed, -speed, start_angle);
-        delay(10);
-    }
+//         m_p_asserv->asserv_global(-speed, -speed, start_angle);
+//         delay(10);
+//     }
 
-    // On s'arrête quand on est arrivés
-    this->set_speed(0);
-}
+//     // On s'arrête quand on est arrivés
+//     this->set_speed(0);
+// }
 
-/*
-Fonction de test qui fait tourner la pami de [theta_target] degrés
-*/
-void Pami::tourner_asserv(float angle_degres, float speed)
-{
-    m_p_mesure_pos->loop();
+// /*
+// Fonction de test qui fait tourner la pami de [theta_target] degrés
+// */
+// void Pami::tourner_asserv(float angle_degres, float speed)
+// {
+//     m_p_mesure_pos->loop();
 
-    float angle_rad = angle_degres * (PI / 180.0);
-    float target_theta = m_p_mesure_pos->position_theta + angle_rad;
-    float current_theta = m_p_mesure_pos->position_theta;
-    float erreur_angle = fmod(target_theta - current_theta, 2 * PI);
-    if (erreur_angle > PI)
-    {
-        erreur_angle -= 2 * PI;
-    }
-    else if (erreur_angle < -PI)
-    {
-        erreur_angle += 2 * PI;
-    }
+//     float angle_rad = angle_degres * (PI / 180.0);
+//     float target_theta = m_p_mesure_pos->position_theta + angle_rad;
+//     float current_theta = m_p_mesure_pos->position_theta;
+//     float erreur_angle = fmod(target_theta - current_theta, 2 * PI);
+//     if (erreur_angle > PI)
+//     {
+//         erreur_angle -= 2 * PI;
+//     }
+//     else if (erreur_angle < -PI)
+//     {
+//         erreur_angle += 2 * PI;
+//     }
 
-    while (abs(erreur_angle) > EPSA)
-    {
-        m_p_mesure_pos->loop();
-        current_theta = abs(m_p_mesure_pos->position_theta);
-        erreur_angle = fmod(target_theta - current_theta, 2 * PI);
+//     while (abs(erreur_angle) > EPSA)
+//     {
+//         m_p_mesure_pos->loop();
+//         current_theta = abs(m_p_mesure_pos->position_theta);
+//         erreur_angle = fmod(target_theta - current_theta, 2 * PI);
 
-        Serial.print("Current angle : ");
-        Serial.println(current_theta * (180.0 / PI));
-        Serial.print("Erreur angle : ");
-        Serial.println(erreur_angle * (180.0 / PI));
+//         Serial.print("Current angle : ");
+//         Serial.println(current_theta * (180.0 / PI));
+//         Serial.print("Erreur angle : ");
+//         Serial.println(erreur_angle * (180.0 / PI));
 
-        m_p_asserv->asserv_angle(target_theta);
-        delay(10);
-    }
+//         m_p_asserv->asserv_angle(target_theta);
+//         delay(10);
+//     }
 
-    this->set_speed(0);
-}
+//     this->set_speed(0);
+// }
 
-/*
-Fonction pour aller a une position (x, y) du plateau
-*/
-bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
-{
-    m_p_mesure_pos->loop();
-    pos_x = m_p_mesure_pos->position_x + pos_init_x;
-    pos_y = m_p_mesure_pos->position_y + pos_init_y;
-    distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
+// /*
+// Fonction pour aller a une position (x, y) du plateau
+// */
+// bool Pami::go_to_with_obstacle(float pos_final_x, float pos_final_y, int speed)
+// {
+//     m_p_mesure_pos->loop();
+//     pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//     pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
 
-    while (distance_target > EPSP)
-    {
-        // 1. Sécurité temps de match
-        if (millis() - m_time_match >= GLOBALTIME)
-        {
-            this->set_speed(0);
-            return false; // Fin du match, on force la sortie !
-        }
+//     while (distance_target > EPSP)
+//     {
+//         // 1. Sécurité temps de match
+//         if (millis() - m_time_match >= TOTAL_TIME)
+//         {
+//             this->set_speed(0);
+//             return false; // Fin du match, on force la sortie !
+//         }
 
-        // 2. Distance au prochain obstacle
-        if (m_p_ir_sensor != nullptr)
-        {
-            // Condition d'évitement pour capteur ir
-            float dist_obstacle = this->get_IR_distance();
+//         // 2. Distance au prochain obstacle
+//         if (m_p_ir_sensor != nullptr)
+//         {
+//             // Condition d'évitement pour capteur ir
+//             float dist_obstacle = this->get_IR_distance();
 
-            if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
-            {
-                this->set_speed(0);
-                Serial.println("Obstacle !");
-                delay(10);
-                continue; // Repart au début du "do" sans avancer
-            }
-        }
+//             if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
+//             {
+//                 this->set_speed(0);
+//                 Serial.println("Obstacle !");
+//                 delay(10);
+//                 continue; // Repart au début du "do" sans avancer
+//             }
+//         }
 
-        // 3. Position actuelle
-        m_p_mesure_pos->loop();
-        pos_x = m_p_mesure_pos->position_x + pos_init_x;
-        pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//         // 3. Position actuelle
+//         m_p_mesure_pos->loop();
+//         pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//         pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-        // 4. Déplacement
-        distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
-        angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
-        angle = fmod(angle, 2 * PI);
-        if (angle > PI)
-            angle -= 2 * PI;
-        else if (angle < -PI)
-            angle += 2 * PI;
+//         // 4. Déplacement
+//         distance_target = sqrt(pow(pos_x - pos_final_x, 2) + pow(pos_y - pos_final_y, 2));
+//         angle = atan2(pos_final_y - pos_y, pos_final_x - pos_x);
+//         angle = fmod(angle, 2 * PI);
+//         if (angle > PI)
+//             angle -= 2 * PI;
+//         else if (angle < -PI)
+//             angle += 2 * PI;
 
-        float erreur_angle = angle - m_p_mesure_pos->position_theta;
-        erreur_angle = fmod(erreur_angle, 2 * PI);
-        if (erreur_angle > PI)
-            erreur_angle -= 2 * PI;
-        else if (erreur_angle < -PI)
-            erreur_angle += 2 * PI;
+//         float erreur_angle = angle - m_p_mesure_pos->position_theta;
+//         erreur_angle = fmod(erreur_angle, 2 * PI);
+//         if (erreur_angle > PI)
+//             erreur_angle -= 2 * PI;
+//         else if (erreur_angle < -PI)
+//             erreur_angle += 2 * PI;
 
-        Serial.print("Distance target : ");
-        Serial.println(distance_target);
-        Serial.print("erreur_angle : ");
-        Serial.println(erreur_angle);
+//         Serial.print("Distance target : ");
+//         Serial.println(distance_target);
+//         Serial.print("erreur_angle : ");
+//         Serial.println(erreur_angle);
 
-        // Si l'angle est trop éloigné, on tourne sur place avant d'avancer.
-        if (abs(erreur_angle) > 0.25)
-        {
-            m_p_asserv->asserv_global(0, 0, angle);
-        }
-        else
-        {
-            m_p_asserv->asserv_global(speed, speed, angle);
-        }
-        delay(10);
-    }
+//         // Si l'angle est trop éloigné, on tourne sur place avant d'avancer.
+//         if (abs(erreur_angle) > 0.25)
+//         {
+//             m_p_asserv->asserv_global(0, 0, angle);
+//         }
+//         else
+//         {
+//             m_p_asserv->asserv_global(speed, speed, angle);
+//         }
+//         delay(10);
+//     }
 
-    // On s'arrête quand on est arrivés
-    this->set_speed(0);
-    return true;
-}
+//     // On s'arrête quand on est arrivés
+//     this->set_speed(0);
+//     return true;
+// }
 
 /*
 Fonction pour avancer d'une certaine distance
 */
-bool Pami::avancer_with_obstacle(float distance, int speed)
-{
-    m_p_mesure_pos->loop();
-    float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
-    float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
-    float start_angle = m_p_mesure_pos->position_theta;
+// bool Pami::avancer_with_obstacle(float distance, int speed)
+// {
+//     m_p_mesure_pos->loop();
+//     float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//     float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     float start_angle = m_p_mesure_pos->position_theta;
 
-    float distance_parcourue = 0.0;
+//     float distance_parcourue = 0.0;
 
-    while (distance_parcourue < distance)
-    {
-        // 1. Sécurité temps de match
-        if (millis() - m_time_match >= GLOBALTIME)
-        {
-            m_p_asserv->asserv_global(0, 0, start_angle);
-            return false;
-        }
+//     while (distance_parcourue < distance)
+//     {
+//         // 1. Sécurité temps de match
+//         if (millis() - m_time_match >= TOTAL_TIME)
+//         {
+//             m_p_asserv->asserv_global(0, 0, start_angle);
+//             return false;
+//         }
 
-        // 2. Distance au prochain obstacle
-        if (m_p_ir_sensor != nullptr)
-        {
-            float dist_obstacle = this->get_IR_distance();
+//         // 2. Distance au prochain obstacle
+//         if (m_p_ir_sensor != nullptr)
+//         {
+//             float dist_obstacle = this->get_IR_distance();
 
-            if (dist_obstacle > 0.01 && dist_obstacle < DISTANCE_MIN)
-            {
-                this->set_speed(0);
-                // m_p_asserv->asserv_global(0, 0, start_angle);
-                Serial.println("Obstacle !");
-                delay(10);
-                continue; // Repart au début du "do" sans avancer
-            }
-        }
+//             if (dist_obstacle > 0.01 && dist_obstacle < DISTANCE_MIN)
+//             {
+//                 this->set_speed(0);
+//                 // m_p_asserv->asserv_global(0, 0, start_angle);
+//                 Serial.println("Obstacle !");
+//                 delay(10);
+//                 continue; // Repart au début du "do" sans avancer
+//             }
+//         }
 
-        // 3. Position actuelle
-        m_p_mesure_pos->loop();
-        float pos_x = m_p_mesure_pos->position_x + pos_init_x;
-        float pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//         // 3. Position actuelle
+//         m_p_mesure_pos->loop();
+//         float pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//         float pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-        // 4. Déplacement
-        float dx = pos_x - start_pos_x;
-        float dy = pos_y - start_pos_y;
+//         // 4. Déplacement
+//         float dx = pos_x - start_pos_x;
+//         float dy = pos_y - start_pos_y;
 
-        distance_parcourue = dx * cos(start_angle) + dy * sin(start_angle);
+//         distance_parcourue = dx * cos(start_angle) + dy * sin(start_angle);
 
-        Serial.print("Distance parcourue : ");
-        Serial.println(distance_parcourue);
+//         Serial.print("Distance parcourue : ");
+//         Serial.println(distance_parcourue);
 
-        m_p_asserv->asserv_global(speed, speed, start_angle);
-        delay(10);
-    }
+//         m_p_asserv->asserv_global(speed, speed, start_angle);
+//         delay(10);
+//     }
 
-    // On s'arrête quand on est arrivés
-    this->set_speed(0);
-    return true;
-}
+//     // On s'arrête quand on est arrivés
+//     this->set_speed(0);
+//     return true;
+// }
 
-/*
-Fonction pour reculer d'une distance en x et en y
-*/
-bool Pami::reculer_with_obstacle(float distance, int speed)
-{
-    m_p_mesure_pos->loop();
-    float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
-    float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
-    float start_angle = m_p_mesure_pos->position_theta;
+// /*
+// Fonction pour reculer d'une distance en x et en y
+// */
+// bool Pami::reculer_with_obstacle(float distance, int speed)
+// {
+//     m_p_mesure_pos->loop();
+//     float start_pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//     float start_pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//     float start_angle = m_p_mesure_pos->position_theta;
 
-    float distance_parcourue = 0.0;
+//     float distance_parcourue = 0.0;
 
-    while (distance_parcourue < distance)
-    {
-        // 1. Sécurité temps de match
-        if (millis() - m_time_match >= GLOBALTIME)
-        {
-            m_p_asserv->asserv_global(0, 0, start_angle);
-            return false;
-        }
+//     while (distance_parcourue < distance)
+//     {
+//         // 1. Sécurité temps de match
+//         if (millis() - m_time_match >= TOTAL_TIME)
+//         {
+//             m_p_asserv->asserv_global(0, 0, start_angle);
+//             return false;
+//         }
 
-        // 2. Distance au prochain obstacle
-        if (m_p_ir_sensor != nullptr)
-        {
-            float dist_obstacle = this->get_IR_distance();
+//         // 2. Distance au prochain obstacle
+//         if (m_p_ir_sensor != nullptr)
+//         {
+//             float dist_obstacle = this->get_IR_distance();
 
-            if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
-            {
-                m_p_asserv->asserv_global(0, 0, start_angle);
-                Serial.println("Obstacle !");
-                delay(10);
-                continue; // Repart au début du "do" sans avancer
-            }
-        }
+//             if (dist_obstacle > 0.1 && dist_obstacle < DISTANCE_MIN)
+//             {
+//                 m_p_asserv->asserv_global(0, 0, start_angle);
+//                 Serial.println("Obstacle !");
+//                 delay(10);
+//                 continue; // Repart au début du "do" sans avancer
+//             }
+//         }
 
-        // 3. Mise à jour des capteurs
-        m_p_mesure_pos->loop();
-        float pos_x = m_p_mesure_pos->position_x + pos_init_x;
-        float pos_y = m_p_mesure_pos->position_y + pos_init_y;
+//         // 3. Mise à jour des capteurs
+//         m_p_mesure_pos->loop();
+//         float pos_x = m_p_mesure_pos->position_x + pos_init_x;
+//         float pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-        // 4. Déplacement
-        float dx = pos_x - start_pos_x;
-        float dy = pos_y - start_pos_y;
+//         // 4. Déplacement
+//         float dx = pos_x - start_pos_x;
+//         float dy = pos_y - start_pos_y;
 
-        distance_parcourue = abs(dx * cos(start_angle) + dy * sin(start_angle));
+//         distance_parcourue = abs(dx * cos(start_angle) + dy * sin(start_angle));
 
-        Serial.print("Distance parcourue (à l'envers) : ");
-        Serial.println(distance_parcourue);
+//         Serial.print("Distance parcourue (à l'envers) : ");
+//         Serial.println(distance_parcourue);
 
-        m_p_asserv->asserv_global(-speed, -speed, start_angle);
-        delay(10);
-    }
+//         m_p_asserv->asserv_global(-speed, -speed, start_angle);
+//         delay(10);
+//     }
 
-    // On s'arrête quand on est arrivés
-    this->set_speed(0);
-    return true;
-}
+//     // On s'arrête quand on est arrivés
+//     this->set_speed(0);
+//     return true;
+// }
 
-/*
-Modifie la position initiale en x et en y du robot
-*/
-void Pami::set_initial_position(float pos_initial_x, float pos_initial_y)
-{
-    pos_init_x = pos_initial_x;
-    pos_init_y = pos_initial_y;
-}
 
 /*
 Allume les deux moteurs à une vitesse en (entre 0 et 255)
@@ -789,217 +687,173 @@ void Pami::set_speed(float speed)
 /*
 Fonction pour bouger le servo entre deux angles en un temps donné
 */
-void Pami::blink_servo(long temps_blink, int angle1, int angle2)
-{
-    m_p_servo->blink(temps_blink, angle1, angle2);
-    delay(100);
-}
-
+// void Pami::blink_servo(long temps_blink, int angle1, int angle2)
+// {
+    // m_p_servo->blink(temps_blink, angle1, angle2);
+    // delay(100);
+// }
+// 
 /*
 Fonction qui affiche la distance au prochain obstacle détectée par le capteur ultrason
 */
-double Pami::get_ultrason_distance()
-{
-    if (m_p_ultrason == nullptr)
-    {
-        Serial.println("Pas de capteur ultrason");
-        return -1;
-    }
-    else
-    {
-        return m_p_ultrason->m_distance;
-    }
-}
+// double Pami::get_ultrason_distance()
+// {
+//     if (m_p_ultrason == nullptr)
+//     {
+//         Serial.println("Pas de capteur ultrason");
+//         return -1;
+//     }
+//     else
+//     {
+//         return m_p_ultrason->m_distance;
+//     }
+// }
 
 /*
 En mm
 Fonction qui retourne la distance minimal au prochain obstacle détectée par le capteur infrarouge (ToF)
 */
-double Pami::get_IR_distance()
-{
-    if (m_p_ir_sensor == nullptr)
-    {
-        Serial.println("Pas de capteur infrarouge");
-        return -1;
-    }
-    else
-    {
-        m_p_ir_sensor->loop();
-        return m_p_ir_sensor->ir_minimum_distance;
-    }
-}
+// double Pami::get_IR_distance()
+// {
+//     if (m_p_ir_sensor == nullptr)
+//     {
+//         Serial.println("Pas de capteur infrarouge");
+//         return -1;
+//     }
+//     else
+//     {
+//         m_p_ir_sensor->loop();
+//         return m_p_ir_sensor->ir_minimum_distance;
+//     }
+// }
 
-void Pami::print_position()
-{
-    if (millis() - m_time > 250)
-    {
-        m_p_mesure_pos->loop();
-        Serial.print("Pos X : " + String(m_p_mesure_pos->position_x / 10) + " cm");
-        Serial.print(" | Pos Y : " + String(m_p_mesure_pos->position_y / 10) + " cm");
-        Serial.println(" | Theta : " + String(m_p_mesure_pos->position_theta * (180.0 / PI)) + "°");
-    }
-}
+// void Pami::print_position()
+// {
+//     if (millis() - m_time > 250)
+//     {
+//         m_p_mesure_pos->loop();
+//         Serial.print("Pos X : " + String(m_p_mesure_pos->position_x / 10) + " cm");
+//         Serial.print(" | Pos Y : " + String(m_p_mesure_pos->position_y / 10) + " cm");
+//         Serial.println(" | Theta : " + String(m_p_mesure_pos->position_theta * (180.0 / PI)) + "°");
+//     }
+// }
 
-void Pami::print_encodeur()
-{
-    if (millis() - m_time > 250)
-    {
-        Serial.print("Encodeur gauche : " + String(m_p_encodeur_g->mesure()));
-        Serial.println(" | Encodeur droit : " + String(m_p_encodeur_d->mesure()));
-    }
-}
+// void Pami::print_encodeur()
+// {
+//     if (millis() - m_time > 250)
+//     {
+//         Serial.print("Encodeur gauche : " + String(m_p_encodeur_g->mesure()));
+//         Serial.println(" | Encodeur droit : " + String(m_p_encodeur_d->mesure()));
+//     }
+// }
 
-void Pami::print_speed()
-{
-    if (millis() - m_time > 275)
-    {
-        m_p_mesure_pos->loop();
-        Serial.print("Vitesse droite : " + String(m_p_mesure_pos->vitesse_r / 10) + " cm/s | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l / 10) + " cm/s");
-        Serial.print(" | Vitesse en x : " + String(m_p_mesure_pos->vitesse_x / 10) + " cm/s | Vitesse en y : " + String(m_p_mesure_pos->vitesse_y / 10) + " cm/s");
-        Serial.println(" | Vitesse angulaire : " + String(m_p_mesure_pos->vitesse_theta) + " rad/s");
-    }
-}
+// void Pami::print_speed()
+// {
+//     if (millis() - m_time > 275)
+//     {
+//         m_p_mesure_pos->loop();
+//         Serial.print("Vitesse droite : " + String(m_p_mesure_pos->vitesse_r / 10) + " cm/s | Vitesse gauche : " + String(m_p_mesure_pos->vitesse_l / 10) + " cm/s");
+//         Serial.print(" | Vitesse en x : " + String(m_p_mesure_pos->vitesse_x / 10) + " cm/s | Vitesse en y : " + String(m_p_mesure_pos->vitesse_y / 10) + " cm/s");
+//         Serial.println(" | Vitesse angulaire : " + String(m_p_mesure_pos->vitesse_theta) + " rad/s");
+//     }
+// }
 
-void Pami::print_log()
-{
-    if (m_time + 500 < millis()) // Log toutes les secondes
-    {
-        Serial.println("Distance Ir: " + String(this->get_IR_distance()) + " mm");
-        this->print_speed();
-        this->print_position();
-        this->print_encodeur();
-        this->print_infos_interrupteur();
+// void Pami::print_log()
+// {
+//     if (m_time + 500 < millis()) // Log toutes les secondes
+//     {
+//         Serial.println("Distance Ir: " + String(this->get_IR_distance()) + " mm");
+//         this->print_speed();
+//         this->print_position();
+//         this->print_encodeur();
 
-        m_time = millis();
-    }
-}
+//         m_time = millis();
+//     }
+// }
 
-void Pami::print_infos_interrupteur()
-{
-    int equipe = digitalRead(PIN_READEQUIPE);
-    int tirette = digitalRead(PIN_TIRETTE);
-    int int_pami_1 = digitalRead(PIN_INT_PAMI_1);
-    int int_pami_2 = digitalRead(PIN_INT_PAMI_2);
 
-    if (tirette == 1)
-    {
-        Serial.println("Tirette : Mise en place");
-    }
-    else
-    {
-        Serial.println("Tirette : Enlevée");
-    }
+// void Pami::start_match()
+// {
+//     // --- 1. PHASE INIT (Attente Tirette) ---
+//     Serial.println("Attente de la tirette...");
+//     while (digitalRead(PIN_TIRETTE) == 1)
+//     {
+//         this->set_speed(0);
+//         delay(10);
+//     }
 
-    if (equipe == 1)
-    {
-        Serial.println("Equipe : JAUNE");
-    }
-    else
-    {
-        Serial.println("Equipe : BLEUE");
-    }
+//     // --- 2. DEPART (La tirette est tirée) ---
+//     Serial.println("Début du match");
+//     m_time_match = millis(); // On lance le chrono de 100s
 
-    if (int_pami_1 == 0 && int_pami_2 == 0)
-    {
-        Serial.println("PAMI n°1 - collé au mur");
-    }
-    else if (int_pami_1 == 0 && int_pami_2 == 1)
-    {
-        Serial.println("PAMI n°2");
-    }
-    else if (int_pami_1 == 1 && int_pami_2 == 0)
-    {
-        Serial.println("PAMI n°3");
-    }
-    else if (int_pami_1 == 1 && int_pami_2 == 1)
-    {
-        Serial.println("PAMI n°4 - plus éloigné du mur");
-    }
-}
+//     // On attend le délai de départ de la PAMI (ex: démarre à T+85s)
+//     while (millis() - m_time_match < START_TIME)
+//     {
+//         delay(10);
+//     }
 
-void Pami::start_match()
-{
-    // --- 1. PHASE INIT (Attente Tirette) ---
-    Serial.println("Attente de la tirette...");
-    while (digitalRead(PIN_TIRETTE) == 1)
-    {
-        this->config_start_position();
-        this->set_speed(0);
-        delay(10);
-    }
+//     if (num_pami == 1)
+//     {
+//         if (equipe == 1)
+//         {
+//             if (go_to_with_obstacle(J_POSITION_1_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//         else
+//         {
+//             if (go_to_with_obstacle(B_POSITION_1_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//     }
+//     else if (num_pami == 2)
+//     {
+//         if (equipe == 1)
+//         {
+//             if (go_to_with_obstacle(J_POSITION_2_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//         else
+//         {
+//             if (go_to_with_obstacle(B_POSITION_2_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//     }
+//     else if (num_pami == 3)
+//     {
+//         if (equipe == 1)
+//         {
+//             if (go_to_with_obstacle(J_POSITION_3_FINAL_X, J_POSITION_3_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//         else
+//         {
+//             if (go_to_with_obstacle(B_POSITION_3_FINAL_X, B_POSITION_3_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//     }
+//     else if (num_pami == 4)
+//     {
+//         if (equipe == 1)
+//         {
+//             if (go_to_with_obstacle(J_POSITION_4_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//         else
+//         {
+//             if (go_to_with_obstacle(B_POSITION_4_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
+//                 this->end_match();
+//         }
+//     }
+// }
 
-    // --- 2. DEPART (La tirette est tirée) ---
-    Serial.println("Début du match");
-    m_time_match = millis(); // On lance le chrono de 100s
+// void Pami::end_match()
+// {
+//     Serial.println("Fin du match (Temps écoulé !)");
+//     this->set_speed(0);
 
-    // On attend le délai de départ de la PAMI (ex: démarre à T+85s)
-    while (millis() - m_time_match < START_TIME)
-    {
-        delay(10);
-    }
-
-    if (num_pami == 1)
-    {
-        if (equipe == 1)
-        {
-            if (go_to_with_obstacle(J_POSITION_1_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
-        }
-        else
-        {
-            if (go_to_with_obstacle(B_POSITION_1_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
-        }
-    }
-    else if (num_pami == 2)
-    {
-        if (equipe == 1)
-        {
-            if (go_to_with_obstacle(J_POSITION_2_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
-        }
-        else
-        {
-            if (go_to_with_obstacle(B_POSITION_2_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
-        }
-    }
-    else if (num_pami == 3)
-    {
-        if (equipe == 1)
-        {
-            if (go_to_with_obstacle(J_POSITION_3_FINAL_X, J_POSITION_3_FINAL_Y, SPEED))
-                this->end_match();
-        }
-        else
-        {
-            if (go_to_with_obstacle(B_POSITION_3_FINAL_X, B_POSITION_3_FINAL_Y, SPEED))
-                this->end_match();
-        }
-    }
-    else if (num_pami == 4)
-    {
-        if (equipe == 1)
-        {
-            if (go_to_with_obstacle(J_POSITION_4_FINAL_X, J_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
-        }
-        else
-        {
-            if (go_to_with_obstacle(B_POSITION_4_FINAL_X, B_POSITION_1_FINAL_Y, SPEED))
-                this->end_match();
-        }
-    }
-}
-
-void Pami::end_match()
-{
-    Serial.println("Fin du match (Temps écoulé !)");
-    this->set_speed(0);
-
-    while (true)
-    {
-        this->blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
-        delay(100);
-    }
-}
+//     while (true)
+//     {
+//         this->blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
+//         delay(100);
+//     }
+// }
