@@ -2,7 +2,7 @@
 #include <Pami.h>
 #include <cmath>
 
-Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
+Pami::Pami(int *p_etape_globale, Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor, Ultrason *p_ultrason)
 {
     moteur_r = p_moteur_r;
     moteur_l = p_moteur_l;
@@ -11,6 +11,7 @@ Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encod
     mesure_pos = p_mesure_pos;
     servo = p_servo;
     ir_sensor = p_ir_sensor;
+    etape_globale = p_etape_globale;
 }
 
 
@@ -22,10 +23,16 @@ Allume les deux moteurs à une vitesse en (entre 0 et 255)
 Avancer en ligne droite, on veut juste que chaque moteur avance de tick_distance ticks
 */
 // TODO : rajouter un flag pour dire si on doit exécuter la fonction ou pas car si on l'appelle deux fois elle va péter son crane
-std::tuple<float,float,unsigned long> Pami::avancer_asservi(float consigne_l, float consigne_r, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
-{
+std::tuple<float,float,unsigned long> Pami::avancer_asservi(int etape_d_appel,float consigne_l, float consigne_r, float old_ticks_l, float old_ticks_r, unsigned long oldtime)
+{   
+    // Si c'est pas l'étape à laquelle on veut l'appeler, 
+    // aucune des variables du main n'est modifiée
+    if (etape_d_appel != *etape_globale){
+        return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
+    }
+    Serial.println("etape" + String(etape_d_appel));
     /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
-    En gros :
+    En gros :s
     erreur = ticksG - ticksD
     correction = Kp * erreur
 
@@ -40,7 +47,6 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(float consigne_l, fl
     float marge_erreur_ticks = 500;
     float nb_ticks_par_sec_max = 1;
 
-    
     // Si l’intervalle n’est pas écoulé -> on ne fait rien
     if (millis() - oldtime < interval_asserv) {
         return std::make_tuple(old_ticks_l, old_ticks_r, oldtime);
@@ -102,6 +108,7 @@ std::tuple<float,float,unsigned long> Pami::avancer_asservi(float consigne_l, fl
             // ON RENTRE !!
             moteur_l->set_speed(0);
             moteur_r->set_speed(0);
+            (*etape_globale)++;
         }
 
         // On renvoie les nouvelles valeurs

@@ -3,6 +3,7 @@
  * @brief Programme principal , a implementer dans la pami
  */
 
+#include "esp32-hal.h"
 #include <Pami.h>
 #include <Arduino.h>
 #include <ESP32Encoder.h>
@@ -17,8 +18,10 @@ Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
 Mesure_pos mesure_pos = Mesure_pos(&encodeur_r, &encodeur_l);
 
+int etape_globale;
+std::tuple<float, float, unsigned long> resultat;
 // La pami en elle même
-Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &ir_sensor);
+Pami pami = Pami(&etape_globale,&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &ir_sensor);
 
 float global_time = 0; // Variable global du temps
 float pos_x;
@@ -27,6 +30,8 @@ float angle;
 
 float new_ticks_l, new_ticks_r,newtime;
 float old_ticks_l,old_ticks_r,oldtime;
+
+
 
 void setup()
 {
@@ -112,27 +117,55 @@ void setup()
     //setup
     encodeur_l.clear_count();
     encodeur_r.clear_count();
+
+    // initialisation de la strat avec les étapes à 0
+    etape_globale=0;
+    oldtime=millis();
+    newtime=millis();
+    resultat = std::make_tuple(0, 0, 0);
 }
+
 
 
 void loop()
 {
+    float consigne_l = 5000;
+    float consigne_r = 5000;
+    
+    if (etape_globale != 1){
+        new_ticks_l=std::get<0>(resultat);
+        new_ticks_r=std::get<1>(resultat);
+        newtime = std::get<2>(resultat);
+        old_ticks_l=new_ticks_l;
+        old_ticks_r = new_ticks_r;
+        oldtime=newtime;
+    }
 
+    switch (etape_globale)
+    {
+        case 0: // --- TEST 1 : TIRETTE & INTERRUPTEURS ---
+        {
 
-    float consigne_l = 10000;
-    float consigne_r = 10000;
-    
-    auto resultat = pami.avancer_asservi(consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
-    
-    new_ticks_l=std::get<0>(resultat);
-    new_ticks_r=std::get<1>(resultat);
-    newtime = std::get<2>(resultat);
-
-    old_ticks_l=new_ticks_l;
-    old_ticks_r = new_ticks_r;
-    oldtime=newtime;
-    
-    
+            resultat = pami.avancer_asservi(0,consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
+            break;
+        }
+        case 1:
+        {
+            if (millis()-oldtime > 1000){
+                etape_globale=2;
+                break;
+            }
+            
+        }
+        case 2:
+        {
+            resultat = pami.avancer_asservi(2,2*consigne_l,2*consigne_r,old_ticks_l,old_ticks_r,oldtime);
+            break;
+        }
+    }
+        
+    Serial.print("Etape_globale : \t");
+    Serial.println(etape_globale);
 
     // pami.go_to(100, 0, SPEED);
 
@@ -145,8 +178,7 @@ void loop()
     // i = 1;
     // }
 
-    
+        
     // pami.print_log();
     // pami.start_match();
-
 }

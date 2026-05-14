@@ -33,13 +33,14 @@ public:
     float pos_init_x;
     float pos_init_y;
 
-    long m_time;
+    // long m_time;
+    int *etape_globale;
 
-    Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
+    Pami(int *p_ordre_d_appel,Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Mesure_pos *p_mesure_pos, Serv *p_servo, Irsensor *p_ir_sensor = nullptr, Ultrason *p_ultrason = nullptr);
 
     
     void test(int mode);
-    std::tuple<float, float, unsigned long> avancer_asservi(float consigne_l, float consigne_r,float old_ticks_l,float old_ticks_r,unsigned long oldtime);
+    std::tuple<float, float, unsigned long> avancer_asservi(int ordre_d_appel,float consigne_l, float consigne_r,float old_ticks_l,float old_ticks_r,unsigned long oldtime);
 
     void setup();
     void print_log();
