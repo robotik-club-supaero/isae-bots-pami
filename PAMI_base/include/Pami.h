@@ -24,9 +24,11 @@ public:
     Irsensor *m_p_ir_sensor;
 
     bool m_match_demarre = false;
-    int tirette = 1;  // Etat par défaut de la tirette
-    int equipe = 1;   // Equipe par défaut (1 = gauche = jaune)
-    int num_pami = 1; // Numéro de la pami
+    int tirette = 1;    // Etat par défaut de la tirette
+    int equipe = 1;     // Equipe par défaut (1 = gauche = jaune)
+    int num_pami = 1;   // Numéro de la pami
+    int int_pami_1 = 0; // Etat interrupteur 1
+    int int_pami_2 = 0; // Etat interrupteur 2
 
     float pos_x;
     float pos_y;
@@ -53,11 +55,12 @@ public:
     void print_infos_interrupteur();
     void set_initial_position(float pos_initial_x, float pos_initial_y);
 
-    void go_to(float pos_target_x, float pos_target_y, int speed = SPEED);
+    void go_to_asserv(float pos_target_x, float pos_target_y, int speed = SPEED);
     void avancer_asserv(float distance, int speed = SPEED);
     void reculer_asserv(float distance, int speed = SPEED);
     void tourner_asserv(float angle_degres, float speed = SPEED);
 
+    void go_to(float distance_x, float distance_y, int speed = SPEED);
     void avancer(float distance, int speed = SPEED);
     void reculer(float distance, int speed = SPEED);
     void tourner(float angle_degres, float speed = SPEED);

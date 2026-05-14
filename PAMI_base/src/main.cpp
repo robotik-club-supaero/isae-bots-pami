@@ -1,5 +1,5 @@
 /**
- * @file main.cpp
+ * @file ain.cpp
  * @brief Programme principal , a implementer dans la pami
  */
 
@@ -47,15 +47,26 @@ void setup()
         delay(500);
     }
 
+    // pami.test(8);
+
+    pami.tirette = digitalRead(PIN_TIRETTE);
+    pami.equipe = digitalRead(PIN_READEQUIPE);
+    pami.num_pami = (digitalRead(PIN_INT_PAMI_1) * 2) + digitalRead(PIN_INT_PAMI_2) + 1;
+
     time_start_match = millis();
 }
 
+bool start_moving = false;
+
 void loop()
 {
-    if (millis() - time_start_match >= GLOBALTIME) // 100 000 ms = 100s
+    static unsigned long time_last_log = 0;
+    static unsigned long time_last_sensor = 0;
+
+    if (millis() - time_start_match >= GLOBALTIME)
     {
-        Serial.println("Temps de match écoulé - Arrêt du robot.");
         pami.set_speed(0);
+        Serial.println("Temps de match écoulé - Arrêt du robot.");
         while (true)
         {
             pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
@@ -63,28 +74,28 @@ void loop()
         }
     }
 
-    if ((millis() - time_start_match) > START_TIME and (millis() - time_start_match) <= GLOBALTIME)
+    if ((millis() - time_start_match) > START_TIME && (millis() - time_start_match) < GLOBALTIME)
     {
-        float dist = pami.get_IR_distance();
-        Serial.print("Distance mesuree : ");
-        Serial.print(dist / 10.0);
-        Serial.println(" cm");
-
-        if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
+        if (!start_moving)
         {
-            Serial.println("Obstacle détecté ! Arrêt du robot.");
-            pami.set_speed(0);
+            if (pami.num_pami == 1)
+            {
+                if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+                {
+                    Serial.println("Action Match : PAMI 1 BLEUE");
+                    // pami.avancer(700);
+                    pami.go_to(700, 700);
+                    start_moving = true;
+                }
+            }
         }
-        else
-        {
-            pami.set_speed(SPEED);
-        }
-        delay(200);
     }
 
-    // pami.start_match();
+    if (millis() - time_last_log >= 1000)
+    {
+        pami.print_log();
+        Serial.println("------------- Time since start match : " + String((millis() - time_start_match) / 1000) + " s -------------");
 
-    pami.print_log();
-    Serial.println("------------- Time since start match : " + String((millis() - time_start_match) / 1000) + " s -------------");
-    delay(1000);
+        time_last_log = millis();
+    }
 }

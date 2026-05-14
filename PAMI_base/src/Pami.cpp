@@ -292,6 +292,9 @@ void Pami::setup()
     Serial.begin(115200); // Initialisation de la communication série
     Serial.println("---------- Setup starting ----------");
 
+    pinMode(PIN_LED, OUTPUT);
+    digitalWrite(PIN_LED, HIGH); // LED ON pour indiquer le début du setup
+
     // Setup ultrason
     if (m_p_ultrason != nullptr) // pas d'ultrason cette année
     {
@@ -323,22 +326,35 @@ void Pami::setup()
     m_p_asserv->setup();
     Serial.println("Setup Done : Asservissement");
 
-    // pinMode(LED, OUTPUT);
-    // digitalWrite(LED, 1); // LED ON pour indiquer le setup réussi
-
     pinMode(PIN_TIRETTE, INPUT);
     pinMode(PIN_READEQUIPE, INPUT);
     pinMode(PIN_INT_PAMI_1, INPUT);
     pinMode(PIN_INT_PAMI_2, INPUT);
 
     this->config_start_position();
-    Serial.println("Setup Done : Tirette & Equipe & PAMI");
-    // Faire une fonction log qui donne couleur équipe & numéro pami
     this->print_infos_interrupteur();
+
+    Serial.println("Setup Done : Tirette & Equipe & PAMI");
 
     m_time_log = millis();
 
     Serial.println("\n---------- Setup over ----------\n\n");
+    digitalWrite(PIN_LED, LOW);
+}
+
+/*
+
+Fonctions de déplacement basiques (sans asservissement, juste pour tester les fonctions de base et régler les gains K_NAIF et K_ANGLE_NAIF
+
+*/
+void Pami::go_to(float distance_x, float distance_y, int speed)
+{
+    this->avancer(distance_x, speed);
+    delay(200);
+    this->tourner(90, speed);
+    delay(200);
+    this->avancer(distance_y, speed);
+    delay(200);
 }
 
 void Pami::avancer(float distance, int speed)
@@ -357,9 +373,6 @@ void Pami::avancer(float distance, int speed)
     while (millis() - function_start_time < moving_time)
     {
         float dist = this->get_IR_distance();
-        Serial.print("Distance mesuree : ");
-        Serial.print(dist / 10.0);
-        Serial.println(" cm");
 
         if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
         {
@@ -409,9 +422,6 @@ void Pami::reculer(float distance, int speed)
     this->set_speed(0);
 }
 
-/*
-Tourner dans le sens trigo
-*/
 void Pami::tourner(float angle_degres, float speed)
 {
     m_p_moteur_d->set_speed(speed);
@@ -423,7 +433,7 @@ void Pami::tourner(float angle_degres, float speed)
 /*
 Fonction de test pour aller a une position (x, y) [mm & mm] du plateau
 */
-void Pami::go_to(float pos_final_x, float pos_final_y, int speed)
+void Pami::go_to_asserv(float pos_final_x, float pos_final_y, int speed)
 {
     m_p_mesure_pos->loop();
     pos_x = m_p_mesure_pos->position_x + pos_init_x;
@@ -871,10 +881,10 @@ void Pami::print_log()
 
 void Pami::print_infos_interrupteur()
 {
-    int equipe = digitalRead(PIN_READEQUIPE);
-    int tirette = digitalRead(PIN_TIRETTE);
-    int int_pami_1 = digitalRead(PIN_INT_PAMI_1);
-    int int_pami_2 = digitalRead(PIN_INT_PAMI_2);
+    equipe = digitalRead(PIN_READEQUIPE);
+    tirette = digitalRead(PIN_TIRETTE);
+    int_pami_1 = digitalRead(PIN_INT_PAMI_1);
+    int_pami_2 = digitalRead(PIN_INT_PAMI_2);
 
     if (tirette == 1)
     {
@@ -914,20 +924,15 @@ void Pami::print_infos_interrupteur()
 
 void Pami::action_match()
 {
+    num_pami = (digitalRead(PIN_INT_PAMI_1) * 2) + digitalRead(PIN_INT_PAMI_2) + 1;
+    equipe = digitalRead(PIN_READEQUIPE);
+
     if (num_pami == 1)
     {
-        if (equipe == 1)
+        if (equipe == 0)
         {
-            this->avancer(200);
-            delay(100);
-            this->tourner(-45);
-            delay(100);
-            this->avancer(300);
-            delay(100);
-            this->tourner(45);
-            delay(100);
-            this->avancer(500);
-            delay(100);
+            Serial.println("Action Match : PAMI 1 BLEUE");
+            this->avancer(700);
         }
         else
         {
@@ -945,7 +950,7 @@ void Pami::action_match()
     }
     else if (num_pami == 2)
     {
-        if (equipe == 1)
+        if (equipe == 0)
         {
             this->avancer(200);
             delay(100);
@@ -974,7 +979,7 @@ void Pami::action_match()
     }
     else if (num_pami == 3)
     {
-        if (equipe == 1)
+        if (equipe == 0)
         {
             this->avancer(200);
             delay(100);
@@ -1003,7 +1008,7 @@ void Pami::action_match()
     }
     else if (num_pami == 4)
     {
-        if (equipe == 1)
+        if (equipe == 0)
         {
             this->avancer(200);
             delay(100);

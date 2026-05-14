@@ -10,22 +10,22 @@
 /*
 MOTEURS
 */
-#define EN_L 32  // M1 EN RIGHT MOTEUR
-#define IN1_L 14 // M1 IN1 RIGHT MOTEUR
-#define IN2_L 27 // M1 IN2 RIGHT MOTEUR
+#define EN_L 32  // M1 EN LEFT MOTEUR
+#define IN1_L 14 // M1 IN1 LEFT MOTEUR
+#define IN2_L 27 // M1 IN2 LEFT MOTEUR
 
-#define EN_R 26  // M2 EN LEFT MOTEUR
-#define IN1_R 25 // M2 IN1 LEFT MOTEUR
-#define IN2_R 33 // M2 IN2 LEFT MOTEUR
+#define EN_R 26  // M2 EN RIGHT MOTEUR
+#define IN1_R 25 // M2 IN1 RIGHT MOTEUR
+#define IN2_R 33 // M2 IN2 RIGHT MOTEUR
 
 /*
 ENCODEURS
 */
-#define CLK_L 39 // C1 RIGHT ENCODER
-#define DT_L 36  // C2 RIGHT ENCODER
+#define CLK_L 39 // C1 LEFT ENCODER
+#define DT_L 36  // C2 LEFT ENCODER
 
-#define CLK_R 35 // C1 LEFT ENCODER
-#define DT_R 34  // C2 LEFT ENCODER
+#define CLK_R 35 // C1 RIGHT ENCODER
+#define DT_R 34  // C2 RIGHT ENCODER
 
 /*
 A tester avec print_vitesse ou print_encodeur pour que les vitesses soient positives et que le robot avance
@@ -33,10 +33,10 @@ A tester avec print_vitesse ou print_encodeur pour que les vitesses soient posit
     Mais modifier le sens encodeur ne change pas le sens moteur
 # Mention abominable
 */
-#define INV_ENC_R 1 // Inversion du sens de rotation de l'encodeur gauche
-#define INV_MOT_R 0 // Inversion du sens de rotation du moteur gauche
+#define INV_ENC_R 1 // Inversion du sens de rotation de l'encodeur droit
+#define INV_MOT_R 0 // Inversion du sens de rotation du moteur droit
 
-#define INV_ENC_L 0 // Inversion du sens de rotation de l'encodeur droit
+#define INV_ENC_L 0 // Inversion du sens de rotation de l'encodeur gauche
 #define INV_MOT_L 1 // Inversion du sens de rotation du moteur gauche
 
 /*
@@ -59,7 +59,7 @@ SERVO
 #define SERVPIN 18 // Broche du servo moteur sur D15
 #define ANGLE1 0   // Valeur en degrés comprises entre 0° et 180° max
 #define ANGLE2 180
-#define TEMPS_BLINK 1000 // Temps clignotement (ms).
+#define TEMPS_BLINK 500 // Temps clignotement (ms).
 
 /*
 MACHINE A ETAT
@@ -68,7 +68,7 @@ MACHINE A ETAT
 //  equipe = 1 : on est du coté gauche (jaune).
 //  equipe = 0 : on est du coté droit (bleue).
 
-#define LED 2             // PIN LED pour le setup
+#define PIN_LED 2         // PIN LED pour le setup
 #define PIN_READEQUIPE 19 // PIN pour lire l'interrupteur qui defini l'équipe
 #define PIN_TIRETTE 23    // PIN de la tirette pour lancer le match
 
@@ -84,10 +84,10 @@ MACHINE A ETAT
 /*
 Paramètres globaux
 */
-#define GLOBALTIME 99000 // Temps global de la pami en ms (99s)
-#define START_TIME 85000 // Les pamis commencent dans les 15 dernières secondes.
-#define SPEED 200        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
-#define DISTANCE_MIN 200 // Distance minimale pour éviter un obstacle en mm
+#define GLOBALTIME 29000 // Temps global de la pami en ms (99s)
+#define START_TIME 5000  // Les pamis commencent dans les 15 dernières secondes.
+#define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
+#define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
 #define EPSA 0.1         // Incertitude position, radian
 
@@ -95,7 +95,7 @@ Paramètres globaux
 Gains naifs pour réellement avancer de 10cm avec un delay
 */
 #define K_NAIF 1.402
-#define K_ANGLE_NAIF 2.753
+#define K_ANGLE_NAIF 1.7
 
 /*
 Paramètres de l'asservissement
