@@ -28,9 +28,9 @@ public:
     float pos_init_x;
     float pos_init_y;
 
-    int *etape_globale;
+    int etape_globale;
 
-    Pami(int *p_ordre_d_appel,Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Serv *p_servo, Irsensor *p_ir_sensor = nullptr);
+    Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Serv *p_servo, Irsensor *p_ir_sensor = nullptr);
 
     
     void test(int mode);

@@ -18,9 +18,8 @@ Moteur moteur_l = Moteur(EN_L, IN1_L, IN2_L, INV_MOT_L);
 Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
 
-int etape_globale;
 // La pami en elle même
-Pami pami = Pami(&etape_globale,&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
+Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
 
 float pos_x;
 float pos_y;
@@ -32,6 +31,11 @@ unsigned long newtime_ir;
 unsigned long oldtime_ir;
 
 int equipe;
+
+// initialisation de la strat avec les étapes à 0
+// ne VRAIMENT pas le bouger d'ici, notamment pas le mettre dans le setup
+// c'est une variable extern donc ici on lui assigne juste sa valeur
+int etape_globale=0;
 
 void delay_non_bloquant(int etape_d_appel, unsigned long oldtime){
     if ((millis()-oldtime > DELAY_TIME ) && (etape_globale == etape_d_appel) ){
@@ -86,17 +90,6 @@ void setup()
     Serial.print("Equipe : ");
     Serial.println(color_equipe);
 
-    // Setup de la position
-    if (equipe == 1) // JAUNE
-    {
-        pos_x = J_POSITION_DEPART_X;
-        pos_y = J_POSITION_DEPART_Y;
-    }
-    else
-    {
-        pos_x = B_POSITION_DEPART_X;
-        pos_y = B_POSITION_DEPART_Y;
-    }
 
     Serial.println("---------- Setup over ----------\n\n");
 
@@ -122,8 +115,7 @@ void setup()
     oldtime_ir=millis();
     newtime_ir=millis();
 
-    // initialisation de la strat avec les étapes à 0
-    etape_globale=-1;
+    
 
 
     // digitalWrite(LED, 1); // LED ON pour indiquer le setup réussi
@@ -176,53 +168,51 @@ void loop()
     float angle = (equipe == 1) ? 90:-90;
     float angle2 = (equipe == 1) ? 10:-10;
 
-    newtime = pami.avancer_asservi(-1,43,oldtime);
+    newtime = pami.avancer_asservi(0,43,oldtime);
     
-    newtime = pami.tourner_asservi(0,-angle,oldtime);
+    newtime = pami.tourner_asservi(1,-angle,oldtime);
 
-    newtime = pami.avancer_asservi(1,26,oldtime);
+    newtime = pami.avancer_asservi(2,26,oldtime);
 
     // recallage
     
-    newtime = pami.avancer_asservi(2,-33,oldtime);
+    newtime = pami.avancer_asservi(3,-33,oldtime);
 
-    newtime = pami.avancer_asservi(3,5,oldtime);
+    newtime = pami.avancer_asservi(4,5,oldtime);
 
     // avance vers 2ème caisse
 
-    newtime = pami.tourner_asservi(4,angle,oldtime);
+    newtime = pami.tourner_asservi(5,angle,oldtime);
 
-    newtime = pami.avancer_asservi(5,27,oldtime);
+    newtime = pami.avancer_asservi(6,27,oldtime);
 
-    newtime = pami.tourner_asservi(6,-angle,oldtime);
+    newtime = pami.tourner_asservi(7,-angle,oldtime);
 
     // pousse 2ème caisse
     
-    newtime = pami.avancer_asservi(7,24,oldtime);
+    newtime = pami.avancer_asservi(8,24,oldtime);
 
 
 
 
-    // newtime = pami.avancer_asservi(9,-26,oldtime);
+    newtime = pami.avancer_asservi(9,-26,oldtime);
 
-    // newtime = pami.avancer_asservi(10,3,oldtime);
+    newtime = pami.avancer_asservi(10,3,oldtime);
 
     // retourner à la position de départ
 
-    // newtime = pami.tourner_asservi(11,angle,oldtime);
-    // newtime = pami.avancer_asservi(12, -73,oldtime);
-    // newtime = pami.avancer_asservi(13,5,oldtime);
+    newtime = pami.tourner_asservi(11,angle,oldtime);
+    newtime = pami.avancer_asservi(12, -73,oldtime);
+    newtime = pami.avancer_asservi(13,5,oldtime);
 
-    // newtime = pami.tourner_asservi(14,-angle,oldtime);
-    // newtime = pami.avancer_asservi(15,25,oldtime);
-    // newtime = pami.tourner_asservi(16,angle,oldtime);
-    // newtime = pami.avancer_asservi(17,27,oldtime);
-    // newtime = pami.tourner_asservi(18,-angle,oldtime);
+    newtime = pami.tourner_asservi(14,-angle,oldtime);
+    newtime = pami.avancer_asservi(15,25,oldtime);
+    newtime = pami.tourner_asservi(16,angle,oldtime);
+    newtime = pami.avancer_asservi(17,27,oldtime);
+    newtime = pami.tourner_asservi(18,-angle,oldtime);
 
-    
-    newtime = pami.tourner_asservi(8,-angle2,oldtime);
 
-    if (etape_globale==9){
+    if (etape_globale==19){
         servo.blink(TEMPS_BLINK,0,90);
     }
 }

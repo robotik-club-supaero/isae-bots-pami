@@ -99,13 +99,12 @@ Paramètres de l'asservissement
 #define DELAY_TIME 500 //pour le delay entre 2 actions de déplacement
 
 
-// Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLEU (droite))
 
-#define J_POSITION_DEPART_X 0
-#define J_POSITION_DEPART_Y 0
+// Permet de numéroter les fonctions non-bloquantes pour les appeler dans l'ordre
+// C'est un extern pour pouvoir le partager à la classe pami et au main.cpp
+// Il est remis à 0 dans le setup du main.
+extern int etape_globale;
 
-// TODO : changer les positions de départ pour bleu
-#define B_POSITION_DEPART_X 0
-#define B_POSITION_DEPART_Y 0
+
 
 #endif

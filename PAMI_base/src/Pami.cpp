@@ -2,7 +2,7 @@
 #include <Pami.h>
 #include <define.h>
 
-Pami::Pami(int *p_etape_globale, Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Serv *p_servo, Irsensor *p_ir_sensor)
+Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Serv *p_servo, Irsensor *p_ir_sensor)
 {
     moteur_r = p_moteur_r;
     moteur_l = p_moteur_l;
@@ -10,7 +10,6 @@ Pami::Pami(int *p_etape_globale, Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeu
     encodeur_l = p_encodeur_l;
     servo = p_servo;
     ir_sensor = p_ir_sensor;
-    etape_globale = p_etape_globale;
 }
 
 
@@ -22,7 +21,7 @@ unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigne
 {   
     // Si c'est pas l'étape à laquelle on veut l'appeler, 
     // aucune des variables du main n'est modifiée
-    if (etape_d_appel != *etape_globale){
+    if (etape_d_appel != etape_globale){
         return oldtime;
     }
     /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
@@ -93,7 +92,7 @@ unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigne
             moteur_r->set_speed(0);
             encodeur_l->clear_count();
             encodeur_r->clear_count();
-            (*etape_globale)++;
+            etape_globale++;
             
         }
 
@@ -107,7 +106,7 @@ unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsi
 {   
     // Si c'est pas l'étape à laquelle on veut l'appeler, 
     // aucune des variables du main n'est modifiée
-    if (etape_d_appel != *etape_globale){
+    if (etape_d_appel != etape_globale){
         return oldtime;
     }
     /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
@@ -187,7 +186,7 @@ unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsi
             moteur_r->set_speed(0);
             encodeur_l->clear_count();
             encodeur_r->clear_count();
-            (*etape_globale)++;
+            etape_globale++;
         }
 
         // On renvoie les nouvelles valeurs
