@@ -3,7 +3,7 @@
  * @brief fichier de configuration des pins pour la pami )
  */
 
-// TODO REGLER LES PINS AVANT LA COUPE AVEC L'ELEC
+// TODO REGLER LES PINS & LES GAINS AVANT LA COUPE AVEC L'ELEC
 #ifndef DEFINE_H
 #define DEFINE_H
 
@@ -40,7 +40,7 @@ A tester avec print_vitesse ou print_encodeur pour que les vitesses soient posit
 #define INV_MOT_L 1 // Inversion du sens de rotation du moteur gauche
 
 /*
-SENSORS (IR, Ultrason, ect...)
+SENSORS (IR, Ultrason, etc...)
 L'IR Sensor demande :
     - PIN I2C SCL & SDA définits dessous
     - Pin AVDD & IOVDD à 3.3V (pas de 5V)
@@ -62,7 +62,7 @@ SERVO
 #define TEMPS_BLINK 500 // Temps clignotement (ms).
 
 /*
-MACHINE A ETAT
+CONFIG DES PAMI
 */
 // Le coté est défini quand on est face à la scène.
 //  equipe = 1 : on est du coté gauche (jaune).
@@ -85,7 +85,7 @@ MACHINE A ETAT
 Paramètres globaux
 */
 #define ENDTIME 99000    // Temps global de la pami en ms (99s)
-#define START_TIME 5000  // Les pamis commencent dans les 15 dernières secondes.
+#define START_TIME 2000  // Les pamis commencent dans les 15 dernières secondes.
 #define DELAY_TIME 200   // Temps de delay pour les fonctions non bloquantes
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 150 // Distance minimale pour éviter un obstacle en mm

@@ -89,8 +89,17 @@ void setup()
 void loop()
 {
     static unsigned long time_last_log = 0;
+    oldtime = newtime; // Enlever pour les delays
 
     pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
+
+    // float dist = pami.get_IR_distance();
+
+    // if (dist < DISTANCE_MIN && dist > 0.5) // Si un obstacle est détecté à moins de 20 cm
+    // {
+    //     Serial.println("Obstacle détecté ! Arrêt du robot.");
+    //     return;
+    // }
 
     if (millis() - pami.m_time_match >= ENDTIME)
     {
@@ -102,55 +111,55 @@ void loop()
         }
     }
 
-    if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
-    {
-        pami.print_infos_interrupteur();
-        if (pami.num_pami == 1)
-        {
-            if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-            {
-                newtime = pami.avancer_asservi(0, B_POSITION_1_FINAL_Y, oldtime);
-                newtime = pami.tourner_asservi(1, -90, oldtime);
-                newtime = pami.avancer_asservi(2, B_POSITION_1_FINAL_X, oldtime);
-            }
-            else
-            {
-                newtime = pami.avancer_asservi(0, J_POSITION_1_FINAL_Y, oldtime);
-                newtime = pami.tourner_asservi(1, 90, oldtime);
-                newtime = pami.avancer_asservi(2, J_POSITION_1_FINAL_X, oldtime);
-            }
-        }
-        else if (pami.num_pami == 2)
-        {
-            if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-            {
-                newtime = pami.avancer_asservi(0, B_POSITION_2_FINAL_Y, oldtime);
-                newtime = pami.tourner_asservi(1, -90, oldtime);
-                newtime = pami.avancer_asservi(2, B_POSITION_2_FINAL_X, oldtime);
-            }
-            else
-            {
-                newtime = pami.avancer_asservi(0, J_POSITION_2_FINAL_Y, oldtime);
-                newtime = pami.tourner_asservi(1, 90, oldtime);
-                newtime = pami.avancer_asservi(2, J_POSITION_2_FINAL_X, oldtime);
-            }
-        }
-        else if (pami.num_pami == 3)
-        {
-            if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-            {
-                newtime = pami.avancer_asservi(0, B_POSITION_3_FINAL_Y, oldtime);
-                newtime = pami.tourner_asservi(1, -90, oldtime);
-                newtime = pami.avancer_asservi(2, B_POSITION_3_FINAL_X, oldtime);
-            }
-            else
-            {
-                newtime = pami.avancer_asservi(0, J_POSITION_3_FINAL_Y, oldtime);
-                newtime = pami.tourner_asservi(1, 90, oldtime);
-                newtime = pami.avancer_asservi(2, J_POSITION_3_FINAL_X, oldtime);
-            }
-        }
-    }
+    // if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
+    // {
+    //     pami.print_infos_interrupteur();
+    //     if (pami.num_pami == 1)
+    //     {
+    //         if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+    //         {
+    //             newtime = pami.avancer_asservi(0, B_POSITION_1_FINAL_Y, oldtime);
+    //             newtime = pami.tourner_asservi(1, -90, oldtime);
+    //             newtime = pami.avancer_asservi(2, B_POSITION_1_FINAL_X, oldtime);
+    //         }
+    //         else
+    //         {
+    //             newtime = pami.avancer_asservi(0, J_POSITION_1_FINAL_Y, oldtime);
+    //             newtime = pami.tourner_asservi(1, 90, oldtime);
+    //             newtime = pami.avancer_asservi(2, J_POSITION_1_FINAL_X, oldtime);
+    //         }
+    //     }
+    //     else if (pami.num_pami == 2)
+    //     {
+    //         if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+    //         {
+    //             newtime = pami.avancer_asservi(0, B_POSITION_2_FINAL_Y, oldtime);
+    //             newtime = pami.tourner_asservi(1, -90, oldtime);
+    //             newtime = pami.avancer_asservi(2, B_POSITION_2_FINAL_X, oldtime);
+    //         }
+    //         else
+    //         {
+    //             newtime = pami.avancer_asservi(0, J_POSITION_2_FINAL_Y, oldtime);
+    //             newtime = pami.tourner_asservi(1, 90, oldtime);
+    //             newtime = pami.avancer_asservi(2, J_POSITION_2_FINAL_X, oldtime);
+    //         }
+    //     }
+    //     else if (pami.num_pami == 3)
+    //     {
+    //         if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+    //         {
+    //             newtime = pami.avancer_asservi(0, B_POSITION_3_FINAL_Y, oldtime);
+    //             newtime = pami.tourner_asservi(1, -90, oldtime);
+    //             newtime = pami.avancer_asservi(2, B_POSITION_3_FINAL_X, oldtime);
+    //         }
+    //         else
+    //         {
+    //             newtime = pami.avancer_asservi(0, J_POSITION_3_FINAL_Y, oldtime);
+    //             newtime = pami.tourner_asservi(1, 90, oldtime);
+    //             newtime = pami.avancer_asservi(2, J_POSITION_3_FINAL_X, oldtime);
+    //         }
+    //     }
+    // }
 
     if (millis() - time_last_log >= 1000)
     {
