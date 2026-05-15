@@ -3,6 +3,7 @@
  * @brief Programme principal , a implementer dans la pami
  */
 
+#include "esp32-hal-gpio.h"
 #include "esp32-hal.h"
 #include <Pami.h>
 #include <Arduino.h>
@@ -29,6 +30,8 @@ unsigned long newtime;
 unsigned long oldtime;
 unsigned long newtime_ir;
 unsigned long oldtime_ir;
+
+int equipe;
 
 void delay_non_bloquant(int etape_d_appel, unsigned long oldtime){
     if ((millis()-oldtime > DELAY_TIME ) && (etape_globale == etape_d_appel) ){
@@ -63,10 +66,12 @@ void setup()
     encodeur_l.setup();
     Serial.println("Setup Done : Encodeurs");
 
+    // LED intégrée à l'ESP32 pour blink quand la pompe est activée
+    pinMode(LED, OUTPUT);
 
-    // LED intégrée à l'ESP32 pour blink quand la configuration est finie
-    // pinMode(LED, OUTPUT);
-    // digitalWrite(LED, 1); // LED ON pour indiquer le setup réussi
+    //Pompe
+    pinMode(POMPE_PIN,OUTPUT);
+    
 
 
     // TIRETTE :
@@ -76,13 +81,13 @@ void setup()
 
     // Interrupteur choix équipe
     pinMode(PIN_READEQUIPE, INPUT);
-    int read_equipe = digitalRead(PIN_READEQUIPE);
-    String color_equipe = (read_equipe == 1) ? "JAUNE" : "BLEUE"; 
+    equipe = digitalRead(PIN_READEQUIPE);
+    String color_equipe = (equipe == 1) ? "JAUNE" : "BLEUE"; 
     Serial.print("Equipe : ");
     Serial.println(color_equipe);
 
     // Setup de la position
-    if (read_equipe == 1) // JAUNE
+    if (equipe == 1) // JAUNE
     {
         pos_x = J_POSITION_DEPART_X;
         pos_y = J_POSITION_DEPART_Y;
@@ -95,10 +100,7 @@ void setup()
 
     Serial.println("---------- Setup over ----------\n\n");
 
-    // On remet a 0 les positions car la roue tourne pendant l'upload 
-    // (car l'esp32 utilise le pin du moteur pendant l'upload)
-    encodeur_l.clear_count();
-    encodeur_r.clear_count();
+    
 
     // On attends le début du match, on mettra ensuite toute la stratégie dans la loop qui tourne en continu
     bool tirette_en_place = digitalRead(PIN_TIRETTE);
@@ -108,6 +110,11 @@ void setup()
     }
     Serial.println("Tirette enlevée, début du match");
     
+    // On remet a 0 les positions car la roue tourne pendant l'upload 
+    // (car l'esp32 utilise le pin du moteur pendant l'upload)
+    encodeur_l.clear_count();
+    encodeur_r.clear_count();
+
     // On commence les timers
     oldtime=millis();
     newtime=millis();
@@ -116,13 +123,23 @@ void setup()
     newtime_ir=millis();
 
     // initialisation de la strat avec les étapes à 0
-    etape_globale=0;
+    etape_globale=-1;
+
+
+    // digitalWrite(LED, 1); // LED ON pour indiquer le setup réussi
+    // digitalWrite(POMPE_PIN,HIGH);
+    // digitalWrite(LED,HIGH);
+    // delay(60000);
+    // digitalWrite(POMPE_PIN,LOW);
+    // digitalWrite(LED,LOW);
+
 }
 
 
 
 void loop()
 {
+    // Pour faire des delais : 
     // penser à ne pas updater le temps dans les délais !
     // remplir ici : 
     // int etapes_avec_delays[] = {1,3,5};
@@ -138,33 +155,74 @@ void loop()
     
 
     oldtime = newtime;
-    if (millis() - oldtime > 4*INTERVAL_ASSERV) {
-        Serial.print("Etape globale = "+String(etape_globale));
-        Serial.println("\t Distance IR = " + String(ir_sensor.ir_minimum_distance));
+    if (millis() - oldtime > 8 * INTERVAL_ASSERV) {
+        Serial.print("Etape globale = "+String(etape_globale)+"\t");
+        // Serial.println("\t Distance IR = " + String(ir_sensor.ir_minimum_distance));
+        
     }
 
-    oldtime_ir = newtime_ir;
-    newtime_ir = ir_sensor.loop(oldtime_ir);
-    if (ir_sensor.ir_minimum_distance<DISTANCE_MIN && ir_sensor.ir_minimum_distance>5){
-        
-        moteur_l.set_speed(0);
-        moteur_r.set_speed(0);
 
-    }
-    else {
-        float consigne = 40;
-        newtime = pami.avancer_asservi(0,consigne,oldtime);
 
-        // delay_non_bloquant(1, oldtime);
+    // Si on veut de l'IR : 
+    // oldtime_ir = newtime_ir;
+    // newtime_ir = ir_sensor.loop(oldtime_ir);
+    // if (ir_sensor.ir_minimum_distance<DISTANCE_MIN && ir_sensor.ir_minimum_distance>5){
+    //     moteur_l.set_speed(0);
+    //     moteur_r.set_speed(0);
+    // }
+    // else { // mettre ici la strat }
 
-        newtime = pami.tourner_asservi(1,180,oldtime);
+    
+    float angle = (equipe == 1) ? 90:-90;
+    float angle2 = (equipe == 1) ? 10:-10;
 
-        // delay_non_bloquant(3, oldtime);
+    newtime = pami.avancer_asservi(-1,43,oldtime);
+    
+    newtime = pami.tourner_asservi(0,-angle,oldtime);
 
-        newtime = pami.avancer_asservi(2,consigne,oldtime);
-        
-        // delay_non_bloquant(5, oldtime);
+    newtime = pami.avancer_asservi(1,26,oldtime);
 
-        newtime = pami.tourner_asservi(3,-180,oldtime);
+    // recallage
+    
+    newtime = pami.avancer_asservi(2,-33,oldtime);
+
+    newtime = pami.avancer_asservi(3,5,oldtime);
+
+    // avance vers 2ème caisse
+
+    newtime = pami.tourner_asservi(4,angle,oldtime);
+
+    newtime = pami.avancer_asservi(5,27,oldtime);
+
+    newtime = pami.tourner_asservi(6,-angle,oldtime);
+
+    // pousse 2ème caisse
+    
+    newtime = pami.avancer_asservi(7,24,oldtime);
+
+
+
+
+    // newtime = pami.avancer_asservi(9,-26,oldtime);
+
+    // newtime = pami.avancer_asservi(10,3,oldtime);
+
+    // retourner à la position de départ
+
+    // newtime = pami.tourner_asservi(11,angle,oldtime);
+    // newtime = pami.avancer_asservi(12, -73,oldtime);
+    // newtime = pami.avancer_asservi(13,5,oldtime);
+
+    // newtime = pami.tourner_asservi(14,-angle,oldtime);
+    // newtime = pami.avancer_asservi(15,25,oldtime);
+    // newtime = pami.tourner_asservi(16,angle,oldtime);
+    // newtime = pami.avancer_asservi(17,27,oldtime);
+    // newtime = pami.tourner_asservi(18,-angle,oldtime);
+
+    
+    newtime = pami.tourner_asservi(8,-angle2,oldtime);
+
+    if (etape_globale==9){
+        servo.blink(TEMPS_BLINK,0,90);
     }
 }

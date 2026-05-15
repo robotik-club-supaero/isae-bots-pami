@@ -46,10 +46,10 @@ unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigne
         // --- Mesures actuelles ---
         float ticks_l = encodeur_l->mesure();
         float ticks_r = encodeur_r->mesure();
-        // Serial.print("ticks_l : ");
-        // Serial.print(ticks_l);
-        // Serial.print("\t ticks_r : ");
-        // Serial.print(ticks_r);
+        Serial.print("ticks_l : ");
+        Serial.print(ticks_l);
+        Serial.print("\t ticks_r : ");
+        Serial.print(ticks_r);
 
         // --- Erreurs ---
 
@@ -194,6 +194,8 @@ unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsi
         return millis();
     }
 }
+
+
 
 
 

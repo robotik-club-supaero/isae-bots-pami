@@ -94,7 +94,7 @@ Paramètres de l'asservissement
 #define KP 1
 #define INTERVAL_ASSERV 50 // en ms
 #define MARGE_ERREUR_TICKS 50
-#define GAIN_CM_TO_TICKS 20809 / 208
+#define GAIN_CM_TO_TICKS 100.04326 // c'est 20809/208
 #define GAIN_ANGLE_TO_TICKS 13.1 // à régler à la main avec un 3-6 no scope.
 #define DELAY_TIME 500 //pour le delay entre 2 actions de déplacement
 
