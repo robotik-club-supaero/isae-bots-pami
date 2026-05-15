@@ -7,12 +7,6 @@
 #ifndef DEFINE_H
 #define DEFINE_H
 
-#define TEST 1
-#define DISABLE_OBS 0
-
-#define EMPATEMENT 140.0 // Distance entre les roues en mm
-#define RAYON_ROUE 48    // Rayon des roues en mm
-
 /*
 MOTEURS
 */
@@ -92,6 +86,7 @@ Paramètres globaux
 */
 #define ENDTIME 99000    // Temps global de la pami en ms (99s)
 #define START_TIME 5000  // Les pamis commencent dans les 15 dernières secondes.
+#define DELAY_TIME 200   // Temps de delay pour les fonctions non bloquantes
 #define SPEED 255        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
 #define DISTANCE_MIN 150 // Distance minimale pour éviter un obstacle en mm
 #define EPSP 100         // Incertitude position, cm
@@ -107,28 +102,12 @@ Gains naifs pour réellement avancer de 10cm avec un delay
 Paramètres de l'asservissement
     A régler pour que le robot suive bien sa trajectoire
     Kp : gain proportionnel, plus il est grand plus le robot réagit vite à une erreur de position, mais peut causer des oscillations si trop élevé.
-    Ti : gain intégral, permet de corriger les erreurs persistantes en accumulant les erreurs passées, mais peut causer des oscillations si trop élevé.
-    Td : gain dérivé, permet de réduire les oscillations en anticipant les erreurs futures, mais peut rendre le système instable si trop élevé.
 */
-#define Kp 1.0
-#define interval_asserv 50
-#define marge_erreur_ticks 500
-#define GAIN_CM_TO_TICKS 20800 / 200
-#define GAIN_ANGLE_TO_TICKS 1
-
-#define GAIN 1.0
-
-#define KP_r 0.085
-#define KP_l 0.090
-#define KP_angle 0.0083
-
-#define TI_r 100
-#define TI_l 100
-#define TI_angle 100
-
-#define TD_r 100
-#define TD_l 100
-#define TD_angle 100
+#define KP 1.0
+#define INTERVAL_ASSERV 50
+#define MARGE_ERREUR_TICKS 500
+#define GAIN_CM_TO_TICKS 20809 / 208
+#define GAIN_ANGLE_TO_TICKS 13.1
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
 // Chaque pami à ses propres positions en cm
