@@ -1,8 +1,8 @@
 #include "esp32-hal-gpio.h"
-#include <Pami.h>
+#include <Ninja.h>
 #include <define.h>
 
-Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Serv *p_servo, Irsensor *p_ir_sensor)
+Ninja::Ninja(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encodeur *p_encodeur_l, Serv *p_servo, Irsensor *p_ir_sensor)
 {
     moteur_r = p_moteur_r;
     moteur_l = p_moteur_l;
@@ -12,33 +12,34 @@ Pami::Pami(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Encod
     ir_sensor = p_ir_sensor;
 }
 
-
-
 /*
 Avancer en ligne droite, on veut que chaque moteur avance de consigne_cm
 */
-unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigned long oldtime)
-{   
-    // Si c'est pas l'étape à laquelle on veut l'appeler, 
+unsigned long Ninja::avancer_asservi(int etape_d_appel, float consigne_cm, unsigned long oldtime)
+{
+    // Si c'est pas l'étape à laquelle on veut l'appeler,
     // aucune des variables du main n'est modifiée
-    if (etape_d_appel != etape_globale){
+    if (etape_d_appel != etape_globale)
+    {
         return oldtime;
     }
-    /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
+    /* But du gain proportionnel : faire une correction proportionnelle à l'erreur.
     En gros :s
     erreur = ticksG - ticksD
     correction = Kp * erreur
 
-    Puis on ajuste le pwm : 
+    Puis on ajuste le pwm :
     pwmG = pwmBase - correction
     pwmD = pwmBase + correction
     */
 
     // Si l’intervalle n’est pas écoulé -> on ne fait rien
-    if (millis() - oldtime < INTERVAL_ASSERV) {
+    if (millis() - oldtime < INTERVAL_ASSERV)
+    {
         return oldtime;
     }
-    else {
+    else
+    {
         // Sinon, c'est qu'on vient de dépasser l'invervalle d'asservissement.
         // il faut donc asservir de nouveau
 
@@ -54,25 +55,22 @@ unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigne
 
         float erreur = ticks_l - ticks_r;
 
+        // l'erreur peut-être négative
 
-        //l'erreur peut-être négative
-        
         // --- Correction --
         // si on avance
-        int pwmR = SPEED + KP*erreur;
-        int pwmL = SPEED - KP*erreur;
+        int pwmR = SPEED + KP * erreur;
+        int pwmL = SPEED - KP * erreur;
         // si on recule, on remplace les valeurs
-        if (consigne_cm < 0 ){
-            pwmR = - SPEED + KP*erreur;
-            pwmL = - SPEED - KP*erreur;
+        if (consigne_cm < 0)
+        {
+            pwmR = -SPEED + KP * erreur;
+            pwmL = -SPEED - KP * erreur;
         }
-        
 
-        pwmL = constrain(pwmL, -255, 255); 
+        pwmL = constrain(pwmL, -255, 255);
         pwmR = constrain(pwmR, -255, 255);
-        
-        
-    
+
         // Serial.print("\tErreur : ");
         // Serial.print(erreur);
         // Serial.print("\tpwmL : ");
@@ -83,17 +81,16 @@ unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigne
         // --- Commande moteurs ---
         moteur_l->set_speed(pwmL);
         moteur_r->set_speed(pwmR);
-        
 
         // --- Condition d’arrêt en ticks ---
-        if (abs(consigne_cm*GAIN_CM_TO_TICKS - ticks_l) < MARGE_ERREUR_TICKS && abs(consigne_cm*GAIN_CM_TO_TICKS-ticks_r) < MARGE_ERREUR_TICKS ) {
+        if (abs(consigne_cm * GAIN_CM_TO_TICKS - ticks_l) < MARGE_ERREUR_TICKS && abs(consigne_cm * GAIN_CM_TO_TICKS - ticks_r) < MARGE_ERREUR_TICKS)
+        {
             // ON RENTRE !!
             moteur_l->set_speed(0);
             moteur_r->set_speed(0);
             encodeur_l->clear_count();
             encodeur_r->clear_count();
             etape_globale++;
-            
         }
 
         // On renvoie les nouvelles valeurs
@@ -102,31 +99,31 @@ unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigne
 }
 
 // consigne angle > 0 = sens trigo
-unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsigned long oldtime)
-{   
-    // Si c'est pas l'étape à laquelle on veut l'appeler, 
+unsigned long Ninja::tourner_asservi(int etape_d_appel, float consigne_angle, unsigned long oldtime)
+{
+    // Si c'est pas l'étape à laquelle on veut l'appeler,
     // aucune des variables du main n'est modifiée
-    if (etape_d_appel != etape_globale){
+    if (etape_d_appel != etape_globale)
+    {
         return oldtime;
     }
-    /* But du gain proportionnel : faire une correction proportionnelle à l'erreur. 
+    /* But du gain proportionnel : faire une correction proportionnelle à l'erreur.
     En gros :s
     erreur = ticksG - ticksD
     correction = Kp * erreur
 
-    Puis on ajuste le pwm : 
+    Puis on ajuste le pwm :
     pwmG = pwmBase - correction
     pwmD = pwmBase + correction
     */
 
-    
-    
-
     // Si l’intervalle n’est pas écoulé -> on ne fait rien
-    if (millis() - oldtime < INTERVAL_ASSERV) {
+    if (millis() - oldtime < INTERVAL_ASSERV)
+    {
         return oldtime;
     }
-    else {
+    else
+    {
         // Sinon, c'est qu'on vient de dépasser l'invervalle d'asservissement.
         // il faut donc asservir de nouveau
 
@@ -143,29 +140,27 @@ unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsi
         // Il faut que les ticks droits et gauches se compensent
         float erreur = ticks_l + ticks_r;
 
+        // l'erreur peut-être négative,
 
-        //l'erreur peut-être négative,
-        
         // --- Correction --
-        // les signes ont étés vérifiés par Florian et Jules à minuit 09 mais soyez confiant, ils sont correctes ! 
+        // les signes ont étés vérifiés par Florian et Jules à minuit 09 mais soyez confiant, ils sont correctes !
         // Faites un schéma !
         // sens trigo
-        int pwmR = SPEED - KP*erreur;
-        int pwmL = -SPEED - KP*erreur;
+        int pwmR = SPEED - KP * erreur;
+        int pwmL = -SPEED - KP * erreur;
         // sens horaire
-        if (consigne_angle < 0 ){
-            pwmR = - SPEED - KP*erreur;
-            pwmL = SPEED - KP*erreur;
+        if (consigne_angle < 0)
+        {
+            pwmR = -SPEED - KP * erreur;
+            pwmL = SPEED - KP * erreur;
         }
-        
 
-        pwmL = constrain(pwmL, -255, 255); 
+        pwmL = constrain(pwmL, -255, 255);
         pwmR = constrain(pwmR, -255, 255);
-        
-        
+
         // Serial.print("Erreur l : ");
         // Serial.print(erreur_l_normalisee);
-        
+
         // Serial.print("\tErreur : ");
         // Serial.print(erreur_normalisee);
         // Serial.print("\tpwmL : ");
@@ -176,11 +171,11 @@ unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsi
         // --- Commande moteurs ---
         moteur_l->set_speed(pwmL);
         moteur_r->set_speed(pwmR);
-        
 
         // --- Condition d’arrêt en ticks ---
         // idem faites confiance ou utilisez votre cerveau
-        if (abs(consigne_angle*GAIN_ANGLE_TO_TICKS + ticks_l) < MARGE_ERREUR_TICKS && abs(consigne_angle*GAIN_ANGLE_TO_TICKS-ticks_r) < MARGE_ERREUR_TICKS ) {
+        if (abs(consigne_angle * GAIN_ANGLE_TO_TICKS + ticks_l) < MARGE_ERREUR_TICKS && abs(consigne_angle * GAIN_ANGLE_TO_TICKS - ticks_r) < MARGE_ERREUR_TICKS)
+        {
             // ON RENTRE !!
             moteur_l->set_speed(0);
             moteur_r->set_speed(0);
@@ -194,16 +189,6 @@ unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsi
     }
 }
 
-
-
-
-
-
-
-
-
-
-
 /*
 Fonction de diagnostic général du robot
 Modes :
@@ -216,7 +201,7 @@ Modes :
 7 = Homologation : Avance et s'arrête en fonction du capteur IR
 8 = Avancer, reculer, tourner (Sans asservissement, juste pour voir si les fonctions de base marchent &  régler les gains)
 */
-// void Pami::test(int mode)
+// void Ninja::test(int mode)
 // {
 //     Serial.print("\n========== LANCEMENT DU TEST MODE : ");
 //     Serial.print(mode);
@@ -374,23 +359,20 @@ Modes :
 //     }
 // }
 
-
-
 /*
 Fonction pour bouger le servo entre deux angles en un temps donné
 */
-void Pami::blink_servo(long temps_blink, int angle1, int angle2)
+void Ninja::blink_servo(long temps_blink, int angle1, int angle2)
 {
     servo->blink(temps_blink, angle1, angle2);
     delay(100);
 }
 
-
 /*
 En mm
 Fonction qui retourne la distance minimal au prochain obstacle détectée par le capteur infrarouge (ToF)
 */
-double Pami::get_IR_distance(unsigned long oldtime)
+double Ninja::get_IR_distance(unsigned long oldtime)
 {
     if (ir_sensor == nullptr)
     {
@@ -404,9 +386,7 @@ double Pami::get_IR_distance(unsigned long oldtime)
     }
 }
 
-
-
-void Pami::print_encodeur(unsigned long oldtime)
+void Ninja::print_encodeur(unsigned long oldtime)
 {
     if (millis() - oldtime > 250)
     {

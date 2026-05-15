@@ -1,6 +1,6 @@
 /**
  * @file define.h
- * @brief fichier de configuration des pins pour la pami )
+ * @brief fichier de configuration des pins pour le ninja )
  */
 
 // TODO REGLER LES PINS AVANT LA COUPE AVEC L'ELEC
@@ -52,7 +52,7 @@ L'IR Sensor demande :
 
 /*POMPE*/
 
-#define POMPE_PIN 17
+#define PIN_POMPE 17
 
 /*
 SERVO
@@ -62,12 +62,11 @@ SERVO
 #define ANGLE2 180
 #define TEMPS_BLINK 1000 // Temps clignotement (ms).
 
-
 // Le coté est défini quand on est face à la scène.
 //  equipe = 1 : on est du coté gauche (jaune).
 //  equipe = 0 : on est du coté droit (bleue).
 
-#define LED 2             // PIN LED pour le setup
+#define PIN_LED 2         // PIN PIN_LED pour le setup
 #define PIN_READEQUIPE 19 // PIN pour lire l'interrupteur qui defini l'équipe
 #define PIN_TIRETTE 23    // PIN de la tirette pour lancer le match
 
@@ -95,16 +94,12 @@ Paramètres de l'asservissement
 #define INTERVAL_ASSERV 50 // en ms
 #define MARGE_ERREUR_TICKS 50
 #define GAIN_CM_TO_TICKS 100.04326 // c'est 20809/208
-#define GAIN_ANGLE_TO_TICKS 13.1 // à régler à la main avec un 3-6 no scope.
-#define DELAY_TIME 500 //pour le delay entre 2 actions de déplacement
-
-
+#define GAIN_ANGLE_TO_TICKS 13.1   // à régler à la main avec un 3-6 no scope.
+#define DELAY_TIME 500             // pour le delay entre 2 actions de déplacement
 
 // Permet de numéroter les fonctions non-bloquantes pour les appeler dans l'ordre
-// C'est un extern pour pouvoir le partager à la classe pami et au main.cpp
+// C'est un extern pour pouvoir le partager à la classe ninja et au main.cpp
 // Il est remis à 0 dans le setup du main.
 extern int etape_globale;
-
-
 
 #endif
