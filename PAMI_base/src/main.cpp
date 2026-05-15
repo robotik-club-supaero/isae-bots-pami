@@ -16,20 +16,24 @@ Moteur moteur_r = Moteur(EN_R, IN1_R, IN2_R, INV_MOT_R);
 Moteur moteur_l = Moteur(EN_L, IN1_L, IN2_L, INV_MOT_L);
 Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
-Mesure_pos mesure_pos = Mesure_pos(&encodeur_r, &encodeur_l);
 
 int etape_globale;
-std::tuple<float, float, unsigned long> resultat;
 // La pami en elle même
-Pami pami = Pami(&etape_globale,&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &ir_sensor);
+Pami pami = Pami(&etape_globale,&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
 
-float global_time = 0; // Variable global du temps
 float pos_x;
 float pos_y;
 float angle;
 
-float new_ticks_l, new_ticks_r,newtime;
-float old_ticks_l,old_ticks_r,oldtime;
+float newtime;
+float oldtime;
+
+void delay_non_bloquant(int etape_d_appel, unsigned long oldtime){
+    if ((millis()-oldtime > DELAY_TIME ) && (etape_globale == etape_d_appel) ){
+        Serial.println("Etape_global : " + String(etape_globale));
+        etape_globale++; // suivant
+    }
+};
 
 
 
@@ -46,10 +50,6 @@ void setup()
     // Setup servo
     // m_p_servo->setup();
     // Serial.println("Setup Done : Servo");
-
-    // Setup mesure position
-    mesure_pos.setup();
-    Serial.println("Setup Done : Mesure de Position");
 
     // Setup moteur droit & gauche
     moteur_l.setup();
@@ -95,8 +95,8 @@ void setup()
 
     // On remet a 0 les positions car la roue tourne pendant l'upload 
     // (car l'esp32 utilise le pin du moteur pendant l'upload)
-    
-    angle=0;
+    encodeur_l.clear_count();
+    encodeur_r.clear_count();
 
     // On attends le début du match, on mettra ensuite toute la stratégie dans la loop qui tourne en continu
     bool tirette_en_place = digitalRead(PIN_TIRETTE);
@@ -105,114 +105,44 @@ void setup()
         tirette_en_place = digitalRead(PIN_TIRETTE);
     }
     Serial.println("Tirette enlevée, début du match");
-    // On commence le timer
-    mesure_pos.reinitialise();
-    global_time = millis();
-
-
-
-    // pami.distance_target = 0;
-    // pami.test(7);
-
-    //setup
-    encodeur_l.clear_count();
-    encodeur_r.clear_count();
+    
+    // On commence les timers
+    oldtime=millis();
+    newtime=millis();
 
     // initialisation de la strat avec les étapes à 0
     etape_globale=0;
-    oldtime=millis();
-    newtime=millis();
-    resultat = std::make_tuple(0, 0, 0);
 }
 
 
 
 void loop()
 {
-    
+    // penser à ne pas updater le temps dans les délais !
+    // remplir ici : 
+    int etapes_avec_delays[] = {1,3,5};
+    int taille_tab = sizeof(etapes_avec_delays)/sizeof(int);
 
-    if (etape_globale != 1){
-        new_ticks_l=std::get<0>(resultat);
-        new_ticks_r=std::get<1>(resultat);
-        newtime = std::get<2>(resultat);
-        old_ticks_l=new_ticks_l;
-        old_ticks_r = new_ticks_r;
-        oldtime=newtime;
+    for (int i = 0; i < taille_tab; i++) {
+        if (etape_globale != etapes_avec_delays[i]) {
+            oldtime = newtime;
+            break;
+        }
     }
-
-    switch (etape_globale)
-    {
-        case 0: // --- TEST 1 : TIRETTE & INTERRUPTEURS ---
-        {
-            float consigne_l = 20;
-            float consigne_r = 20;
-            resultat = pami.avancer_asservi(0,consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
-            break;
-        }
-        case 1 :
-        {
-            if (millis()-oldtime > DELAY_TIME){
-                etape_globale=2; // suivant
-                break;
-            }
-        }
-        case 2:
-        {
-            resultat = pami.tourner_asservi(2,180,old_ticks_l,old_ticks_r,oldtime);
-            Serial.print("ticks_l : ");
-            Serial.print(encodeur_l.mesure());
-            Serial.print("\t ticks_r : ");
-            Serial.println(encodeur_r.mesure());
-            break;
-        }
-        case 3 :
-        {
-            if (millis()-oldtime > DELAY_TIME){
-                etape_globale=4;
-                break;
-            }
-        }
-        case 4:
-        {
-            float consigne_l = 20;
-            float consigne_r = 20;
-            resultat = pami.avancer_asservi(4,consigne_l,consigne_r,old_ticks_l,old_ticks_r,oldtime);
-            break;
-        }
-        case 5 :
-        {
-            if (millis()-oldtime > DELAY_TIME){
-                etape_globale=6;
-                break;
-            }
-        }
-        case 6:
-        {
-            resultat = pami.tourner_asservi(6,-180,old_ticks_l,old_ticks_r,oldtime);
-            Serial.print("ticks_l : ");
-            Serial.print(encodeur_l.mesure());
-            Serial.print("\t ticks_r : ");
-            Serial.println(encodeur_r.mesure());
-            break;
-        }
-        
-    }
-        
     
+    float consigne = 40;
+    newtime = pami.avancer_asservi(0,consigne,oldtime);
 
+    delay_non_bloquant(1, oldtime);
 
-    // pami.go_to(100, 0, SPEED);
+    newtime = pami.tourner_asservi(2,180,oldtime);
 
-    // Test avancer ou reculer ou tourner
-    // if (i == 0)
-    // {
-    // pami.avancer(300);
-    // pami.print_encodeur();
-    // pami.print_position();
-    // i = 1;
-    // }
+    delay_non_bloquant(3, oldtime);
 
-        
-    // pami.print_log();
-    // pami.start_match();
+    newtime = pami.avancer_asservi(4,consigne,oldtime);
+    
+    delay_non_bloquant(5, oldtime);
+
+    newtime = pami.tourner_asservi(6,-180,oldtime);
+    
 }
