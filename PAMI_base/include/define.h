@@ -104,10 +104,10 @@ Paramètres de l'asservissement
     Kp : gain proportionnel, plus il est grand plus le robot réagit vite à une erreur de position, mais peut causer des oscillations si trop élevé.
 */
 #define KP 1.0
-#define INTERVAL_ASSERV 50
+#define INTERVAL_ASSERV 50 // en ms
 #define MARGE_ERREUR_TICKS 50
 #define GAIN_CM_TO_TICKS 20809 / 208
-#define GAIN_ANGLE_TO_TICKS 13.1
+#define GAIN_ANGLE_TO_TICKS 13.1 // à régler à la main avec un 3-6 no scope.
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
 // Chaque pami à ses propres positions en cm
