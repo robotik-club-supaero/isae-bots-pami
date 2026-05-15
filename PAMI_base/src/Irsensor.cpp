@@ -22,7 +22,7 @@ void Irsensor::interruptRoutine()
 void Irsensor::setup()
 {
     Serial.begin(115200);
-    delay(1000);
+    delay(1500);
 
     pinMode(m_LPN_PIN, OUTPUT);
     digitalWrite(m_LPN_PIN, HIGH);
@@ -87,7 +87,7 @@ void Irsensor::loop()
                     int tot_tmp = 0;
                     for (int line = 0; line < 8; line++)
                     {
-                        tot_tmp += measurementData.distance_mm[line * col];
+                        tot_tmp += measurementData.distance_mm[line * 8 + col];
                     }
                     vision[col] = tot_tmp / 8;
                     if (min_distance == -1 || vision[col] < min_distance)

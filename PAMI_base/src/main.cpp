@@ -135,7 +135,7 @@ void loop()
     // Fonction constamment
     pami.blink_servo(TEMPS_BLINK, ANGLE1, ANGLE2);
 
-    newtime = pami.avancer_asservi(0, 20, oldtime);
+    // newtime = pami.tourner_asservi(0, 360 * 3, oldtime);
 
     float dist = pami.get_IR_distance();
 
@@ -143,71 +143,74 @@ void loop()
     {
         Serial.println("Obstacle détecté ! Arrêt du robot.");
         pami.set_speed(0);
+        return;
     }
 
-    // if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
-    // {
-    //     pami.print_infos_interrupteur();
-    //     if (pami.num_pami == 1)
-    //     {
-    //         if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-    //         {
-    //             newtime = pami.avancer_asservi(0, 20, oldtime);
-    //             // pami.print_encodeur();
-    //             // newtime = pami.avancer_asservi(0, B_POSITION_1_FINAL_Y, oldtime);
-    //             // delay_non_bloquant(1, oldtime);
-    //             // newtime = pami.tourner_asservi(2, -90, oldtime);
-    //             // delay_non_bloquant(3, oldtime);
-    //             // newtime = pami.avancer_asservi(4, B_POSITION_1_FINAL_X, oldtime);
-    //         }
-    //         else
-    //         {
-    //             newtime = pami.avancer_asservi(0, J_POSITION_1_FINAL_Y, oldtime);
-    //             delay_non_bloquant(1, oldtime);
-    //             newtime = pami.tourner_asservi(2, 90, oldtime);
-    //             delay_non_bloquant(3, oldtime);
-    //             newtime = pami.avancer_asservi(4, J_POSITION_1_FINAL_X, oldtime);
-    //         }
-    //     }
-    //     else if (pami.num_pami == 2)
-    //     {
-    //         if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-    //         {
-    //             newtime = pami.avancer_asservi(0, B_POSITION_2_FINAL_Y, oldtime);
-    //             delay_non_bloquant(1, oldtime);
-    //             newtime = pami.tourner_asservi(2, -90, oldtime);
-    //             delay_non_bloquant(3, oldtime);
-    //             newtime = pami.avancer_asservi(4, B_POSITION_2_FINAL_X, oldtime);
-    //         }
-    //         else
-    //         {
-    //             newtime = pami.avancer_asservi(0, J_POSITION_2_FINAL_Y, oldtime);
-    //             delay_non_bloquant(1, oldtime);
-    //             newtime = pami.tourner_asservi(2, 90, oldtime);
-    //             delay_non_bloquant(3, oldtime);
-    //             newtime = pami.avancer_asservi(4, J_POSITION_2_FINAL_X, oldtime);
-    //         }
-    //     }
-    //     else if (pami.num_pami == 3)
-    //     {
-    //         if (pami.equipe == 0) // 0 = bleue, 1 = jaune
-    //         {
-    //             newtime = pami.avancer_asservi(0, B_POSITION_3_FINAL_Y, oldtime);
-    //             delay_non_bloquant(1, oldtime);
-    //             newtime = pami.tourner_asservi(2, -90, oldtime);
-    //             delay_non_bloquant(3, oldtime);
-    //             newtime = pami.avancer_asservi(4, B_POSITION_3_FINAL_X, oldtime);
-    //         }
-    //         else
-    //         {
-    //             newtime = pami.avancer_asservi(0, J_POSITION_3_FINAL_Y, oldtime);
-    //             delay_non_bloquant(1, oldtime);
-    //             newtime = pami.tourner_asservi(2, 90, oldtime);
-    //             delay_non_bloquant(3, oldtime);
-    //             newtime = pami.avancer_asservi(4, J_POSITION_3_FINAL_X, oldtime);
-    //         }
-    //     }
-    // }
+    // newtime = pami.avancer_asservi(0, 20, oldtime);
+    // newtime = pami.tourner_asservi(0, 180, oldtime);
+
+    if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
+    {
+        pami.print_infos_interrupteur();
+        if (pami.num_pami == 1)
+        {
+            if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+            {
+                // newtime = pami.avancer_asservi(0, 20, oldtime);
+                newtime = pami.avancer_asservi(0, B_DELTA_1_X, oldtime);
+                delay_non_bloquant(1, oldtime);
+                newtime = pami.tourner_asservi(2, -90, oldtime);
+                delay_non_bloquant(3, oldtime);
+                newtime = pami.avancer_asservi(4, B_DELTA_1_Y, oldtime);
+            }
+            else
+            {
+                newtime = pami.avancer_asservi(0, J_DELTA_1_X, oldtime);
+                delay_non_bloquant(1, oldtime);
+                newtime = pami.tourner_asservi(2, 90, oldtime);
+                delay_non_bloquant(3, oldtime);
+                newtime = pami.avancer_asservi(4, J_DELTA_1_Y, oldtime);
+            }
+        }
+        else if (pami.num_pami == 2)
+        {
+            if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+            {
+                newtime = pami.avancer_asservi(0, B_DELTA_2_X, oldtime);
+                delay_non_bloquant(1, oldtime);
+                newtime = pami.tourner_asservi(2, -90, oldtime);
+                delay_non_bloquant(3, oldtime);
+                newtime = pami.avancer_asservi(4, B_DELTA_2_Y, oldtime);
+            }
+            else
+            {
+                newtime = pami.avancer_asservi(0, J_DELTA_2_X, oldtime);
+                delay_non_bloquant(1, oldtime);
+                newtime = pami.tourner_asservi(2, 90, oldtime);
+                delay_non_bloquant(3, oldtime);
+                newtime = pami.avancer_asservi(4, J_DELTA_2_Y, oldtime);
+            }
+        }
+        else if (pami.num_pami == 3)
+        {
+            if (pami.equipe == 0) // 0 = bleue, 1 = jaune
+            {
+                newtime = pami.avancer_asservi(0, B_DELTA_3_X, oldtime);
+                delay_non_bloquant(1, oldtime);
+                newtime = pami.tourner_asservi(2, 90, oldtime);
+                delay_non_bloquant(3, oldtime);
+                newtime = pami.avancer_asservi(4, B_DELTA_3_Y, oldtime);
+            }
+            else
+            {
+                newtime = pami.avancer_asservi(0, J_DELTA_3_X, oldtime);
+                delay_non_bloquant(1, oldtime);
+                newtime = pami.tourner_asservi(2, -90, oldtime);
+                delay_non_bloquant(3, oldtime);
+                newtime = pami.avancer_asservi(4, J_DELTA_3_Y, oldtime);
+            }
+        }
+    }
 
     if (millis() - time_last_log >= 1000)
     {

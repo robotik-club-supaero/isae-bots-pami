@@ -104,52 +104,70 @@ Paramètres de l'asservissement
     Kp : gain proportionnel, plus il est grand plus le robot réagit vite à une erreur de position, mais peut causer des oscillations si trop élevé.
 */
 #define KP 1.0
-#define INTERVAL_ASSERV 50.0     // en ms
-#define MARGE_ERREUR_TICKS 100.0 // Nombre de ticks autorisés
-#define GAIN_CM_TO_TICKS 100     // Dépend de la pami ?
-#define GAIN_ANGLE_TO_TICKS 13.1 // à régler à la main avec un 3-6 no scope.
+#define INTERVAL_ASSERV 50.0      // en ms
+#define MARGE_ERREUR_TICKS 100.0  // Nombre de ticks autorisés
+#define GAIN_CM_TO_TICKS 90.9     // Dépend de la pami ?
+#define GAIN_ANGLE_TO_TICKS 11.47 // à régler à la main avec un 3-6 no scope.
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
 // Chaque pami à ses propres positions en cm
 
 // PAMI 1
-#define J_POSITION_1_DEPART_X 40
-#define J_POSITION_1_DEPART_Y 43
+#define J_POSITION_1_DEPART_X 35
+#define J_POSITION_1_DEPART_Y 50
 
-#define J_POSITION_1_FINAL_X 140
-#define J_POSITION_1_FINAL_Y 120
+#define J_POSITION_1_FINAL_X 200
+#define J_POSITION_1_FINAL_Y 70
 
-#define B_POSITION_1_DEPART_X 40
-#define B_POSITION_1_DEPART_Y 43
+#define J_DELTA_1_X abs(J_POSITION_1_FINAL_X - J_POSITION_1_DEPART_X)
+#define J_DELTA_1_Y abs(J_POSITION_1_FINAL_Y - J_POSITION_1_DEPART_Y)
 
-#define B_POSITION_1_FINAL_X 140
-#define B_POSITION_1_FINAL_Y 120
+#define B_POSITION_1_DEPART_X 35
+#define B_POSITION_1_DEPART_Y 50
+
+#define B_POSITION_1_FINAL_X 200
+#define B_POSITION_1_FINAL_Y 70
+
+#define B_DELTA_1_X abs(B_POSITION_1_FINAL_X - B_POSITION_1_DEPART_X)
+#define B_DELTA_1_Y abs(B_POSITION_1_FINAL_Y - B_POSITION_1_DEPART_Y)
 
 // PAMI 2
-#define J_POSITION_2_DEPART_X 40
-#define J_POSITION_2_DEPART_Y 28
+#define J_POSITION_2_DEPART_X 20
+#define J_POSITION_2_DEPART_Y 50
 
-#define J_POSITION_2_FINAL_X 68
-#define J_POSITION_2_FINAL_Y 120
+#define J_POSITION_2_FINAL_X 120
+#define J_POSITION_2_FINAL_Y 90
 
-#define B_POSITION_2_DEPART_X 40
-#define B_POSITION_2_DEPART_Y 28
+#define J_DELTA_2_X abs(J_POSITION_2_FINAL_X - J_POSITION_2_DEPART_X)
+#define J_DELTA_2_Y abs(J_POSITION_2_FINAL_Y - J_POSITION_2_DEPART_Y)
 
-#define B_POSITION_2_FINAL_X 68
-#define B_POSITION_2_FINAL_Y 120
+#define B_POSITION_2_DEPART_X 20
+#define B_POSITION_2_DEPART_Y 50
+
+#define B_POSITION_2_FINAL_X 120
+#define B_POSITION_2_FINAL_Y 90
+
+#define B_DELTA_2_X abs(B_POSITION_2_FINAL_X - B_POSITION_2_DEPART_X)
+#define B_DELTA_2_Y abs(B_POSITION_2_FINAL_Y - B_POSITION_2_DEPART_Y)
 
 // PAMI 3
-#define J_POSITION_3_DEPART_X 40
-#define J_POSITION_3_DEPART_Y 13
+#define J_POSITION_3_DEPART_X 5
+#define J_POSITION_3_DEPART_Y 50
 
-#define J_POSITION_3_FINAL_X 10
-#define J_POSITION_3_FINAL_Y 120
+#define J_POSITION_3_FINAL_X 120
+#define J_POSITION_3_FINAL_Y 10
 
-#define B_POSITION_3_DEPART_X 40
-#define B_POSITION_3_DEPART_Y 13
+#define J_DELTA_3_X abs(J_POSITION_3_FINAL_X - J_POSITION_3_DEPART_X)
+#define J_DELTA_3_Y abs(J_POSITION_3_FINAL_Y - J_POSITION_3_DEPART_Y)
 
-#define B_POSITION_3_FINAL_X 10
-#define B_POSITION_3_FINAL_Y 120
+#define B_POSITION_3_DEPART_X 5
+#define B_POSITION_3_DEPART_Y 50
+
+#define B_POSITION_3_FINAL_X 120
+#define B_POSITION_3_FINAL_Y 10
+
+#define B_DELTA_3_X abs(B_POSITION_3_FINAL_X - B_POSITION_3_DEPART_X)
+#define B_DELTA_3_Y abs(B_POSITION_3_FINAL_Y - B_POSITION_3_DEPART_Y)
 
 // PAMI 4
 #define J_POSITION_4_DEPART_X 0

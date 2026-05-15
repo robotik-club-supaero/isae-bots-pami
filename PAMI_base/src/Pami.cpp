@@ -379,12 +379,11 @@ unsigned long Pami::avancer_asservi(int etape_d_appel, float consigne_cm, unsign
         // --- Mesures actuelles ---
         float ticks_l = p_encodeur_l->mesure();
         float ticks_r = p_encodeur_r->mesure();
+        // Serial.print("ticks_l : " + String(ticks_l));
+        // Serial.print("ticks_r : " + String(ticks_r));
 
-        Serial.print("ticks_l : " + String(ticks_l));
-        Serial.println("\t cm : " + String(ticks_l / GAIN_CM_TO_TICKS));
-
-        Serial.print("ticks_r : " + String(ticks_r));
-        Serial.println("\t cm : " + String(ticks_r / GAIN_CM_TO_TICKS));
+        Serial.print("Roue gauche (cm) : " + String(ticks_l / GAIN_CM_TO_TICKS));
+        Serial.println("\tRoue droite (cm) : " + String(ticks_r / GAIN_CM_TO_TICKS));
 
         // --- Erreurs ---
         // l'erreur peut-être négative
@@ -466,10 +465,12 @@ unsigned long Pami::tourner_asservi(int etape_d_appel, float consigne_angle, uns
         // --- Mesures actuelles ---
         float ticks_l = p_encodeur_l->mesure();
         float ticks_r = p_encodeur_r->mesure();
-        // Serial.print("ticks_l : ");
-        // Serial.print(ticks_l);
-        // Serial.print("\t ticks_r : ");
-        // Serial.print(ticks_r);
+
+        float angle_trigo = ticks_r / GAIN_ANGLE_TO_TICKS;
+        // Serial.print("ticks_l : " + String(ticks_l));
+        // Serial.print("\t ticks_r : " + String(ticks_r));
+
+        Serial.println("\t Angle en ° : " + String(ticks_r / GAIN_ANGLE_TO_TICKS));
 
         // --- Erreurs ---
         // On asservis le centre de gravité pour qu'il ne bouge pas,
