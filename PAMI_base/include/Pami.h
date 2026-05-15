@@ -41,7 +41,7 @@ public:
 
     void blink_servo(long temps_blink, int angle1, int angle2);
 
-    double get_IR_distance();
+    double get_IR_distance(unsigned long oldtime);
 
 };
 

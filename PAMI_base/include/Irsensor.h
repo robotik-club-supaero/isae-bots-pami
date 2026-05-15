@@ -42,7 +42,7 @@ public:
     /**
      * @brief Boucle de lecture du capteur IR, met à jour la distance
      */
-    void loop();
+    unsigned long loop(unsigned long oldtime);
 };
 
 #endif

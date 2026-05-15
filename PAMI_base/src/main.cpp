@@ -25,8 +25,10 @@ float pos_x;
 float pos_y;
 float angle;
 
-float newtime;
-float oldtime;
+unsigned long newtime;
+unsigned long oldtime;
+unsigned long newtime_ir;
+unsigned long oldtime_ir;
 
 void delay_non_bloquant(int etape_d_appel, unsigned long oldtime){
     if ((millis()-oldtime > DELAY_TIME ) && (etape_globale == etape_d_appel) ){
@@ -44,12 +46,12 @@ void setup()
     Serial.println("---------- Setup starting ----------");
     
     // Setup capteur IR
-    // m_p_ir_sensor->setup();
-    // Serial.println("Setup Done : IR Sensor");
+    ir_sensor.setup();
+    Serial.println("Setup Done : IR Sensor");
 
     // Setup servo
-    // m_p_servo->setup();
-    // Serial.println("Setup Done : Servo");
+    servo.setup();
+    Serial.println("Setup Done : Servo");
 
     // Setup moteur droit & gauche
     moteur_l.setup();
@@ -110,6 +112,9 @@ void setup()
     oldtime=millis();
     newtime=millis();
 
+    oldtime_ir=millis();
+    newtime_ir=millis();
+
     // initialisation de la strat avec les étapes à 0
     etape_globale=0;
 }
@@ -120,29 +125,46 @@ void loop()
 {
     // penser à ne pas updater le temps dans les délais !
     // remplir ici : 
-    int etapes_avec_delays[] = {1,3,5};
-    int taille_tab = sizeof(etapes_avec_delays)/sizeof(int);
+    // int etapes_avec_delays[] = {1,3,5};
+    // int taille_tab = sizeof(etapes_avec_delays)/sizeof(int);
 
-    for (int i = 0; i < taille_tab; i++) {
-        if (etape_globale != etapes_avec_delays[i]) {
-            oldtime = newtime;
-            break;
-        }
+    // for (int i = 0; i < taille_tab; i++) {
+    //     if (etape_globale != etapes_avec_delays[i]) {
+    //         oldtime = newtime;
+    //         break;
+    //     }
+    // }
+
+    
+
+    oldtime = newtime;
+    if (millis() - oldtime > 4*INTERVAL_ASSERV) {
+        Serial.print("Etape globale = "+String(etape_globale));
+        Serial.println("\t Distance IR = " + String(ir_sensor.ir_minimum_distance));
     }
-    
-    float consigne = 40;
-    newtime = pami.avancer_asservi(0,consigne,oldtime);
 
-    delay_non_bloquant(1, oldtime);
+    oldtime_ir = newtime_ir;
+    newtime_ir = ir_sensor.loop(oldtime_ir);
+    if (ir_sensor.ir_minimum_distance<DISTANCE_MIN && ir_sensor.ir_minimum_distance>5){
+        
+        moteur_l.set_speed(0);
+        moteur_r.set_speed(0);
 
-    newtime = pami.tourner_asservi(2,180,oldtime);
+    }
+    else {
+        float consigne = 40;
+        newtime = pami.avancer_asservi(0,consigne,oldtime);
 
-    delay_non_bloquant(3, oldtime);
+        // delay_non_bloquant(1, oldtime);
 
-    newtime = pami.avancer_asservi(4,consigne,oldtime);
-    
-    delay_non_bloquant(5, oldtime);
+        newtime = pami.tourner_asservi(1,180,oldtime);
 
-    newtime = pami.tourner_asservi(6,-180,oldtime);
-    
+        // delay_non_bloquant(3, oldtime);
+
+        newtime = pami.avancer_asservi(2,consigne,oldtime);
+        
+        // delay_non_bloquant(5, oldtime);
+
+        newtime = pami.tourner_asservi(3,-180,oldtime);
+    }
 }

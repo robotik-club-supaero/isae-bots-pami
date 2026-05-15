@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 #include <Irsensor.h>
+#include <define.h>
 
 #include <SparkFun_VL53L5CX_Library.h> //http://librarymanager/All#SparkFun_VL53L5CX
 
@@ -69,9 +70,9 @@ void Irsensor::setup()
     myImager.startRanging();
 }
 
-void Irsensor::loop()
+unsigned long Irsensor::loop(unsigned long oldtime)
 {
-    if (millis() - m_time >= m_dt) // 10ms delay between readings
+    if (millis() - oldtime >= INTERVAL_ASSERV) 
     {
 
         // Poll sensor for new data
@@ -87,7 +88,7 @@ void Irsensor::loop()
                     int tot_tmp = 0;
                     for (int line = 0; line < 8; line++)
                     {
-                        tot_tmp += measurementData.distance_mm[line * col];
+                        tot_tmp += measurementData.distance_mm[line * 8 + col];
                     }
                     vision[col] = tot_tmp / 8;
                     if (min_distance == -1 || vision[col] < min_distance)
@@ -101,6 +102,9 @@ void Irsensor::loop()
                 // Serial.println(measurementData.distance_mm[35]);
             }
         }
-        m_time = millis();
+        return millis();
+    }
+    else {
+        return oldtime;
     }
 }

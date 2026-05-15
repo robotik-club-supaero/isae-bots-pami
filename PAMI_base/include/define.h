@@ -76,7 +76,7 @@ Paramètres globaux
 */
 
 #define SPEED 200        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
-#define DISTANCE_MIN 100 // Distance minimale pour éviter un obstacle en mm
+#define DISTANCE_MIN 120 // Distance minimale pour éviter un obstacle en mm
 // #define EPSP 100         // Incertitude position, cm
 // #define EPSA 0.1         // Incertitude position, radian
 

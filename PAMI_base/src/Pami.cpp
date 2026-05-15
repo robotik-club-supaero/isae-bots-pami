@@ -94,6 +94,7 @@ unsigned long Pami::avancer_asservi(int etape_d_appel,float consigne_cm, unsigne
             encodeur_l->clear_count();
             encodeur_r->clear_count();
             (*etape_globale)++;
+            
         }
 
         // On renvoie les nouvelles valeurs
@@ -133,10 +134,10 @@ unsigned long Pami::tourner_asservi(int etape_d_appel,float consigne_angle, unsi
         // --- Mesures actuelles ---
         float ticks_l = encodeur_l->mesure();
         float ticks_r = encodeur_r->mesure();
-        // Serial.print("ticks_l : ");
-        // Serial.print(ticks_l);
-        // Serial.print("\t ticks_r : ");
-        // Serial.print(ticks_r);
+        Serial.print("ticks_l : ");
+        Serial.print(ticks_l);
+        Serial.print("\t ticks_r : ");
+        Serial.println(ticks_r);
 
         // --- Erreurs ---
         // On asservis le centre de gravité pour qu'il ne bouge pas,
@@ -388,7 +389,7 @@ void Pami::blink_servo(long temps_blink, int angle1, int angle2)
 En mm
 Fonction qui retourne la distance minimal au prochain obstacle détectée par le capteur infrarouge (ToF)
 */
-double Pami::get_IR_distance()
+double Pami::get_IR_distance(unsigned long oldtime)
 {
     if (ir_sensor == nullptr)
     {
@@ -397,7 +398,7 @@ double Pami::get_IR_distance()
     }
     else
     {
-        ir_sensor->loop();
+        ir_sensor->loop(oldtime);
         return ir_sensor->ir_minimum_distance;
     }
 }
