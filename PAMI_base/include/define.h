@@ -59,7 +59,7 @@ SERVO
 #define SERVPIN 18 // Broche du servo moteur sur D15
 #define ANGLE1 0   // Valeur en degrés comprises entre 0° et 180° max
 #define ANGLE2 180
-#define TEMPS_BLINK 500 // Temps clignotement (ms).
+#define TEMPS_BLINK 1000 // Temps clignotement (ms).
 
 /*
 CONFIG DES PAMI
@@ -104,9 +104,9 @@ Paramètres de l'asservissement
     Kp : gain proportionnel, plus il est grand plus le robot réagit vite à une erreur de position, mais peut causer des oscillations si trop élevé.
 */
 #define KP 1.0
-#define INTERVAL_ASSERV 50 // en ms
-#define MARGE_ERREUR_TICKS 50
-#define GAIN_CM_TO_TICKS 20809 / 208
+#define INTERVAL_ASSERV 50.0     // en ms
+#define MARGE_ERREUR_TICKS 100.0 // Nombre de ticks autorisés
+#define GAIN_CM_TO_TICKS 100     // Dépend de la pami ?
 #define GAIN_ANGLE_TO_TICKS 13.1 // à régler à la main avec un 3-6 no scope.
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))

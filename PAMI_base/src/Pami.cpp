@@ -68,6 +68,18 @@ void Pami::test(int mode)
         Serial.println("Fin du test Servomoteur.");
         break;
     }
+    // case 4: // --- Test 4 : GAINS ASSERVISSEMENT ---
+    // {
+    //     float time = millis();
+    //     float oldtime = time;
+    //     while (true)
+    //     {
+    //         time = this->avancer_asservi(0, 5000, oldtime);
+    //         this->print_encodeur();
+    //         oldtime = time;
+    //     }
+    //     break;
+    // }
     case 5: // --- TEST 5 : ODOMETRIE ---
     {
         Serial.println("Test Encodeurs... Poussez le robot a la main ! (Boucle infinie)");
@@ -158,17 +170,6 @@ void Pami::update_setup()
     int int_pami_1 = digitalRead(PIN_INT_PAMI_1);
     int int_pami_2 = digitalRead(PIN_INT_PAMI_2);
     int read_num_pami = (int_pami_1 * 2) + int_pami_2 + 1;
-}
-
-void Pami::delay_non_blocking(unsigned long oldtime, int etape)
-{
-    if (etape == *p_etape_globale)
-    {
-        if (millis() - oldtime >= DELAY_TIME)
-        {
-            (*p_etape_globale)++;
-        }
-    }
 }
 
 /*
@@ -303,8 +304,11 @@ void Pami::print_encodeur()
 {
     if (millis() - m_time_log > 250)
     {
-        Serial.print("Encodeur gauche : " + String(p_encodeur_l->mesure()) + " ticks & " + String(p_encodeur_l->mesure() / GAIN_CM_TO_TICKS) + " cm \t");
-        Serial.println(" | Encodeur droit : " + String(p_encodeur_r->mesure()) + " ticks & " + String(p_encodeur_r->mesure() / GAIN_CM_TO_TICKS) + " cm");
+        float ticks_l = p_encodeur_l->mesure();
+        float ticks_r = p_encodeur_r->mesure();
+
+        Serial.println("Encodeur gauche : " + String(ticks_l) + " ticks & " + String(ticks_l / GAIN_CM_TO_TICKS) + " cm");
+        Serial.println(" | Encodeur droit : " + String(ticks_r) + " ticks & " + String(ticks_r / GAIN_CM_TO_TICKS) + " cm");
     }
 }
 
@@ -313,7 +317,7 @@ void Pami::print_log()
     if (m_time_log + 500 < millis()) // Log toutes les secondes
     {
         Serial.println("Distance Ir: " + String(this->get_IR_distance()) + " mm");
-        this->print_encodeur();
+        // this->print_encodeur();
         this->print_infos_interrupteur();
 
         m_time_log = millis();
@@ -375,16 +379,16 @@ unsigned long Pami::avancer_asservi(int etape_d_appel, float consigne_cm, unsign
         // --- Mesures actuelles ---
         float ticks_l = p_encodeur_l->mesure();
         float ticks_r = p_encodeur_r->mesure();
-        // Serial.print("ticks_l : ");
-        // Serial.print(ticks_l);
-        // Serial.print("\t ticks_r : ");
-        // Serial.print(ticks_r);
+
+        Serial.print("ticks_l : " + String(ticks_l));
+        Serial.println("\t cm : " + String(ticks_l / GAIN_CM_TO_TICKS));
+
+        Serial.print("ticks_r : " + String(ticks_r));
+        Serial.println("\t cm : " + String(ticks_r / GAIN_CM_TO_TICKS));
 
         // --- Erreurs ---
-
-        float erreur = ticks_l - ticks_r;
-
         // l'erreur peut-être négative
+        float erreur = ticks_l - ticks_r;
 
         // --- Correction --
         // si on avance
@@ -417,7 +421,7 @@ unsigned long Pami::avancer_asservi(int etape_d_appel, float consigne_cm, unsign
         // --- Condition d’arrêt en ticks ---
         if (abs(consigne_cm * GAIN_CM_TO_TICKS - ticks_l) < MARGE_ERREUR_TICKS && abs(consigne_cm * GAIN_CM_TO_TICKS - ticks_r) < MARGE_ERREUR_TICKS)
         {
-            // ON RENTRE !!
+            // ON RENTRE & on nettoie les encodeurs !!
             p_moteur_l->set_speed(0);
             p_moteur_r->set_speed(0);
             p_encodeur_l->clear_count();

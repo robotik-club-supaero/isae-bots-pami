@@ -42,7 +42,6 @@ public:
 
     void test(int mode);
     void update_setup();
-    void delay_non_blocking(unsigned long delay_time, int etape);
 
     unsigned long avancer_asservi(int etape_d_appel, float consigne_cm, unsigned long oldtime);
     unsigned long tourner_asservi(int etape_d_appel, float consigne_angle, unsigned long oldtime);
