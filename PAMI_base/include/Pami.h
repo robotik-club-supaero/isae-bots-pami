@@ -21,40 +21,27 @@ public:
     Ultrason *p_ultrason;
     Irsensor *p_ir_sensor;
 
-    bool m_match_demarre = false;
     int tirette = 1;    // Etat par défaut de la tirette
     int equipe = 1;     // Equipe par défaut (1 = gauche = jaune)
     int num_pami = 1;   // Numéro de la pami
     int int_pami_1 = 0; // Etat interrupteur 1
     int int_pami_2 = 0; // Etat interrupteur 2
 
-    float pos_x;
-    float pos_y;
-    float angle;
-
-    float pos_init_x;
-    float pos_init_y;
-    float pos_target_x;
-    float pos_target_y;
-    float distance_target = 0;
-
     long m_time_log;
     long m_time_match;
 
     int *p_etape_globale;
+    unsigned long p_newtime;
 
     Pami(int *etape_globale, Moteur *moteur_d, Moteur *moteur_g, Encodeur *encodeur_d, Encodeur *encodeur_g, Mesure_pos *mesure_pos, Serv *servo, Irsensor *ir_sensor = nullptr, Ultrason *ultrason = nullptr);
 
     void test(int mode);
-    std::tuple<float, float, unsigned long> avancer_asservi(int etape_d_appel, float consigne_cm_l, float consigne_cm_r, float old_ticks_l, float old_ticks_r, unsigned long oldtime);
-    std::tuple<float, float, unsigned long> tourner_asservi(int etape_d_appel, float consigne_angle, float old_ticks_l, float old_ticks_r, unsigned long oldtime);
+    void update_setup();
+    void delay_non_blocking(unsigned long delay_time, int etape);
 
-    void config_start_position();
-    void print_log();
-    void print_position();
-    void print_encodeur();
-    void print_speed();
-    void print_infos_interrupteur();
+    unsigned long avancer_asservi(int etape_d_appel, float consigne_cm, unsigned long oldtime);
+    unsigned long tourner_asservi(int etape_d_appel, float consigne_angle, unsigned long oldtime);
+    void go_to_asservi(float consigne_x, float consigne_y, unsigned long oldtime);
 
     // Avancer basiquement sans asserv
     void go_to(float distance_x, float distance_y, int speed = SPEED);
@@ -67,6 +54,12 @@ public:
 
     double get_ultrason_distance();
     double get_IR_distance();
+
+    void print_log();
+    void print_position();
+    void print_encodeur();
+    void print_speed();
+    void print_infos_interrupteur();
 };
 
 #endif
