@@ -1,13 +1,12 @@
 #include <Pami.h>
 #include <cmath>
 
-Pami::Pami(int *etape_globale, Moteur *moteur_r, Moteur *moteur_l, Encodeur *encodeur_r, Encodeur *encodeur_l, Mesure_pos *mesure_pos, Serv *servo, Irsensor *ir_sensor, Ultrason *ultrason)
+Pami::Pami(int *etape_globale, Moteur *moteur_r, Moteur *moteur_l, Encodeur *encodeur_r, Encodeur *encodeur_l, Serv *servo, Irsensor *ir_sensor, Ultrason *ultrason)
 {
     p_moteur_r = moteur_r;
     p_moteur_l = moteur_l;
     p_encodeur_r = encodeur_r;
     p_encodeur_l = encodeur_l;
-    p_mesure_pos = mesure_pos;
     p_servo = servo;
     p_etape_globale = etape_globale;
     p_ultrason = ultrason;
@@ -72,13 +71,9 @@ void Pami::test(int mode)
     case 5: // --- TEST 5 : ODOMETRIE ---
     {
         Serial.println("Test Encodeurs... Poussez le robot a la main ! (Boucle infinie)");
-        p_mesure_pos->reinitialise();
         while (true)
         {
-            p_mesure_pos->loop(); // Met a jour les calculs
             this->print_encodeur();
-            this->print_position();
-            this->print_speed();
             Serial.println("-------------------------");
             delay(250);
         }
@@ -93,7 +88,6 @@ void Pami::test(int mode)
             Serial.println("\n-> Test Roue Droite (Vitesse 200)");
             p_moteur_r->set_speed(SPEED);
             p_moteur_l->stop();
-            this->print_speed();
             this->print_encodeur();
             delay(1500);
 
@@ -104,7 +98,6 @@ void Pami::test(int mode)
             Serial.println("\n-> Test Roue Gauche (Vitesse 200)");
             p_moteur_r->stop();
             p_moteur_l->set_speed(SPEED);
-            this->print_speed();
             this->print_encodeur();
             delay(1500);
 
@@ -308,17 +301,6 @@ double Pami::get_IR_distance()
     }
 }
 
-void Pami::print_position()
-{
-    if (millis() - m_time_log > 250)
-    {
-        p_mesure_pos->loop();
-        Serial.print("Pos X : " + String(p_mesure_pos->x_mesuree / 10) + " cm");
-        Serial.print(" | Pos Y : " + String(p_mesure_pos->y_mesuree / 10) + " cm");
-        Serial.println(" | Theta : " + String(p_mesure_pos->theta_mesuree * (180.0 / PI)) + "°");
-    }
-}
-
 void Pami::print_encodeur()
 {
     if (millis() - m_time_log > 250)
@@ -328,24 +310,11 @@ void Pami::print_encodeur()
     }
 }
 
-void Pami::print_speed()
-{
-    if (millis() - m_time_log > 275)
-    {
-        p_mesure_pos->loop();
-        Serial.print("Vitesse droite : " + String(p_mesure_pos->vitesse_r / 10) + " cm/s | Vitesse gauche : " + String(p_mesure_pos->vitesse_l / 10) + " cm/s");
-        Serial.print(" | Vitesse en x : " + String(p_mesure_pos->vitesse_x / 10) + " cm/s | Vitesse en y : " + String(p_mesure_pos->vitesse_y / 10) + " cm/s");
-        Serial.println(" | Vitesse angulaire : " + String(p_mesure_pos->vitesse_theta) + " rad/s");
-    }
-}
-
 void Pami::print_log()
 {
     if (m_time_log + 500 < millis()) // Log toutes les secondes
     {
         Serial.println("Distance Ir: " + String(this->get_IR_distance()) + " mm");
-        this->print_speed();
-        this->print_position();
         this->print_encodeur();
         this->print_infos_interrupteur();
 
