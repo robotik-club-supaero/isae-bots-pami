@@ -1,3 +1,9 @@
+/**
+ * @file Pami.h
+ * @brief Classe pour controler une PAMI
+ *
+ */
+
 #ifndef PAMI_H
 #define PAMI_H
 
@@ -21,7 +27,7 @@ public:
     Irsensor *p_ir_sensor;
 
     int tirette = 1;    // Etat par défaut de la tirette
-    int equipe = 1;     // Equipe par défaut (1 = gauche = jaune)
+    int equipe = 0;     // Equipe par défaut (1 = gauche = jaune)
     int num_pami = 1;   // Numéro de la pami
     int int_pami_1 = 0; // Etat interrupteur 1
     int int_pami_2 = 0; // Etat interrupteur 2
