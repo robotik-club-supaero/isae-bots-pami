@@ -344,7 +344,7 @@ void Pami::print_infos_interrupteur()
 
     if (int_pami_1 == 0 && int_pami_2 == 0)
     {
-        Serial.println("PAMI n°1 - collé au mur");
+        Serial.println("PAMI n°1");
     }
     else if (int_pami_1 == 0 && int_pami_2 == 1)
     {
@@ -356,7 +356,7 @@ void Pami::print_infos_interrupteur()
     }
     else if (int_pami_1 == 1 && int_pami_2 == 1)
     {
-        Serial.println("PAMI n°4 - plus éloigné du mur");
+        Serial.println("PAMI n°4");
     }
 }
 

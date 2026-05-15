@@ -73,7 +73,7 @@ MACHINE A ETAT
 #define PIN_TIRETTE 23    // PIN de la tirette pour lancer le match
 
 /*
-    Low & Low : Première (collée au mur)
+    Low & Low : Première
     Low & High : Deuxième
     High & Low : Troisième
     High & High : Quatrième
@@ -105,14 +105,14 @@ Paramètres de l'asservissement
 */
 #define KP 1.0
 #define INTERVAL_ASSERV 50
-#define MARGE_ERREUR_TICKS 500
+#define MARGE_ERREUR_TICKS 50
 #define GAIN_CM_TO_TICKS 20809 / 208
 #define GAIN_ANGLE_TO_TICKS 13.1
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
 // Chaque pami à ses propres positions en cm
 
-// PAMI 1 (collée au mur - ninja)
+// PAMI 1
 #define J_POSITION_1_DEPART_X 40
 #define J_POSITION_1_DEPART_Y 43
 
