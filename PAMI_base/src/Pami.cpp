@@ -158,8 +158,6 @@ void Pami::update_setup()
     int int_pami_1 = digitalRead(PIN_INT_PAMI_1);
     int int_pami_2 = digitalRead(PIN_INT_PAMI_2);
     int read_num_pami = (int_pami_1 * 2) + int_pami_2 + 1;
-
-    this->print_infos_interrupteur();
 }
 
 void Pami::delay_non_blocking(unsigned long oldtime, int etape)
@@ -305,8 +303,8 @@ void Pami::print_encodeur()
 {
     if (millis() - m_time_log > 250)
     {
-        Serial.print("Encodeur gauche : " + String(p_encodeur_l->mesure()));
-        Serial.println(" | Encodeur droit : " + String(p_encodeur_r->mesure()));
+        Serial.print("Encodeur gauche : " + String(p_encodeur_l->mesure()) + " ticks & " + String(p_encodeur_l->mesure() / GAIN_CM_TO_TICKS) + " cm \t");
+        Serial.println(" | Encodeur droit : " + String(p_encodeur_r->mesure()) + " ticks & " + String(p_encodeur_r->mesure() / GAIN_CM_TO_TICKS) + " cm");
     }
 }
 
@@ -324,39 +322,22 @@ void Pami::print_log()
 
 void Pami::print_infos_interrupteur()
 {
-    if (tirette == 1)
+    if (digitalRead(PIN_TIRETTE) != tirette)
     {
-        Serial.println("Tirette : Mise en place");
+        tirette = digitalRead(PIN_TIRETTE);
+        Serial.print(tirette == 1 ? "Tirette en place \n" : "Tirette enlevée \n");
     }
-    else
+    if (digitalRead(PIN_READEQUIPE) != equipe)
     {
-        Serial.println("Tirette : Enlevée");
+        equipe = digitalRead(PIN_READEQUIPE);
+        Serial.print(equipe == 1 ? "Equipe : JAUNE \n" : "Equipe : BLEUE \n");
     }
-
-    if (equipe == 1)
+    if (digitalRead(PIN_INT_PAMI_1) != int_pami_1 || digitalRead(PIN_INT_PAMI_2) != int_pami_2)
     {
-        Serial.println("Equipe : JAUNE");
-    }
-    else
-    {
-        Serial.println("Equipe : BLEUE");
-    }
-
-    if (int_pami_1 == 0 && int_pami_2 == 0)
-    {
-        Serial.println("PAMI n°1");
-    }
-    else if (int_pami_1 == 0 && int_pami_2 == 1)
-    {
-        Serial.println("PAMI n°2");
-    }
-    else if (int_pami_1 == 1 && int_pami_2 == 0)
-    {
-        Serial.println("PAMI n°3");
-    }
-    else if (int_pami_1 == 1 && int_pami_2 == 1)
-    {
-        Serial.println("PAMI n°4");
+        int_pami_1 = digitalRead(PIN_INT_PAMI_1);
+        int_pami_2 = digitalRead(PIN_INT_PAMI_2);
+        num_pami = (int_pami_1 * 2) + int_pami_2 + 1;
+        Serial.print("PAMI n°" + String(num_pami) + "\n");
     }
 }
 
