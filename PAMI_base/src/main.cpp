@@ -15,14 +15,13 @@ Moteur moteur_r = Moteur(EN_R, IN1_R, IN2_R, INV_MOT_R);
 Moteur moteur_l = Moteur(EN_L, IN1_L, IN2_L, INV_MOT_L);
 Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
-Mesure_pos mesure_pos = Mesure_pos(&encodeur_r, &encodeur_l);
 
 int etape_globale = 0;
 unsigned long newtime;
 unsigned long oldtime;
 
 // La pami en elle même
-Pami pami = Pami(&etape_globale, &moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &mesure_pos, &servo, &ir_sensor);
+Pami pami = Pami(&etape_globale, &moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
 
 void setup()
 {
@@ -48,10 +47,6 @@ void setup()
     // Setup servo
     servo.setup();
     Serial.println("Setup Done : Servo");
-
-    // Setup mesure position
-    mesure_pos.setup();
-    Serial.println("Setup Done : Mesure de Position");
 
     // Setup moteur droit & gauche
     moteur_r.setup();
@@ -82,7 +77,6 @@ void setup()
     // On remet a 0 les positions car la roue tourne pendant l'upload (why ?)
     encodeur_l.clear_count();
     encodeur_r.clear_count();
-    mesure_pos.reinitialise();
 
     // Temps des fonctions non bloquantes
     oldtime = millis();

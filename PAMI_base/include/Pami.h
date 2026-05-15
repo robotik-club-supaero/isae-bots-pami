@@ -2,7 +2,7 @@
 #define PAMI_H
 
 #include <Arduino.h>
-#include <Mesure_pos.h>
+#include <Encodeur.h>
 #include <Moteur.h>
 #include <Irsensor.h>
 #include <Ultrason.hpp>
@@ -17,7 +17,6 @@ public:
     Encodeur *p_encodeur_r;
     Encodeur *p_encodeur_l;
     Serv *p_servo;
-    Mesure_pos *p_mesure_pos;
     Ultrason *p_ultrason;
     Irsensor *p_ir_sensor;
 
@@ -33,7 +32,7 @@ public:
     int *p_etape_globale;
     unsigned long p_newtime;
 
-    Pami(int *etape_globale, Moteur *moteur_d, Moteur *moteur_g, Encodeur *encodeur_d, Encodeur *encodeur_g, Mesure_pos *mesure_pos, Serv *servo, Irsensor *ir_sensor = nullptr, Ultrason *ultrason = nullptr);
+    Pami(int *etape_globale, Moteur *moteur_d, Moteur *moteur_g, Encodeur *encodeur_d, Encodeur *encodeur_g, Serv *servo, Irsensor *ir_sensor = nullptr, Ultrason *ultrason = nullptr);
 
     void test(int mode);
     void update_setup();
@@ -56,9 +55,7 @@ public:
     double get_IR_distance();
 
     void print_log();
-    void print_position();
     void print_encodeur();
-    void print_speed();
     void print_infos_interrupteur();
 };
 
