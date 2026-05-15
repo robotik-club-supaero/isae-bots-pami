@@ -1,14 +1,13 @@
 #include <Pami.h>
 #include <cmath>
 
-Pami::Pami(int *etape_globale, Moteur *moteur_r, Moteur *moteur_l, Encodeur *encodeur_r, Encodeur *encodeur_l, Serv *servo, Irsensor *ir_sensor, Ultrason *ultrason)
+Pami::Pami(Moteur *moteur_r, Moteur *moteur_l, Encodeur *encodeur_r, Encodeur *encodeur_l, Serv *servo, Irsensor *ir_sensor, Ultrason *ultrason)
 {
     p_moteur_r = moteur_r;
     p_moteur_l = moteur_l;
     p_encodeur_r = encodeur_r;
     p_encodeur_l = encodeur_l;
     p_servo = servo;
-    p_etape_globale = etape_globale;
     p_ultrason = ultrason;
     p_ir_sensor = ir_sensor;
 }
@@ -352,7 +351,7 @@ unsigned long Pami::avancer_asservi(int etape_d_appel, float consigne_cm, unsign
 {
     // Si c'est pas l'étape à laquelle on veut l'appeler,
     // aucune des variables du main n'est modifiée
-    if (etape_d_appel != *p_etape_globale)
+    if (etape_d_appel != etape_globale)
     {
         return oldtime;
     }
@@ -425,7 +424,7 @@ unsigned long Pami::avancer_asservi(int etape_d_appel, float consigne_cm, unsign
             p_moteur_r->set_speed(0);
             p_encodeur_l->clear_count();
             p_encodeur_r->clear_count();
-            (*p_etape_globale)++;
+            etape_globale++;
         }
 
         // On renvoie les nouvelles valeurs
@@ -448,7 +447,7 @@ unsigned long Pami::tourner_asservi(int etape_d_appel, float consigne_angle, uns
 
     // Si c'est pas l'étape à laquelle on veut l'appeler,
     // aucune des variables du main n'est modifiée
-    if (etape_d_appel != *p_etape_globale)
+    if (etape_d_appel != etape_globale)
     {
         return oldtime;
     }
@@ -518,7 +517,7 @@ unsigned long Pami::tourner_asservi(int etape_d_appel, float consigne_angle, uns
             p_moteur_r->set_speed(0);
             p_encodeur_l->clear_count();
             p_encodeur_r->clear_count();
-            (*p_etape_globale)++;
+            etape_globale++;
         }
 
         // On renvoie les nouvelles valeurs
@@ -528,7 +527,7 @@ unsigned long Pami::tourner_asservi(int etape_d_appel, float consigne_angle, uns
 
 void Pami::go_to_asservi(float consigne_x, float consigne_y, unsigned long oldtime)
 {
-    switch (*p_etape_globale)
+    switch (etape_globale)
     {
     case 0:
     {
@@ -540,7 +539,7 @@ void Pami::go_to_asservi(float consigne_x, float consigne_y, unsigned long oldti
     {
         if (millis() - oldtime > DELAY_TIME)
         {
-            (*p_etape_globale) = 2; // suivant
+            etape_globale = 2; // suivant
             break;
         }
     }
@@ -554,7 +553,7 @@ void Pami::go_to_asservi(float consigne_x, float consigne_y, unsigned long oldti
     {
         if (millis() - oldtime > DELAY_TIME)
         {
-            (*p_etape_globale) = 4;
+            etape_globale = 4;
             break;
         }
     }
@@ -568,7 +567,7 @@ void Pami::go_to_asservi(float consigne_x, float consigne_y, unsigned long oldti
     {
         if (millis() - oldtime > DELAY_TIME)
         {
-            (*p_etape_globale) = 6;
+            etape_globale = 6;
             break;
         }
     }

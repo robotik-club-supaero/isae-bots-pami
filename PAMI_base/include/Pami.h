@@ -35,10 +35,9 @@ public:
     long m_time_log;
     long m_time_match;
 
-    int *p_etape_globale;
     unsigned long p_newtime;
 
-    Pami(int *etape_globale, Moteur *moteur_d, Moteur *moteur_g, Encodeur *encodeur_d, Encodeur *encodeur_g, Serv *servo, Irsensor *ir_sensor = nullptr, Ultrason *ultrason = nullptr);
+    Pami(Moteur *moteur_d, Moteur *moteur_g, Encodeur *encodeur_d, Encodeur *encodeur_g, Serv *servo, Irsensor *ir_sensor = nullptr, Ultrason *ultrason = nullptr);
 
     void test(int mode);
     void update_setup();

@@ -16,12 +16,13 @@ Moteur moteur_l = Moteur(EN_L, IN1_L, IN2_L, INV_MOT_L);
 Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
 
+// La pami en elle même
+Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
+
+// Compteur de la variable globale d'ordre d'appel de la file
 int etape_globale = 0;
 float newtime;
 float oldtime;
-
-// La pami en elle même
-Pami pami = Pami(&etape_globale, &moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
 
 void delay_non_bloquant(int etape_d_appel, unsigned long oldtime)
 {
@@ -109,7 +110,7 @@ void loop()
 
     // penser à ne pas updater le temps dans les délais !
     // remplir ici :
-    int etapes_avec_delays[] = {1, 3, 5};
+    int etapes_avec_delays[] = {1, 3, 5, 7, 9, 11, 13, 15};
     int taille_tab = sizeof(etapes_avec_delays) / sizeof(int);
 
     for (int i = 0; i < taille_tab; i++)
@@ -146,8 +147,7 @@ void loop()
         return;
     }
 
-    // newtime = pami.avancer_asservi(0, 20, oldtime);
-    // newtime = pami.tourner_asservi(0, 180, oldtime);
+    Serial.println("Etape : " + String(etape_globale));
 
     if ((millis() - pami.m_time_match) > START_TIME && (millis() - pami.m_time_match) < ENDTIME)
     {
