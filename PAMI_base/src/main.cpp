@@ -1,11 +1,9 @@
 /**
  * @file main.cpp
- * @brief Programme principal , a implementer dans le ninja
+ * @brief Programme principal , a implementer dans la pami
  */
 
-// #include "esp32-hal-gpio.h"
-// #include "esp32-hal.h"
-#include <Ninja.h>
+#include <Pami.h>
 #include <Arduino.h>
 #include <ESP32Encoder.h>
 
@@ -18,12 +16,8 @@ Moteur moteur_l = Moteur(EN_L, IN1_L, IN2_L, INV_MOT_L);
 Encodeur encodeur_r = Encodeur(CLK_R, DT_R, INV_ENC_R);
 Encodeur encodeur_l = Encodeur(CLK_L, DT_L, INV_ENC_L);
 
-// Le ninja en lui même
-Ninja ninja = Ninja(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
-
-float pos_x;
-float pos_y;
-float angle;
+// La pami en elle même
+Pami pami = Pami(&moteur_r, &moteur_l, &encodeur_r, &encodeur_l, &servo, &ir_sensor);
 
 unsigned long newtime;
 unsigned long oldtime;
@@ -31,15 +25,16 @@ unsigned long newtime_ir;
 unsigned long oldtime_ir;
 
 int equipe;
+float start_time;
 
 // initialisation de la strat avec les étapes à 0
 // ne VRAIMENT pas le bouger d'ici, notamment pas le mettre dans le setup
 // c'est une variable extern donc ici on lui assigne juste sa valeur
 int etape_globale = 0;
 
-void delay_non_bloquant(int etape_d_appel, unsigned long oldtime)
+void delay_non_bloquant(int etape_d_appel, unsigned long oldtime, float delay_time)
 {
-    if ((millis() - oldtime > DELAY_TIME) && (etape_globale == etape_d_appel))
+    if ((millis() - oldtime > delay_time) && (etape_globale == etape_d_appel))
     {
         Serial.println("Etape_global : " + String(etape_globale));
         etape_globale++; // suivant
@@ -49,7 +44,7 @@ void delay_non_bloquant(int etape_d_appel, unsigned long oldtime)
 void setup()
 {
     Serial.begin(115200); // Initialisation de la communication série
-    delay(2000);
+    delay(6000);
     Serial.println("---------- Setup starting ----------");
 
     // Setup capteur IR
@@ -70,7 +65,7 @@ void setup()
     encodeur_l.setup();
     Serial.println("Setup Done : Encodeurs");
 
-    // Led intégrée à l'ESP32 pour blink quand la pompe est activée
+    // LED intégrée à l'ESP32 pour blink quand la pompe est activée
     pinMode(PIN_LED, OUTPUT);
 
     // Pompe
@@ -95,7 +90,6 @@ void setup()
     while (tirette_en_place)
     {
         delay(10);
-        equipe = digitalRead(PIN_READEQUIPE);
         tirette_en_place = digitalRead(PIN_TIRETTE);
     }
     Serial.println("Tirette enlevée, début du match");
@@ -105,9 +99,13 @@ void setup()
     encodeur_l.clear_count();
     encodeur_r.clear_count();
 
+    pami.tourner_asservi(0, 360, oldtime);
+
     // On commence les timers
     oldtime = millis();
     newtime = millis();
+
+    start_time = millis();
 
     oldtime_ir = millis();
     newtime_ir = millis();
@@ -118,7 +116,7 @@ void loop()
     // Pour faire des delais :
     // penser à ne pas updater le temps dans les délais !
     // remplir ici :
-    // int etapes_avec_delays[] = {};
+    // int etapes_avec_delays[] = {1,3,5};
     // int taille_tab = sizeof(etapes_avec_delays)/sizeof(int);
 
     // for (int i = 0; i < taille_tab; i++) {
@@ -127,8 +125,8 @@ void loop()
     //         break;
     //     }
     // }
-
     oldtime = newtime;
+
     if (millis() - oldtime > 8 * INTERVAL_ASSERV)
     {
         Serial.println("Etape globale = " + String(etape_globale) + "\t");
@@ -138,82 +136,89 @@ void loop()
     // Si on veut de l'IR :
     // oldtime_ir = newtime_ir;
     // newtime_ir = ir_sensor.loop(oldtime_ir);
-    // if (ir_sensor.ir_minimum_distance < DISTANCE_MIN && ir_sensor.ir_minimum_distance > 5)
-    // {
+    // if (ir_sensor.ir_minimum_distance<DISTANCE_MIN && ir_sensor.ir_minimum_distance>5){
     //     moteur_l.set_speed(0);
     //     moteur_r.set_speed(0);
     // }
-    // else
-    // { // mettre ici la strat }
+    // else { // mettre ici la strat }
 
     float angle = (equipe == 1) ? 90 : -90;
-    float angle2 = (equipe == 1) ? 10 : -10;
+    float angleFinal = (equipe == 1) ? 25 : -25;
 
-    newtime = ninja.avancer_asservi(0, 43, oldtime);
-    newtime = ninja.tourner_asservi(1, -angle, oldtime);
-    newtime = ninja.avancer_asservi(2, 26, oldtime);
+    // tomber 1er frigo
+    newtime = pami.avancer_asservi(0, 43, oldtime);
+    newtime = pami.tourner_asservi(1, -angle, oldtime);
+    newtime = pami.avancer_asservi(2, 26, oldtime);
 
-    // recallage
-    newtime = ninja.avancer_asservi(3, -33, oldtime);
-    newtime = ninja.avancer_asservi(4, 5, oldtime);
+    // recallage 1
+    newtime = pami.avancer_asservi(3, -33, oldtime);
+    newtime = pami.avancer_asservi(4, 6, oldtime);
 
     // avance vers 2ème caisse
-    newtime = ninja.tourner_asservi(5, angle, oldtime);
-    newtime = ninja.avancer_asservi(6, 27, oldtime);
-    newtime = ninja.tourner_asservi(7, -angle, oldtime);
+    newtime = pami.tourner_asservi(5, angle, oldtime);
+    newtime = pami.avancer_asservi(6, 27, oldtime);
+    newtime = pami.tourner_asservi(7, -angle, oldtime);
 
-    // pousse 2ème caisse
-    newtime = ninja.avancer_asservi(8, 24, oldtime);
-    // newtime = ninja.avancer_asservi(9, -26, oldtime);
-    // newtime = ninja.avancer_asservi(10, 3, oldtime);
+    // tomber 2eme frigo
+    newtime = pami.avancer_asservi(8, 23, oldtime);
 
-    // retourner devant les caisses pourris
-    newtime = ninja.tourner_asservi(11, angle, oldtime);
-    newtime = ninja.avancer_asservi(12, 73, oldtime);
+    // recallage 2
+    newtime = pami.avancer_asservi(9, -31, oldtime);
+    newtime = pami.avancer_asservi(10, 6, oldtime);
+
+    // aller vers garde manger
+    newtime = pami.avancer_asservi(11, 22, oldtime);
+    newtime = pami.tourner_asservi(12, -angle, oldtime);
+    newtime = pami.avancer_asservi(13, 28, oldtime);
 
     // Recuperer pourri 1
-    newtime = ninja.bouger_servo_non_bloquant(13, 0, 90);
-    newtime = ninja.allumer_pompe(14);
-    newtime = ninja.bouger_servo_non_bloquant(15, 90, 0);
+    newtime = pami.bouger_servo_non_bloquant(14, 0, oldtime);
+    newtime = pami.allumer_pompe(15, oldtime);
+    newtime = pami.avancer_asservi(16, -13, oldtime);
 
     // lacher pourri 1
-    newtime = ninja.tourner_asservi(16, 180, oldtime);
-    newtime = ninja.avancer_asservi(17, 20, oldtime);
-    newtime = ninja.eteindre_pompe(18);
+    newtime = pami.tourner_asservi(17, 180, oldtime);
+    newtime = pami.eteindre_pompe(18, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(19, 45, oldtime);
+
+    // recallage 3
+    newtime = pami.tourner_asservi(20, -angle, oldtime);
+    newtime = pami.avancer_asservi(21, -30, oldtime);
+    newtime = pami.avancer_asservi(22, 6, oldtime);
 
     // aller recuperer pourri 2
-    newtime = ninja.tourner_asservi(16, 180, oldtime);
-    newtime = ninja.avancer_asservi(17, 30, oldtime);
+    newtime = pami.avancer_asservi(23, 19, oldtime);
+    newtime = pami.tourner_asservi(24, -angle, oldtime);
+    newtime = pami.avancer_asservi(25, 33, oldtime);
 
     // recuperer pourri 2
-    newtime = ninja.bouger_servo_non_bloquant(18, 0, 90);
-    newtime = ninja.allumer_pompe(19);
-    newtime = ninja.bouger_servo_non_bloquant(20, 90, 0);
+    newtime = pami.bouger_servo_non_bloquant(26, 0, oldtime);
+    newtime = pami.avancer_asservi(28, -1, oldtime);
+    newtime = pami.allumer_pompe(27, oldtime);
+    newtime = pami.avancer_asservi(28, -4, oldtime);
 
     // lacher pourri 2
-    newtime = ninja.tourner_asservi(21, 180, oldtime);
-    newtime = ninja.eteindre_pompe(22);
+    newtime = pami.tourner_asservi(29, 180, oldtime);
+    newtime = pami.eteindre_pompe(30, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(31, 90, oldtime);
 
-    // aller vers zone
-    newtime = ninja.tourner_asservi(23, angle, oldtime);
-    newtime = ninja.avancer_asservi(24, 20, oldtime);
-    newtime = ninja.tourner_asservi(25, -angle, oldtime);
-    newtime = ninja.avancer_asservi(26, 25, oldtime);
-    newtime = ninja.tourner_asservi(27, -angle, oldtime);
-    newtime = ninja.avancer_asservi(28, -10, oldtime);
-    newtime = ninja.avancer_asservi(29, 26, oldtime);
+    // recallage 4
+    newtime = pami.tourner_asservi(32, -angle, oldtime);
+    newtime = pami.avancer_asservi(33, -27, oldtime);
+    newtime = pami.avancer_asservi(34, 6, oldtime);
 
-    // Descend servo
+    // aller à zone fin
+    newtime = pami.tourner_asservi(35, angle, oldtime);
+    newtime = pami.avancer_asservi(36, 27, oldtime);
+    newtime = pami.tourner_asservi(37, -angle, oldtime);
 
-    // Tourner de -120°
+    // recallage 5 pour la dernière avance
+    newtime = pami.avancer_asservi(38, -8, oldtime);
+    newtime = pami.avancer_asservi(39, 29, oldtime);
+    newtime = pami.tourner_asservi(40, -angleFinal, oldtime);
 
-    // Tourner de 60° pour atteindre les 180°
-
-    // Avancer pour pousser les caisses
-
-    if (etape_globale == 30)
-    {
-        servo.blink(TEMPS_BLINK, 0, 90);
-    }
+    // if (etape_globale == 41 || start_time >= ENDTIME)
+    // {
+    //     servo.blink(TEMPS_BLINK, 0, 90);
     // }
 }

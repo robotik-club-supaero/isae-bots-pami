@@ -31,6 +31,7 @@ public:
     void blink(long temps_blink, int angle1, int angle2);
     void setup();
     void loop();
+    void set_position(float angle);
 };
 
 #endif

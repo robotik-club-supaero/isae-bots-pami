@@ -8,7 +8,7 @@
 #include <Encodeur.h>
 #include <define.h>
 
-class Ninja
+class Pami
 {
 public:
     Moteur *moteur_r;
@@ -30,7 +30,7 @@ public:
 
     int etape_globale;
 
-    Ninja(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Serv *p_servo, Irsensor *p_ir_sensor = nullptr);
+    Pami(Moteur *p_moteur_d, Moteur *p_moteur_g, Encodeur *p_encodeur_d, Encodeur *p_encodeur_g, Serv *p_servo, Irsensor *p_ir_sensor = nullptr);
 
     unsigned long avancer_asservi(int ordre_d_appel, float consigne, unsigned long oldtime);
     unsigned long tourner_asservi(int ordre_d_appel, float consigne_angle, unsigned long oldtime);
@@ -39,9 +39,9 @@ public:
 
     void blink_servo(long temps_blink, int angle1, int angle2);
     double get_IR_distance(unsigned long oldtime);
-    unsigned long allumer_pompe(int etape);
-    unsigned long eteindre_pompe(int etape);
-    unsigned long bouger_servo_non_bloquant(int etape, float angle1, float angle2);
+    unsigned long allumer_pompe(int etape_d_appel, unsigned long oldtime);
+    unsigned long eteindre_pompe(int etape_d_appel, unsigned long oldtime);
+    unsigned long bouger_servo_non_bloquant(int etape_d_appel, float angle, unsigned long oldtime);
 };
 
 #endif

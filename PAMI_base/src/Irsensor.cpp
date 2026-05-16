@@ -72,7 +72,7 @@ void Irsensor::setup()
 
 unsigned long Irsensor::loop(unsigned long oldtime)
 {
-    if (millis() - oldtime >= INTERVAL_ASSERV) 
+    if (millis() - oldtime >= INTERVAL_ASSERV)
     {
 
         // Poll sensor for new data
@@ -104,7 +104,8 @@ unsigned long Irsensor::loop(unsigned long oldtime)
         }
         return millis();
     }
-    else {
+    else
+    {
         return oldtime;
     }
 }

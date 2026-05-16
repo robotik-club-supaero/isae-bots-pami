@@ -32,6 +32,15 @@ void Serv::blink(long temps_blink, int angle1, int angle2)
   }
 }
 
+void Serv::set_position(float angle)
+{
+  if (angle != etat)
+  {
+    this->servo.write(angle);
+    etat = angle;
+  }
+}
+
 void Serv::setup()
 {
   temps_servo = millis();

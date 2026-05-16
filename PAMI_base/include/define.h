@@ -97,6 +97,9 @@ Paramètres de l'asservissement
 #define GAIN_ANGLE_TO_TICKS 13.1   // à régler à la main avec un 3-6 no scope.
 #define DELAY_TIME 500             // pour le delay entre 2 actions de déplacement
 
+#define DELAY_POMPE 2000
+#define DELAY_TIME_SERVO 1000
+
 // Permet de numéroter les fonctions non-bloquantes pour les appeler dans l'ordre
 // C'est un extern pour pouvoir le partager à la classe ninja et au main.cpp
 // Il est remis à 0 dans le setup du main.
