@@ -143,82 +143,361 @@ void loop()
     // else { // mettre ici la strat }
 
     float angle = (equipe == 1) ? 90 : -90;
-    float angleFinal = (equipe == 1) ? 25 : -25;
+    float angleFinal = 25;
+    float angleLourd = (equipe == 1) ? 100 : -100;
 
-    // tomber 1er frigo
-    newtime = pami.avancer_asservi(0, 43, oldtime);
-    newtime = pami.tourner_asservi(1, -angle, oldtime);
-    newtime = pami.avancer_asservi(2, 26, oldtime);
+    if (equipe == 0)
+    {
+        // tomber 1er frigo
+        newtime = pami.avancer_asservi(0, 43, oldtime);
+        newtime = pami.tourner_asservi(1, -angle, oldtime);
+        newtime = pami.avancer_asservi(2, 26, oldtime);
 
-    // recallage 1
-    newtime = pami.avancer_asservi(3, -33, oldtime);
-    newtime = pami.avancer_asservi(4, 6, oldtime);
+        // recallage 1
+        newtime = pami.avancer_asservi(3, -33.5, oldtime);
+        newtime = pami.avancer_asservi(4, 6, oldtime);
 
-    // avance vers 2ème caisse
-    newtime = pami.tourner_asservi(5, angle, oldtime);
-    newtime = pami.avancer_asservi(6, 27, oldtime);
-    newtime = pami.tourner_asservi(7, -angle, oldtime);
+        // avance vers 2ème caisse
+        newtime = pami.tourner_asservi(5, angle, oldtime);
+        newtime = pami.avancer_asservi(6, 27, oldtime);
+        newtime = pami.tourner_asservi(7, -angle, oldtime);
 
-    // tomber 2eme frigo
-    newtime = pami.avancer_asservi(8, 23, oldtime);
+        // tomber 2eme frigo
+        newtime = pami.avancer_asservi(8, 23, oldtime);
 
-    // recallage 2
-    newtime = pami.avancer_asservi(9, -31, oldtime);
-    newtime = pami.avancer_asservi(10, 6, oldtime);
+        // recallage 2
+        newtime = pami.avancer_asservi(9, -31, oldtime);
+        newtime = pami.avancer_asservi(10, 6, oldtime);
 
-    // aller vers garde manger
-    newtime = pami.avancer_asservi(11, 22, oldtime);
-    newtime = pami.tourner_asservi(12, -angle, oldtime);
-    newtime = pami.avancer_asservi(13, 28, oldtime);
+        // aller vers garde manger
+        newtime = pami.avancer_asservi(11, 17, oldtime);
+        newtime = pami.tourner_asservi(12, -angle, oldtime);
+        newtime = pami.avancer_asservi(13, 28, oldtime);
 
-    // Recuperer pourri 1
-    newtime = pami.bouger_servo_non_bloquant(14, 0, oldtime);
-    newtime = pami.allumer_pompe(15, oldtime);
-    newtime = pami.avancer_asservi(16, -13, oldtime);
+        // Recuperer pourri 1
+        newtime = pami.bouger_servo_non_bloquant(14, 0, oldtime);
+        newtime = pami.allumer_pompe(15, oldtime);
+        newtime = pami.avancer_asservi(16, -23, oldtime);
 
-    // lacher pourri 1
-    newtime = pami.tourner_asservi(17, 180, oldtime);
-    newtime = pami.eteindre_pompe(18, oldtime);
-    newtime = pami.bouger_servo_non_bloquant(19, 45, oldtime);
+        // lacher pourri 1
+        newtime = pami.eteindre_pompe(17, oldtime);
+        newtime = pami.bouger_servo_non_bloquant(18, 45, oldtime);
 
-    // recallage 3
-    newtime = pami.tourner_asservi(20, -angle, oldtime);
-    newtime = pami.avancer_asservi(21, -30, oldtime);
-    newtime = pami.avancer_asservi(22, 6, oldtime);
+        // recallage 3
+        newtime = pami.tourner_asservi(19, angle, oldtime);
+        newtime = pami.avancer_asservi(20, -30.5, oldtime);
+        newtime = pami.avancer_asservi(21, 5, oldtime);
 
-    // aller recuperer pourri 2
-    newtime = pami.avancer_asservi(23, 19, oldtime);
-    newtime = pami.tourner_asservi(24, -angle, oldtime);
-    newtime = pami.avancer_asservi(25, 33, oldtime);
+        // aller recuperer pourri 2
+        newtime = pami.tourner_asservi(22, -angle, oldtime);
+        newtime = pami.avancer_asservi(23, 48, oldtime);
+        newtime = pami.tourner_asservi(24, angle, oldtime);
 
-    // recuperer pourri 2
-    newtime = pami.bouger_servo_non_bloquant(26, 0, oldtime);
-    newtime = pami.avancer_asservi(28, -1, oldtime);
-    newtime = pami.allumer_pompe(27, oldtime);
-    newtime = pami.avancer_asservi(28, -4, oldtime);
+        // recuperer pourri 2
+        newtime = pami.bouger_servo_non_bloquant(25, 0, oldtime);
+        newtime = pami.allumer_pompe(26, oldtime);
 
-    // lacher pourri 2
-    newtime = pami.tourner_asservi(29, 180, oldtime);
-    newtime = pami.eteindre_pompe(30, oldtime);
-    newtime = pami.bouger_servo_non_bloquant(31, 90, oldtime);
+        // aller à lacher pourri 2
+        newtime = pami.avancer_asservi(27, -4, oldtime);
+        newtime = pami.tourner_asservi(28, angle, oldtime);
+        newtime = pami.avancer_asservi(29, 43, oldtime);
+        newtime = pami.tourner_asservi(30, -angle / 2, oldtime);
+        newtime = pami.eteindre_pompe(31, oldtime);
 
-    // recallage 4
-    newtime = pami.tourner_asservi(32, -angle, oldtime);
-    newtime = pami.avancer_asservi(33, -27, oldtime);
-    newtime = pami.avancer_asservi(34, 6, oldtime);
+        // recallage 4
+        newtime = pami.tourner_asservi(32, -angle / 2, oldtime);
+        newtime = pami.avancer_asservi(33, -25, oldtime);
 
-    // aller à zone fin
-    newtime = pami.tourner_asservi(35, angle, oldtime);
-    newtime = pami.avancer_asservi(36, 27, oldtime);
-    newtime = pami.tourner_asservi(37, -angle, oldtime);
+        // avancer vers bord de scene
+        newtime = pami.avancer_asservi(34, 30, oldtime);
 
-    // recallage 5 pour la dernière avance
-    newtime = pami.avancer_asservi(38, -8, oldtime);
-    newtime = pami.avancer_asservi(39, 29, oldtime);
-    newtime = pami.tourner_asservi(40, -angleFinal, oldtime);
+        // angle pour être sur la zone
+        newtime = pami.tourner_asservi(35, angleFinal, oldtime);
+    }
+    else
+    {
+        // tomber 1er frigo
+        newtime = pami.avancer_asservi(0, 43, oldtime);
+        newtime = pami.tourner_asservi(1, -angle, oldtime);
+        newtime = pami.avancer_asservi(2, 26, oldtime);
 
-    // if (etape_globale == 41 || start_time >= ENDTIME)
-    // {
-    //     servo.blink(TEMPS_BLINK, 0, 90);
-    // }
+        // recallage 1
+        newtime = pami.avancer_asservi(3, -33.5, oldtime);
+        newtime = pami.avancer_asservi(4, 6, oldtime);
+
+        // avance vers 2ème caisse
+        newtime = pami.tourner_asservi(5, angle, oldtime);
+        newtime = pami.avancer_asservi(6, 27, oldtime);
+        newtime = pami.tourner_asservi(7, -angle, oldtime);
+
+        // tomber 2eme frigo
+        newtime = pami.avancer_asservi(8, 23, oldtime);
+
+        // recallage 2
+        newtime = pami.avancer_asservi(9, -31, oldtime);
+        newtime = pami.avancer_asservi(10, 6, oldtime);
+ 
+        // aller vers garde manger
+        newtime = pami.avancer_asservi(11, 16, oldtime);
+        newtime = pami.tourner_asservi(12, -angle, oldtime);
+        newtime = pami.avancer_asservi(13, 30, oldtime);
+
+        // Recuperer pourri 1
+        newtime = pami.bouger_servo_non_bloquant(14, 0, oldtime);
+        newtime = pami.allumer_pompe(15, oldtime);
+        newtime = pami.avancer_asservi(16, -23, oldtime);
+
+        // lacher pourri 1
+        newtime = pami.eteindre_pompe(17, oldtime);
+        newtime = pami.bouger_servo_non_bloquant(18, 45, oldtime);
+
+        // recallage 3
+        newtime = pami.tourner_asservi(19, angle, oldtime);
+        newtime = pami.avancer_asservi(20, -30.5, oldtime);
+        newtime = pami.avancer_asservi(21, 5, oldtime);
+
+        // aller recuperer pourri 2
+        newtime = pami.tourner_asservi(22, -angle, oldtime);
+        newtime = pami.avancer_asservi(23, 43, oldtime);
+        newtime = pami.tourner_asservi(24, angle, oldtime);
+
+        // recuperer pourri 2
+        newtime = pami.bouger_servo_non_bloquant(25, 0, oldtime);
+        newtime = pami.allumer_pompe(26, oldtime);
+
+        // aller à lacher pourri 2
+        newtime = pami.avancer_asservi(27, -4, oldtime);
+        newtime = pami.tourner_asservi(28, angle, oldtime);
+        newtime = pami.avancer_asservi(29, 46, oldtime);
+        newtime = pami.tourner_asservi(30, -angle / 2, oldtime);
+        newtime = pami.eteindre_pompe(31, oldtime);
+
+        // recallage 4
+        newtime = pami.tourner_asservi(32, -angle / 2, oldtime);
+        newtime = pami.avancer_asservi(33, -9.5, oldtime);
+
+        // avancer vers bord de scene
+        newtime = pami.avancer_asservi(34, 30, oldtime);
+
+        // angle pour être sur la zone
+        newtime = pami.tourner_asservi(35, angleFinal, oldtime);
+    }
+
+    // --- SÉQUENCE DE 100 ÉTAPES DE SERVO (ÉTAPES 36 À 136)--
+    // --- SÉQUENCE DE MOUVEMENTS DE SERVO (ÉTAPES 36 À 250) ---
+    newtime = pami.bouger_servo_non_bloquant(36, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(37, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(38, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(39, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(40, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(41, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(42, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(43, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(44, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(45, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(46, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(47, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(48, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(49, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(50, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(51, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(52, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(53, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(54, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(55, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(56, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(57, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(58, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(59, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(60, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(61, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(62, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(63, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(64, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(65, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(66, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(67, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(68, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(69, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(70, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(71, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(72, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(73, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(74, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(75, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(76, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(77, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(78, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(79, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(80, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(81, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(82, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(83, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(84, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(85, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(86, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(87, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(88, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(89, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(90, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(91, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(92, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(93, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(94, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(95, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(96, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(97, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(98, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(99, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(100, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(101, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(102, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(103, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(104, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(105, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(106, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(107, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(108, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(109, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(110, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(111, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(112, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(113, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(114, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(115, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(116, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(117, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(118, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(119, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(120, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(121, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(122, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(123, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(124, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(125, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(126, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(127, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(128, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(129, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(130, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(131, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(132, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(133, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(134, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(135, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(136, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(137, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(138, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(139, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(140, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(141, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(142, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(143, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(144, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(145, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(146, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(147, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(148, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(149, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(150, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(151, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(152, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(153, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(154, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(155, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(156, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(157, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(158, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(159, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(160, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(161, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(162, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(163, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(164, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(165, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(166, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(167, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(168, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(169, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(170, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(171, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(172, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(173, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(174, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(175, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(176, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(177, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(178, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(179, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(180, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(181, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(182, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(183, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(184, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(185, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(186, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(187, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(188, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(189, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(190, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(191, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(192, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(193, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(194, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(195, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(196, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(197, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(198, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(199, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(200, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(201, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(202, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(203, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(204, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(205, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(206, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(207, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(208, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(209, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(210, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(211, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(212, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(213, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(214, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(215, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(216, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(217, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(218, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(219, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(220, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(221, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(222, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(223, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(224, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(225, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(226, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(227, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(228, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(229, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(230, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(231, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(232, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(233, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(234, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(235, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(236, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(237, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(238, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(239, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(240, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(241, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(242, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(243, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(244, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(245, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(246, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(247, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(248, 0, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(249, 90, oldtime);
+    newtime = pami.bouger_servo_non_bloquant(250, 0, oldtime);
 }

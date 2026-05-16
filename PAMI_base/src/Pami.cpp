@@ -18,23 +18,30 @@ unsigned long Pami::bouger_servo_non_bloquant(int etape_d_appel, float angle, un
     {
         return oldtime;
     }
-    if ((millis() - oldtime) < DELAY_TIME_SERVO)
+
+    // Le gardien de temps statique interne
+    static unsigned long servo_time = 0;
+
+    // Premier passage dans cette étape : on donne l'ordre mécanique immédiat au servo
+    if (servo_time == 0)
     {
-        return oldtime;
+        servo->set_position(angle);
+        servo_time = millis(); // On arme le chrono à ce moment précis
+        Serial.println("Servo cible angle " + String(angle) + " (Etape: " + String(etape_globale) + ")");
+    }
+
+    // Tant que le délai requis pour que le servo finisse sa course n'est pas écoulé
+    if ((millis() - servo_time) < DELAY_TIME_SERVO)
+    {
+        return oldtime; // On reste à cette étape et on ne met pas à jour le fil conducteur de temps
     }
     else
     {
-        static unsigned long servo_time = millis();
-        servo->set_position(angle);
-        Serial.println("Etape globale dans servo : " + String(etape_globale));
+        // Le temps est écoulé ! Le mouvement est fini.
+        etape_globale++; // On débloque l'étape suivante
+        servo_time = 0;  // Crucial : On reset à 0 pour que l'étape suivante puisse réarmer le chrono !
 
-        if (millis() - servo_time > 3 * DELAY_TIME_SERVO)
-        {
-            servo_time = 0;
-            etape_globale++;
-        }
-
-        return millis();
+        return millis(); // On renvoie le temps frais pour initialiser le cycle de l'étape d'après
     }
 }
 
@@ -72,20 +79,24 @@ unsigned long Pami::eteindre_pompe(int etape_d_appel, unsigned long oldtime)
     {
         return oldtime;
     }
-    if ((millis() - oldtime) < DELAY_TIME_SERVO)
+
+    static unsigned long pompe_time = 0;
+
+    if (pompe_time == 0)
+    {
+        pompe_time = millis();
+        digitalWrite(PIN_POMPE, LOW);
+    }
+
+    if (millis() - pompe_time < DELAY_POMPE)
     {
         return oldtime;
     }
     else
     {
-        static unsigned long pompe_time = millis();
-        digitalWrite(PIN_POMPE, LOW);
+        etape_globale++;
+        pompe_time = 0;
 
-        if (millis() - pompe_time > DELAY_POMPE)
-        {
-            etape_globale++;
-            pompe_time = 0;
-        }
         return millis();
     }
 }

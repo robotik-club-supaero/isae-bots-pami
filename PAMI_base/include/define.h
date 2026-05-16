@@ -74,8 +74,8 @@ SERVO
 Paramètres globaux
 */
 
-#define SPEED 200        // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
-#define DISTANCE_MIN 120 // Distance minimale pour éviter un obstacle en mm
+#define SPEED 200       // Vitesse (en cm/s ?) (255 est la vitesse max des moteurs)
+#define DISTANCE_MIN 50 // Distance minimale pour éviter un obstacle en mm
 // #define EPSP 100         // Incertitude position, cm
 // #define EPSA 0.1         // Incertitude position, radian
 
@@ -97,6 +97,7 @@ Paramètres de l'asservissement
 #define GAIN_ANGLE_TO_TICKS 13.1   // à régler à la main avec un 3-6 no scope.
 #define DELAY_TIME 500             // pour le delay entre 2 actions de déplacement
 
+#define ENDTIME 99000
 #define DELAY_POMPE 2000
 #define DELAY_TIME_SERVO 1000
 
