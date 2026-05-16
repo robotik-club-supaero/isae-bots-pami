@@ -12,6 +12,36 @@ Ninja::Ninja(Moteur *p_moteur_r, Moteur *p_moteur_l, Encodeur *p_encodeur_r, Enc
     ir_sensor = p_ir_sensor;
 }
 
+unsigned long Ninja::bouger_servo_non_bloquant(int etape, float angle1, float angle2)
+{
+    if (etape == etape_globale)
+    {
+        servo->blink(TEMPS_BLINK, angle1, angle2);
+        etape_globale++;
+        return millis();
+    }
+}
+
+unsigned long Ninja::allumer_pompe(int etape)
+{
+    if (etape == etape_globale)
+    {
+        digitalWrite(PIN_POMPE, HIGH);
+        etape_globale++;
+        return millis();
+    }
+}
+
+unsigned long Ninja::eteindre_pompe(int etape)
+{
+    if (etape == etape_globale)
+    {
+        digitalWrite(PIN_POMPE, LOW);
+        etape_globale++;
+        return millis();
+    }
+}
+
 /*
 Avancer en ligne droite, on veut que chaque moteur avance de consigne_cm
 */
@@ -52,10 +82,8 @@ unsigned long Ninja::avancer_asservi(int etape_d_appel, float consigne_cm, unsig
         Serial.print(ticks_r);
 
         // --- Erreurs ---
-
-        float erreur = ticks_l - ticks_r;
-
         // l'erreur peut-être négative
+        float erreur = ticks_l - ticks_r;
 
         // --- Correction --
         // si on avance
@@ -188,176 +216,6 @@ unsigned long Ninja::tourner_asservi(int etape_d_appel, float consigne_angle, un
         return millis();
     }
 }
-
-/*
-Fonction de diagnostic général du robot
-Modes :
-1 = Interrupteurs & Tirette
-2 = Capteur IR (ToF)
-3 = Servomoteur
-4 = Moteurs (Puissance brute)
-5 = Encodeurs & Odométrie (À pousser à la main)
-6 = Moteurs Individuels (Puissance brute)
-7 = Homologation : Avance et s'arrête en fonction du capteur IR
-8 = Avancer, reculer, tourner (Sans asservissement, juste pour voir si les fonctions de base marchent &  régler les gains)
-*/
-// void Ninja::test(int mode)
-// {
-//     Serial.print("\n========== LANCEMENT DU TEST MODE : ");
-//     Serial.print(mode);
-//     Serial.println(" ==========");
-
-//     switch (mode)
-//     {
-//     case 1: // --- TEST 1 : TIRETTE & INTERRUPTEURS ---
-//     {
-//         Serial.println("Test Interrupteurs... Modifiez leurs etats ! (Boucle infinie)");
-//         while (true)
-//         {
-//             Serial.println("-------------------------");
-//             delay(1000); // On attend 1s pour ne pas spammer le terminal
-//         }
-//         break;
-//     }
-
-//     case 2: // --- TEST 2 : CAPTEUR IR ---
-//     {
-//         Serial.println("Test Capteur IR... Passez votre main devant ! (Boucle infinie)");
-//         while (true)
-//         {
-//             float dist = this->get_IR_distance();
-//             Serial.print("Distance mesuree : ");
-//             Serial.print(dist / 10.0);
-//             Serial.println(" cm");
-//             delay(200);
-//         }
-//         break;
-//     }
-
-//     case 3: // --- TEST 3 : SERVOMOTEUR ---
-//     {
-//         Serial.println("Test Servomoteur : Va-et-vient de 3 secondes");
-//         while (true)
-//         {
-//             // Utilise les constantes ANGLE1 et ANGLE2 de ton define.h
-//             this->blink_servo(1000, ANGLE1, ANGLE2);
-//         }
-//         Serial.println("Fin du test Servomoteur.");
-//         break;
-//     }
-
-//     case 4: // --- TEST 4 : MOTEURS BRUTS ---
-//     {
-//         Serial.println("Test Moteurs : Attention, le robot va avancer puis reculer !");
-//         delay(2000); // Laisse le temps de poser le robot ou de le lever
-
-//         Serial.println("-> Marche Avant (Vitesse SPEED)");
-//         this->tout_droit(SPEED);
-//         delay(1500);
-
-//         Serial.println("-> Arret");
-//         this->tout_droit(0);
-//         delay(1000);
-
-//         Serial.println("-> Marche Arriere (Vitesse -SPEED)");
-//         this->tout_droit(-SPEED);
-//         delay(1500);
-
-//         Serial.println("-> Arret Definitif");
-//         this->tout_droit(0);
-//         Serial.println("Fin du test Moteurs.");
-//         break;
-//     }
-
-//     case 5: // --- TEST 5 : ODOMETRIE ---
-//     {
-//         Serial.println("Test Encodeurs... Poussez le robot a la main ! (Boucle infinie)");
-//         m_p_mesure_pos->reinitialise();
-//         while (true)
-//         {
-//             m_p_mesure_pos->loop(); // Met a jour les calculs
-//             this->print_encodeur();
-//             this->print_position();
-//             this->print_speed();
-//             Serial.println("-------------------------");
-//             delay(250);
-//         }
-//         break;
-//     }
-//     case 6: // Essais roue droite & gauche indépendament
-//     {
-//         Serial.println("Test Moteurs Individuels : Attention, le robot va tester chaque roue indépendamment !");
-
-//         while (true)
-//         {
-//             Serial.println("\n-> Test Roue Droite (Vitesse 200)");
-//             m_p_moteur_d->set_speed(SPEED);
-//             m_p_moteur_g->set_speed(0);
-//             this->print_speed();
-//             this->print_encodeur();
-//             delay(1500);
-
-//             Serial.println("\n-> Arret");
-//             m_p_moteur_d->set_speed(0);
-//             delay(1500);
-
-//             Serial.println("\n-> Test Roue Gauche (Vitesse 200)");
-//             m_p_moteur_d->set_speed(0);
-//             m_p_moteur_g->set_speed(SPEED);
-//             this->print_speed();
-//             this->print_encodeur();
-//             delay(1500);
-
-//             Serial.println("\n-> Arret Definitif");
-//             m_p_moteur_d->set_speed(0);
-//             m_p_moteur_g->set_speed(0);
-//             delay(1500);
-//             Serial.println("Fin du test Moteurs Individuels.");
-//         }
-//         break;
-//     }
-//     case 7: // Homologation
-//     {
-//         Serial.println("Homologation : Le robot avance et s'arrête lorsque le capteur IR détecte un obstacle à moins de 5 cm (Boucle infinie)");
-
-//         while (true)
-//         {
-//             float dist = this->get_IR_distance(); // en mm
-//             Serial.print("Distance mesuree : ");
-//             Serial.print(dist / 10.0);
-//             Serial.println(" cm");
-
-//             if (dist < 120 && dist > 0.5) // Si un obstacle est détecté à moins de 8 cm
-//             {
-//                 Serial.println("Obstacle détecté ! Arrêt du robot.");
-//                 this->tout_droit(0);
-//             }
-//             else
-//             {
-//                 this->tout_droit(SPEED);
-//             }
-//             delay(200);
-//         }
-//         break;
-//     }
-//     case 8:
-//     {
-//         Serial.println("Test Avancer/Reculer/Tourner... Attention, le robot va avancer, reculer puis tourner !");
-
-//         this->avancer(100);
-//         delay(2000);
-//         // this->reculer(100);
-//         delay(2000);
-//         this->tourner(180);
-//     }
-
-//     default:
-//     {
-//         Serial.println("Erreur : Mode de test inconnu ! (Choisissez entre 1 et 6)");
-//         break;
-//     }
-//     }
-// }
 
 /*
 Fonction pour bouger le servo entre deux angles en un temps donné
