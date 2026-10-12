@@ -236,7 +236,7 @@ void loop()
         // recallage 2
         newtime = pami.avancer_asservi(9, -31, oldtime);
         newtime = pami.avancer_asservi(10, 6, oldtime);
- 
+
         // aller vers garde manger
         newtime = pami.avancer_asservi(11, 16, oldtime);
         newtime = pami.tourner_asservi(12, -angle, oldtime);
